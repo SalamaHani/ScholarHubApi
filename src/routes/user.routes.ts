@@ -26,7 +26,6 @@ import {
   handleUploadError,
   uploadDocument,
 } from "../middleware/index.js";
-
 const router = Router();
 
 // ==================== USER PROFILE ROUTES ====================
