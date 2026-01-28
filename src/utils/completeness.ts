@@ -28,6 +28,7 @@ export const calculateStudentProfileCompleteness = (
         profile?.age,
         profile?.gender,
         profile?.phoneNumber,
+        profile?.experience && Array.isArray(profile.experience) && profile.experience.length > 0,
         // Collections
         profile?.skills && Array.isArray(profile.skills) && profile.skills.length > 0,
         profile?.languages && Array.isArray(profile.languages) && profile.languages.length > 0,
@@ -68,7 +69,9 @@ export const calculateProfessorProfileCompleteness = (
         profile?.city,
         profile?.zipCode,
         profile?.phoneNumber,
-        profile?.experience,
+        profile?.experience && Array.isArray(profile.experience) && profile.experience.length > 0,
+        profile?.age,
+        profile?.gender,
         // Collections
         profile?.skills && Array.isArray(profile.skills) && profile.skills.length > 0,
         profile?.languages && Array.isArray(profile.languages) && profile.languages.length > 0,
@@ -129,7 +132,7 @@ export const updateUserCompleteness = async (userId: string, role: string): Prom
             });
         }
     } else if (role === UserRole.PROFESSOR) {
-        const profile = await prisma.professorProfile.findUnique({
+        const profile = await (prisma.professorProfile as any).findUnique({
             where: { userId },
             include: { user: true },
         });
@@ -140,7 +143,7 @@ export const updateUserCompleteness = async (userId: string, role: string): Prom
                 (profile.languages as Array<{ name: string; proficiency: number }>) || [],
             );
 
-            await prisma.professorProfile.update({
+            await (prisma.professorProfile as any).update({
                 where: { userId },
                 data: {
                     profileCompleteness: completeness,

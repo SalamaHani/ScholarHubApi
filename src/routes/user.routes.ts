@@ -12,6 +12,7 @@ import {
   verifyProfessor,
   deleteUser,
   changeUserRole,
+  updateUser,
   updateStudentProfile,
   updateProfessorProfile,
   getStudentProfileDetails,
@@ -121,6 +122,19 @@ router.get(
   idParamValidator,
   validate,
   getUserById,
+);
+
+/**
+ * @route   PUT /api/users/:id
+ * @desc    Update user data and profile (Admin only)
+ */
+router.put(
+  "/:id",
+  authenticate,
+  isAdmin,
+  idParamValidator,
+  validate,
+  updateUser,
 );
 
 /**

@@ -85,7 +85,55 @@ const parseLanguagesField = (
   return undefined;
 };
 
+// Helper function to parse experience objects
+const parseExperienceField = (value: any): any[] | undefined => {
+  if (!value) return undefined;
 
+  // If it's already an array
+  if (Array.isArray(value)) {
+    return value.filter((exp) => exp && typeof exp === "object");
+  }
+
+  // If it's a string, try to parse it as JSON
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((exp) => exp && typeof exp === "object");
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+};
+
+// Helper function to parse certifications objects
+const parseCertificationsField = (value: any): any[] | undefined => {
+  if (!value) return undefined;
+
+  // If it's already an array
+  if (Array.isArray(value)) {
+    return value.filter((cert) => cert && typeof cert === "object");
+  }
+
+  // If it's a string, try to parse it as JSON
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((cert) => cert && typeof cert === "object");
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+};
 
 /**
  * @route   GET /api/users/profile
@@ -105,8 +153,53 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
       phone: true,
       isEmailVerified: true,
       createdAt: true,
-      studentProfile: true,
-      professorProfile: true,
+      studentProfile: {
+        select: {
+          id: true,
+          university: true,
+          fieldOfStudy: true,
+          currentDegree: true,
+          gpa: true,
+          graduationYear: true,
+          country: true,
+          city: true,
+          zipCode: true,
+          bio: true,
+          languages: true,
+          skills: true,
+          experience: true,
+          age: true,
+          gender: true,
+          phoneNumber: true,
+          profileCompleteness: true,
+          documents: true,
+          certifications: true,
+        }
+      },
+      professorProfile: {
+        select: {
+          id: true,
+          institution: true,
+          department: true,
+          position: true,
+          specialization: true,
+          website: true,
+          bio: true,
+          languages: true,
+          skills: true,
+          experience: true,
+          country: true,
+          city: true,
+          zipCode: true,
+          phoneNumber: true,
+          age: true,
+          gender: true,
+          isVerified: true,
+          profileCompleteness: true,
+          documents: true,
+          certifications: true,
+        }
+      },
     },
   });
 
@@ -163,6 +256,17 @@ export const updateProfile = asyncHandler(
     if (profileData.skills) {
       profileData.skills = parseArrayField(profileData.skills);
     }
+    if (profileData.experience) {
+      profileData.experience = parseExperienceField(profileData.experience);
+    }
+    if (profileData.certifications) {
+      profileData.certifications = parseCertificationsField(profileData.certifications);
+    }
+
+    // Parse age if it's a string
+    if (profileData.age !== undefined && profileData.age !== null) {
+      profileData.age = typeof profileData.age === 'string' ? parseInt(profileData.age) : profileData.age;
+    }
 
     // Update base user fields
     const updateData: any = {};
@@ -204,6 +308,7 @@ export const updateProfile = asyncHandler(
           age: profileData.age,
           gender: profileData.gender,
           phoneNumber: profileData.phoneNumber,
+          experience: profileData.experience,
         },
         create: {
           userId,
@@ -221,6 +326,7 @@ export const updateProfile = asyncHandler(
           age: profileData.age,
           gender: profileData.gender,
           phoneNumber: profileData.phoneNumber,
+          experience: profileData.experience,
         },
       });
     }
@@ -229,7 +335,7 @@ export const updateProfile = asyncHandler(
       userRole === UserRole.PROFESSOR &&
       Object.keys(profileData).length > 0
     ) {
-      await prisma.professorProfile.upsert({
+      await (prisma.professorProfile as any).upsert({
         where: { userId },
         update: {
           institution: profileData.institution,
@@ -245,6 +351,9 @@ export const updateProfile = asyncHandler(
           zipCode: profileData.zipCode,
           phoneNumber: profileData.phoneNumber,
           experience: profileData.experience,
+          certifications: profileData.certifications,
+          age: profileData.age,
+          gender: profileData.gender,
         },
         create: {
           userId,
@@ -261,6 +370,9 @@ export const updateProfile = asyncHandler(
           zipCode: profileData.zipCode,
           phoneNumber: profileData.phoneNumber,
           experience: profileData.experience,
+          certifications: profileData.certifications,
+          age: profileData.age,
+          gender: profileData.gender,
         },
       });
     }
@@ -279,8 +391,53 @@ export const updateProfile = asyncHandler(
         role: true,
         avatar: true,
         phone: true,
-        studentProfile: true,
-        professorProfile: true,
+        studentProfile: {
+          select: {
+            id: true,
+            university: true,
+            fieldOfStudy: true,
+            currentDegree: true,
+            gpa: true,
+            graduationYear: true,
+            country: true,
+            city: true,
+            zipCode: true,
+            bio: true,
+            languages: true,
+            skills: true,
+            experience: true,
+            age: true,
+            gender: true,
+            phoneNumber: true,
+            profileCompleteness: true,
+            documents: true,
+            certifications: true,
+          }
+        },
+        professorProfile: {
+          select: {
+            id: true,
+            institution: true,
+            department: true,
+            position: true,
+            specialization: true,
+            website: true,
+            bio: true,
+            languages: true,
+            skills: true,
+            experience: true,
+            country: true,
+            city: true,
+            zipCode: true,
+            phoneNumber: true,
+            age: true,
+            gender: true,
+            isVerified: true,
+            profileCompleteness: true,
+            documents: true,
+            certifications: true,
+          }
+        },
       },
     });
 
@@ -713,7 +870,23 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
         createdAt: true,
         lastLoginAt: true,
         professorProfile: {
-          select: { isVerified: true },
+          select: {
+            institution: true,
+            department: true,
+            position: true,
+            specialization: true,
+            isVerified: true,
+            experience: true,
+          },
+        },
+        studentProfile: {
+          select: {
+            university: true,
+            fieldOfStudy: true,
+            currentDegree: true,
+            gpa: true,
+            experience: true,
+          },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -939,44 +1112,74 @@ export const changeUserRole = asyncHandler(
 
     // Handle profile migration when changing from STUDENT to PROFESSOR
     if (user.role === UserRole.STUDENT && role === UserRole.PROFESSOR) {
-      // Get student profile data
-      const studentProfile = user.studentProfile;
-
-      // Create professor profile from student profile data
-      await prisma.professorProfile.upsert({
+      const sp = user.studentProfile as any;
+      await (prisma.professorProfile as any).upsert({
         where: { userId: id },
         update: {
-          institution: studentProfile?.university || "Not specified",
-          department: studentProfile?.fieldOfStudy,
-          bio: studentProfile?.bio,
+          institution: sp?.university || "Not specified",
+          department: sp?.fieldOfStudy,
+          bio: sp?.bio,
+          skills: sp?.skills,
+          languages: sp?.languages,
+          country: sp?.country,
+          city: sp?.city,
+          zipCode: sp?.zipCode,
+          phoneNumber: sp?.phoneNumber,
+          experience: sp?.experience,
+          age: sp?.age,
+          gender: sp?.gender,
         },
         create: {
           userId: id,
-          institution: studentProfile?.university || "Not specified",
-          department: studentProfile?.fieldOfStudy,
-          bio: studentProfile?.bio,
+          institution: sp?.university || "Not specified",
+          department: sp?.fieldOfStudy,
+          bio: sp?.bio,
+          skills: sp?.skills || [],
+          languages: sp?.languages || [],
+          country: sp?.country,
+          city: sp?.city,
+          zipCode: sp?.zipCode,
+          phoneNumber: sp?.phoneNumber,
+          experience: sp?.experience || [],
+          age: sp?.age,
+          gender: sp?.gender,
         },
       });
     }
 
     // Handle profile migration when changing from PROFESSOR to STUDENT
     if (user.role === UserRole.PROFESSOR && role === UserRole.STUDENT) {
-      // Get professor profile data
-      const professorProfile = user.professorProfile;
-
-      // Create student profile from professor profile data
-      await prisma.studentProfile.upsert({
+      const pp = user.professorProfile as any;
+      await (prisma.studentProfile as any).upsert({
         where: { userId: id },
         update: {
-          university: professorProfile?.institution,
-          fieldOfStudy: professorProfile?.department,
-          bio: professorProfile?.bio,
+          university: pp?.institution,
+          fieldOfStudy: pp?.department,
+          bio: pp?.bio,
+          skills: pp?.skills,
+          languages: pp?.languages,
+          country: pp?.country,
+          city: pp?.city,
+          zipCode: pp?.zipCode,
+          phoneNumber: pp?.phoneNumber,
+          experience: pp?.experience,
+          age: pp?.age,
+          gender: pp?.gender,
         },
         create: {
           userId: id,
-          university: professorProfile?.institution,
-          fieldOfStudy: professorProfile?.department,
-          bio: professorProfile?.bio,
+          university: pp?.institution,
+          fieldOfStudy: pp?.department,
+          bio: pp?.bio,
+          skills: pp?.skills || [],
+          languages: pp?.languages || [],
+          country: pp?.country,
+          city: pp?.city,
+          zipCode: pp?.zipCode,
+          phoneNumber: pp?.phoneNumber,
+          experience: pp?.experience || [],
+          age: pp?.age,
+          gender: pp?.gender,
         },
       });
     }
@@ -1015,6 +1218,169 @@ export const changeUserRole = asyncHandler(
 );
 
 /**
+ * @route   PUT /api/admin/users/:id
+ * @desc    Update any user data and profile (Admin only)
+ * @access  Private/Admin
+ */
+export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    role,
+    avatar,
+    isBlocked,
+    isEmailVerified,
+    ...profileData
+  } = req.body;
+
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+    include: { studentProfile: true, professorProfile: true }
+  });
+
+  if (!existingUser) {
+    throw ApiError.notFound("User not found");
+  }
+
+  // Update base user fields
+  const updateData: any = {};
+  if (firstName !== undefined) updateData.firstName = firstName;
+  if (lastName !== undefined) updateData.lastName = lastName;
+  if (email !== undefined) updateData.email = email;
+  if (phone !== undefined) updateData.phone = phone;
+  if (avatar !== undefined) updateData.avatar = avatar;
+  if (isBlocked !== undefined) updateData.isBlocked = isBlocked;
+  if (isEmailVerified !== undefined) updateData.isEmailVerified = isEmailVerified;
+
+  // Handle role change if requested
+  if (role !== undefined && role !== existingUser.role) {
+    // Reuse change logic if needed, but for simplicity we'll just update here
+    // or we could throw an error asking to use the dedicated change-role endpoint
+    // but usually admin update can do everything
+    updateData.role = role;
+  }
+
+  const user = await prisma.user.update({
+    where: { id },
+    data: updateData,
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      avatar: true,
+      phone: true,
+      isBlocked: true,
+      isEmailVerified: true,
+    },
+  });
+
+  // Handle role-specific profile updates
+  const userRole = role || user.role;
+
+  // Parse array fields if they exist in profileData
+  if (profileData.languages) profileData.languages = parseLanguagesField(profileData.languages);
+  if (profileData.skills) profileData.skills = parseArrayField(profileData.skills);
+  if (profileData.experience) profileData.experience = parseExperienceField(profileData.experience);
+  if (profileData.age !== undefined && profileData.age !== null) {
+    profileData.age = typeof profileData.age === 'string' ? parseInt(profileData.age) : profileData.age;
+  }
+
+  if (userRole === UserRole.STUDENT) {
+    await (prisma.studentProfile as any).upsert({
+      where: { userId: id },
+      update: {
+        university: profileData.university,
+        fieldOfStudy: profileData.fieldOfStudy,
+        currentDegree: profileData.currentDegree,
+        gpa: profileData.gpa,
+        graduationYear: profileData.graduationYear,
+        country: profileData.country,
+        city: profileData.city,
+        zipCode: profileData.zipCode,
+        bio: profileData.bio,
+        languages: profileData.languages,
+        skills: profileData.skills,
+        age: profileData.age,
+        gender: profileData.gender,
+        phoneNumber: profileData.phoneNumber,
+        experience: profileData.experience,
+      },
+      create: {
+        userId: id,
+        university: profileData.university || "Not specified",
+        fieldOfStudy: profileData.fieldOfStudy,
+        currentDegree: profileData.currentDegree,
+        gpa: profileData.gpa,
+        graduationYear: profileData.graduationYear,
+        country: profileData.country,
+        city: profileData.city,
+        zipCode: profileData.zipCode,
+        bio: profileData.bio,
+        languages: profileData.languages || [],
+        skills: profileData.skills || [],
+        age: profileData.age,
+        gender: profileData.gender,
+        phoneNumber: profileData.phoneNumber,
+        experience: profileData.experience || [],
+      },
+    });
+  } else if (userRole === UserRole.PROFESSOR) {
+    await (prisma.professorProfile as any).upsert({
+      where: { userId: id },
+      update: {
+        institution: profileData.institution,
+        department: profileData.department,
+        position: profileData.position,
+        specialization: profileData.specialization,
+        website: profileData.website,
+        bio: profileData.bio,
+        skills: profileData.skills,
+        languages: profileData.languages,
+        country: profileData.country,
+        city: profileData.city,
+        zipCode: profileData.zipCode,
+        phoneNumber: profileData.phoneNumber,
+        experience: profileData.experience,
+        age: profileData.age,
+        gender: profileData.gender,
+      },
+      create: {
+        userId: id,
+        institution: profileData.institution || "Not specified",
+        department: profileData.department,
+        position: profileData.position,
+        specialization: profileData.specialization,
+        website: profileData.website,
+        bio: profileData.bio,
+        skills: profileData.skills || [],
+        languages: profileData.languages || [],
+        country: profileData.country,
+        city: profileData.city,
+        zipCode: profileData.zipCode,
+        phoneNumber: profileData.phoneNumber,
+        experience: profileData.experience || [],
+        age: profileData.age,
+        gender: profileData.gender,
+      },
+    });
+  }
+
+  // Update profile completeness
+  await updateUserCompleteness(id, userRole);
+
+  res.json({
+    success: true,
+    message: "User updated successfully",
+    data: { user },
+  });
+});
+
+/**
  * @route   DELETE /api/admin/users/:id
  * @desc    Delete a user (Admin only)
  * @access  Private/Admin
@@ -1034,13 +1400,14 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     throw ApiError.forbidden("Cannot delete admin users");
   }
 
+  // Delete the user (cascade will handle profiles)
   await prisma.user.delete({
     where: { id },
   });
 
   res.json({
     success: true,
-    message: "User deleted successfully",
+    message: "User and associated profile deleted successfully",
   });
 });
 
@@ -1073,6 +1440,7 @@ export const updateStudentProfile = asyncHandler(
       age,
       gender,
       phoneNumber,
+      experience,
     } = req.body;
 
     // Validate graduation year
@@ -1093,6 +1461,7 @@ export const updateStudentProfile = asyncHandler(
     // Parse array fields
     const parsedLanguages = parseLanguagesField(languages);
     const parsedSkills = parseArrayField(skills);
+    const parsedExperience = parseExperienceField(experience);
 
     const studentProfile = await prisma.studentProfile.update({
       where: { userId },
@@ -1111,6 +1480,7 @@ export const updateStudentProfile = asyncHandler(
         age: age || undefined,
         gender: gender || undefined,
         phoneNumber: phoneNumber || undefined,
+        experience: parsedExperience || undefined,
       },
       include: {
         user: {
@@ -1185,13 +1555,16 @@ export const updateProfessorProfile = asyncHandler(
       zipCode,
       phoneNumber,
       experience,
+      age,
+      gender,
     } = req.body;
 
     // Parse array fields
     const parsedSkills = parseArrayField(skills);
     const parsedLanguages = parseLanguagesField(languages);
+    const parsedExperience = parseExperienceField(experience);
 
-    const professorProfile = await prisma.professorProfile.update({
+    const professorProfile = await (prisma.professorProfile as any).update({
       where: { userId },
       data: {
         institution: institution || undefined,
@@ -1206,7 +1579,9 @@ export const updateProfessorProfile = asyncHandler(
         city: city || undefined,
         zipCode: zipCode || undefined,
         phoneNumber: phoneNumber || undefined,
-        experience: experience || undefined,
+        experience: parsedExperience || undefined,
+        age: age ? (typeof age === 'string' ? parseInt(age) : age) : undefined,
+        gender: gender || undefined,
       },
       include: {
         user: {

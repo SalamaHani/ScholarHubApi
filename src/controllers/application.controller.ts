@@ -17,7 +17,15 @@ export const createApplication = asyncHandler(async (req: Request, res: Response
     // Get student profile to validate completeness and prefill data
     const studentProfile = await prisma.studentProfile.findUnique({
         where: { userId },
-        include: {
+        select: {
+            id: true,
+            university: true,
+            fieldOfStudy: true,
+            currentDegree: true,
+            gpa: true,
+            skills: true,
+            languages: true,
+            phoneNumber: true,
             user: {
                 select: {
                     id: true,
@@ -188,7 +196,16 @@ export const getApplicationById = asyncHandler(async (req: Request, res: Respons
                     firstName: true,
                     lastName: true,
                     email: true,
-                    studentProfile: true,
+                    studentProfile: {
+                        select: {
+                            id: true,
+                            university: true,
+                            fieldOfStudy: true,
+                            currentDegree: true,
+                            gpa: true,
+                            experience: true,
+                        }
+                    },
                 },
             },
             scholarship: {
@@ -341,7 +358,16 @@ export const getProfessorApplications = asyncHandler(async (req: Request, res: R
                         firstName: true,
                         lastName: true,
                         email: true,
-                        studentProfile: true,
+                        studentProfile: {
+                            select: {
+                                id: true,
+                                university: true,
+                                fieldOfStudy: true,
+                                currentDegree: true,
+                                gpa: true,
+                                experience: true,
+                            }
+                        },
                     },
                 },
                 scholarship: {
