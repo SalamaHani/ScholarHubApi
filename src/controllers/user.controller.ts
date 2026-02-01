@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import { UserRole } from "@prisma/client";
 import prisma from "../lib/prisma.js";
-import { ApiError, asyncHandler, hashPassword, updateUserCompleteness, calculateAverageLanguageLevel } from "../utils/index.js";
+import {
+  ApiError,
+  asyncHandler,
+  hashPassword,
+  updateUserCompleteness,
+  calculateAverageLanguageLevel,
+} from "../utils/index.js";
 
 // Helper function to parse array fields that might come as strings or objects
 const parseArrayField = (value: any): string[] | undefined => {
@@ -174,7 +180,7 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
           profileCompleteness: true,
           documents: true,
           certifications: true,
-        }
+        },
       },
       professorProfile: {
         select: {
@@ -198,7 +204,7 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
           profileCompleteness: true,
           documents: true,
           certifications: true,
-        }
+        },
       },
     },
   });
@@ -260,12 +266,17 @@ export const updateProfile = asyncHandler(
       profileData.experience = parseExperienceField(profileData.experience);
     }
     if (profileData.certifications) {
-      profileData.certifications = parseCertificationsField(profileData.certifications);
+      profileData.certifications = parseCertificationsField(
+        profileData.certifications,
+      );
     }
 
     // Parse age if it's a string
     if (profileData.age !== undefined && profileData.age !== null) {
-      profileData.age = typeof profileData.age === 'string' ? parseInt(profileData.age) : profileData.age;
+      profileData.age =
+        typeof profileData.age === "string"
+          ? parseInt(profileData.age)
+          : profileData.age;
     }
 
     // Update base user fields
@@ -308,6 +319,7 @@ export const updateProfile = asyncHandler(
           age: profileData.age,
           gender: profileData.gender,
           phoneNumber: profileData.phoneNumber,
+          certifications: profileData.certifications,
           experience: profileData.experience,
         },
         create: {
@@ -327,6 +339,7 @@ export const updateProfile = asyncHandler(
           gender: profileData.gender,
           phoneNumber: profileData.phoneNumber,
           experience: profileData.experience,
+          certifications: profileData.certifications,
         },
       });
     }
@@ -412,7 +425,7 @@ export const updateProfile = asyncHandler(
             profileCompleteness: true,
             documents: true,
             certifications: true,
-          }
+          },
         },
         professorProfile: {
           select: {
@@ -436,7 +449,7 @@ export const updateProfile = asyncHandler(
             profileCompleteness: true,
             documents: true,
             certifications: true,
-          }
+          },
         },
       },
     });
@@ -493,7 +506,7 @@ export const uploadProfileAvatar = asyncHandler(
 
     if (!avatarPath) {
       throw ApiError.badRequest(
-        "No image file or avatar URL provided. Please upload an image with the key 'avatar' or provide an 'avatar' URL string in the request body."
+        "No image file or avatar URL provided. Please upload an image with the key 'avatar' or provide an 'avatar' URL string in the request body.",
       );
     }
 
@@ -519,7 +532,7 @@ export const uploadProfileAvatar = asyncHandler(
       message: "Avatar uploaded successfully",
       data: {
         user,
-        avatar: user.avatar
+        avatar: user.avatar,
       },
     });
   },
@@ -564,7 +577,10 @@ export const uploadProfileDocument = asyncHandler(
       }
 
       // Update profile completeness
-      const profileCompleteness = await updateUserCompleteness(userId, userRole);
+      const profileCompleteness = await updateUserCompleteness(
+        userId,
+        userRole,
+      );
 
       return res.json({
         success: true,
@@ -609,7 +625,10 @@ export const uploadProfileDocument = asyncHandler(
       }
 
       // Update profile completeness
-      const profileCompleteness = await updateUserCompleteness(userId, userRole);
+      const profileCompleteness = await updateUserCompleteness(
+        userId,
+        userRole,
+      );
 
       return res.json({
         success: true,
@@ -691,7 +710,10 @@ export const deleteProfileDocument = asyncHandler(
         },
       });
 
-      const profileCompleteness = await updateUserCompleteness(userId, userRole);
+      const profileCompleteness = await updateUserCompleteness(
+        userId,
+        userRole,
+      );
 
       return res.json({
         success: true,
@@ -751,7 +773,10 @@ export const deleteProfileDocument = asyncHandler(
         },
       });
 
-      const profileCompleteness = await updateUserCompleteness(userId, userRole);
+      const profileCompleteness = await updateUserCompleteness(
+        userId,
+        userRole,
+      );
 
       return res.json({
         success: true,
@@ -1238,7 +1263,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 
   const existingUser = await prisma.user.findUnique({
     where: { id },
-    include: { studentProfile: true, professorProfile: true }
+    include: { studentProfile: true, professorProfile: true },
   });
 
   if (!existingUser) {
@@ -1253,7 +1278,8 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   if (phone !== undefined) updateData.phone = phone;
   if (avatar !== undefined) updateData.avatar = avatar;
   if (isBlocked !== undefined) updateData.isBlocked = isBlocked;
-  if (isEmailVerified !== undefined) updateData.isEmailVerified = isEmailVerified;
+  if (isEmailVerified !== undefined)
+    updateData.isEmailVerified = isEmailVerified;
 
   // Handle role change if requested
   if (role !== undefined && role !== existingUser.role) {
@@ -1283,11 +1309,17 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const userRole = role || user.role;
 
   // Parse array fields if they exist in profileData
-  if (profileData.languages) profileData.languages = parseLanguagesField(profileData.languages);
-  if (profileData.skills) profileData.skills = parseArrayField(profileData.skills);
-  if (profileData.experience) profileData.experience = parseExperienceField(profileData.experience);
+  if (profileData.languages)
+    profileData.languages = parseLanguagesField(profileData.languages);
+  if (profileData.skills)
+    profileData.skills = parseArrayField(profileData.skills);
+  if (profileData.experience)
+    profileData.experience = parseExperienceField(profileData.experience);
   if (profileData.age !== undefined && profileData.age !== null) {
-    profileData.age = typeof profileData.age === 'string' ? parseInt(profileData.age) : profileData.age;
+    profileData.age =
+      typeof profileData.age === "string"
+        ? parseInt(profileData.age)
+        : profileData.age;
   }
 
   if (userRole === UserRole.STUDENT) {
@@ -1510,8 +1542,8 @@ export const updateStudentProfile = asyncHandler(
             lastName: true,
             role: true,
             avatar: true,
-            phone: true
-          }
+            phone: true,
+          },
         },
       },
     });
@@ -1580,7 +1612,7 @@ export const updateProfessorProfile = asyncHandler(
         zipCode: zipCode || undefined,
         phoneNumber: phoneNumber || undefined,
         experience: parsedExperience || undefined,
-        age: age ? (typeof age === 'string' ? parseInt(age) : age) : undefined,
+        age: age ? (typeof age === "string" ? parseInt(age) : age) : undefined,
         gender: gender || undefined,
       },
       include: {
@@ -1611,8 +1643,8 @@ export const updateProfessorProfile = asyncHandler(
             lastName: true,
             role: true,
             avatar: true,
-            phone: true
-          }
+            phone: true,
+          },
         },
       },
     });
@@ -1773,7 +1805,10 @@ export const getProfessorProfileDetails = asyncHandler(
     }
 
     // Recalculate completeness to ensure it's always up to date
-    const profileCompleteness = await updateUserCompleteness(userId, "PROFESSOR");
+    const profileCompleteness = await updateUserCompleteness(
+      userId,
+      "PROFESSOR",
+    );
 
     // Re-fetch to get updated state
     const updatedProfessorProfile = await prisma.professorProfile.findUnique({

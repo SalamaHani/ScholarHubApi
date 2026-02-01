@@ -103,6 +103,10 @@ export const createScholarshipValidator = [
         .trim()
         .isIn(['ONLINE', 'ON_CAMPUS', 'HYBRID'])
         .withMessage('Invalid study mode'),
+    body('questions')
+        .optional()
+        .isArray()
+        .withMessage('Questions must be an array'),
 ];
 
 export const updateScholarshipValidator = [
@@ -144,6 +148,10 @@ export const createApplicationValidator = [
         .trim()
         .isLength({ max: 2000 })
         .withMessage('Additional info must be less than 2000 characters'),
+    body('answers')
+        .optional()
+        .isArray()
+        .withMessage('Answers must be an array'),
 ];
 
 export const evaluateApplicationValidator = [
@@ -218,6 +226,18 @@ export const scholarshipQueryValidator = [
         .optional()
         .isBoolean()
         .withMessage('Open filter must be a boolean'),
+];
+
+export const professorScholarshipQueryValidator = [
+    ...paginationValidator,
+    query('status')
+        .optional()
+        .isIn(['PENDING_APPROVAL', 'APPROVED', 'REJECTED'])
+        .withMessage('Invalid status'),
+    query('userId')
+        .optional()
+        .isString()
+        .withMessage('Invalid user ID format'),
 ];
 
 // ==================== ID VALIDATOR ====================

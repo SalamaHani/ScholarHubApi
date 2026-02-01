@@ -6,6 +6,7 @@ interface ErrorResponse {
     success: false;
     message: string;
     errors?: any;
+    data?: Record<string, any>;
     stack?: string;
 }
 
@@ -21,11 +22,13 @@ export const errorHandler = (
     let statusCode = 500;
     let message = 'Internal Server Error';
     let errors: any = undefined;
+    let data: Record<string, any> | undefined = undefined;
 
     // Handle ApiError instances
     if (err instanceof ApiError) {
         statusCode = err.statusCode;
         message = err.message;
+        data = err.data;
     }
 
     // Handle Prisma errors
@@ -65,6 +68,10 @@ export const errorHandler = (
 
     if (errors) {
         response.errors = errors;
+    }
+
+    if (data) {
+        response.data = data;
     }
 
     // Include stack trace in development

@@ -50,6 +50,7 @@ export const createScholarship = asyncHandler(
       language,
       studyMode,
       categoryIds,
+      questions,
     } = req.body;
 
     // Create scholarship
@@ -82,14 +83,21 @@ export const createScholarship = asyncHandler(
         createdById: userId,
         approvedById: userId,
         approvedAt: new Date(),
-        categories: categoryIds
+        categories: Array.isArray(categoryIds) && categoryIds.length > 0
           ? {
-              create: categoryIds.map((categoryId: string) => ({
-                categoryId,
-              })),
-            }
+            create: categoryIds.map((categoryId: string) => ({
+              categoryId,
+            })),
+          }
           : undefined,
-      },
+        questions: Array.isArray(questions) && questions.length > 0
+          ? {
+            create: questions.map((q: any) => ({
+              question: typeof q === "string" ? q : q.question,
+            })),
+          }
+          : undefined,
+      } as any,
       include: {
         createdBy: {
           select: { id: true, firstName: true, lastName: true, email: true },
@@ -97,7 +105,8 @@ export const createScholarship = asyncHandler(
         categories: {
           include: { category: true },
         },
-      },
+        questions: true,
+      } as any,
     });
 
     res.status(201).json({
@@ -282,8 +291,9 @@ export const getScholarshipById = asyncHandler(
         categories: {
           include: { category: true },
         },
+        questions: true,
         _count: { select: { applications: true, savedBy: true } },
-      },
+      } as any,
     });
 
     if (!scholarship) {
@@ -374,6 +384,7 @@ export const updateScholarship = asyncHandler(
       benefits,
       documents,
       categoryIds,
+      questions,
     } = req.body;
 
     // Build update data
@@ -400,7 +411,7 @@ export const updateScholarship = asyncHandler(
     if (documents) updateData.documents = documents;
 
     // Update categories if provided
-    if (categoryIds) {
+    if (Array.isArray(categoryIds) && categoryIds.length > 0) {
       // Delete existing categories
       await prisma.categoryOnScholarship.deleteMany({
         where: { scholarshipId: id },
@@ -412,12 +423,28 @@ export const updateScholarship = asyncHandler(
       };
     }
 
+    // Update questions if provided
+    if (Array.isArray(questions) && questions.length > 0) {
+      // Delete existing questions
+      await (prisma as any).scholarshipQuestion.deleteMany({
+        where: { scholarshipId: id },
+      });
+
+      // Add new questions
+      (updateData as any).questions = {
+        create: questions.map((q: any) => ({
+          question: typeof q === "string" ? q : q.question,
+        })),
+      };
+    }
+
     const updatedScholarship = await prisma.scholarship.update({
       where: { id },
       data: updateData,
       include: {
         categories: { include: { category: true } },
-      },
+        questions: true,
+      } as any,
     });
 
     res.json({
@@ -482,12 +509,36 @@ export const deleteScholarship = asyncHandler(
  */
 export const getProfessorScholarships = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const { page = 1, limit = 20, status } = req.query;
+    const { page = 1, limit = 20, status, userId } = req.query;
+    const currentUserId = req.user!.id;
+    const userRole = req.user!.role;
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const where: Prisma.ScholarshipWhereInput = { createdById: userId };
+    // If a userId is provided in query, use it (typically for Admin or for checking another professor)
+    // Otherwise use current user's ID
+    const targetUserId = (userId as string) || currentUserId;
+
+    // Verify the target user is a professor
+    if (userId) {
+      const targetUser = await prisma.user.findUnique({
+        where: { id: targetUserId },
+        select: { role: true },
+      });
+
+      if (!targetUser || targetUser.role !== UserRole.PROFESSOR) {
+        throw ApiError.badRequest("Scholarships can only be retrieved for professors");
+      }
+
+      // If viewing someone else's scholarships, must be an Admin
+      if (targetUserId !== currentUserId && userRole !== UserRole.ADMIN) {
+        throw ApiError.forbidden(
+          "You are not authorized to view another professor's scholarships",
+        );
+      }
+    }
+
+    const where: Prisma.ScholarshipWhereInput = { createdById: targetUserId };
     if (status) {
       where.status = status as ScholarshipStatus;
     }
@@ -648,9 +699,8 @@ export const rejectScholarship = asyncHandler(
       data: {
         userId: scholarship.createdById,
         title: "Scholarship Rejected",
-        message: `Your scholarship "${
-          scholarship.title
-        }" was not approved. Reason: ${reason || "Not specified"}`,
+        message: `Your scholarship "${scholarship.title
+          }" was not approved. Reason: ${reason || "Not specified"}`,
         type: "scholarship_rejected",
         link: `/dashboard/scholarships/${id}`,
       },

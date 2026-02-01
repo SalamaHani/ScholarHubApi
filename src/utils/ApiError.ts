@@ -4,17 +4,19 @@
 export class ApiError extends Error {
     statusCode: number;
     isOperational: boolean;
+    data?: Record<string, any>;
 
-    constructor(statusCode: number, message: string, isOperational = true) {
+    constructor(statusCode: number, message: string, isOperational = true, data?: Record<string, any>) {
         super(message);
         this.statusCode = statusCode;
         this.isOperational = isOperational;
+        this.data = data;
 
         Error.captureStackTrace(this, this.constructor);
     }
 
-    static badRequest(message: string): ApiError {
-        return new ApiError(400, message);
+    static badRequest(message: string, data?: Record<string, any>): ApiError {
+        return new ApiError(400, message, true, data);
     }
 
     static unauthorized(message = 'Unauthorized'): ApiError {

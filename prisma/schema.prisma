@@ -34,7 +34,6 @@ model User {
   scholarships         Scholarship[]      @relation("CreatedBy")
   studentProfile       StudentProfile?
   testimonials         Testimonial[]
-
   @@index([email])
   @@index([role])
 }
@@ -142,6 +141,7 @@ model Scholarship {
   studyMode       String?
   applications    Application[]
   categories      CategoryOnScholarship[]
+  questions       ScholarshipQuestion[]
   savedBy         SavedScholarship[]
   createdBy       User                    @relation("CreatedBy", fields: [createdById], references: [id])
 
@@ -188,7 +188,7 @@ model Application {
   updatedAt       DateTime          @updatedAt
   scholarship     Scholarship       @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  answers         ApplicationAnswer[]
   @@unique([userId, scholarshipId])
   @@index([userId])
   @@index([scholarshipId])
@@ -305,4 +305,30 @@ enum DocumentType {
   RESEARCH_PUBLICATION
   PDF_FILE
   OTHER
+}
+
+model ScholarshipQuestion {
+  id            String              @id @default(cuid())
+  scholarshipId String
+  question      String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  scholarship   Scholarship         @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  answers       ApplicationAnswer[]
+  @@index([scholarshipId])
+}
+
+model ApplicationAnswer {
+  id            String              @id @default(cuid())
+  applicationId String
+  questionId    String
+  answer        String?
+  attachmentId  String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  application   Application         @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  question      ScholarshipQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([questionId])
 }

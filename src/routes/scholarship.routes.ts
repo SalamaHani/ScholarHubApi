@@ -61,11 +61,6 @@ router.post(
   createScholarship
 );
 
-/**
- * @route   GET /api/scholarships/professor/my
- * @desc    Get professor's own scholarships
- */
-router.get("/professor", authenticate, isProfessor, getProfessorScholarships);
 
 /**
  * @route   PUT /api/scholarships/:id

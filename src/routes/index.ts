@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authRoutes from "./auth.routes.js";
+import professorRoutes from "./professor.routes.js";
 import userRoutes from "./user.routes.js";
 import scholarshipRoutes from "./scholarship.routes.js";
 import applicationRoutes from "./application.routes.js";
@@ -83,7 +84,7 @@ router.use("/saved", savedRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/testimonials", testimonialRoutes);
 router.use("/documents", documentRoutes);
-router.use("/professor", scholarshipRoutes);
+router.use("/professor", professorRoutes);
 router.use("/profile", userRoutes);
 router.use("/avatar", userRoutes);
 
