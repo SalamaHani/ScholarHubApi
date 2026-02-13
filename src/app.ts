@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from "url";
+import passport from "./config/passport.js";
 
 import config from "./config/index.js";
 import routes from "./routes/index.js";
@@ -25,8 +26,11 @@ app.use(helmet());
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://localhost:3002",
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3001",
+  "http://127.0.0.1:3002",
+  config.frontendUrl,
 ];
 
 app.use(
@@ -76,6 +80,11 @@ const authLimiter = rateLimit({
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
+
+// ==================== PASSPORT INITIALIZATION ====================
+
+app.use(passport.initialize());
+// Note: We don't use passport.session() because we use JWT, not sessions
 
 // ==================== LOGGING ====================
 

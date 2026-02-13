@@ -820,6 +820,13 @@ export const changePassword = asyncHandler(
       throw ApiError.notFound("User not found");
     }
 
+    // Check if user has a password (OAuth users might not)
+    if (!user.password) {
+      throw ApiError.badRequest(
+        "This account was created using OAuth. Please set a password first."
+      );
+    }
+
     // Verify current password
     const bcrypt = await import("bcryptjs");
     const isValid = await bcrypt.compare(currentPassword, user.password);
@@ -889,28 +896,50 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
         firstName: true,
         lastName: true,
         role: true,
-        isEmailVerified: true,
-        isBlocked: true,
-        isActive: true,
+        avatar: true,
+        phone: true,
         createdAt: true,
         lastLoginAt: true,
         professorProfile: {
           select: {
+            id: true,
             institution: true,
             department: true,
             position: true,
             specialization: true,
-            isVerified: true,
+            bio: true,
+            languages: true,
+            skills: true,
             experience: true,
+            certifications: true,
+            country: true,
+            city: true,
+            age: true,
+            gender: true,
+            phoneNumber: true,
+            isVerified: true,
+            documents: true,
           },
         },
         studentProfile: {
           select: {
+            id: true,
             university: true,
             fieldOfStudy: true,
             currentDegree: true,
             gpa: true,
+            graduationYear: true,
+            country: true,
+            city: true,
+            bio: true,
+            languages: true,
+            skills: true,
             experience: true,
+            certifications: true,
+            age: true,
+            gender: true,
+            phoneNumber: true,
+            documents: true,
           },
         },
       },

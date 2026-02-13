@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { UserRole } from "@prisma/client";
 import prisma from "../lib/prisma.js";
@@ -11,6 +11,9 @@ import {
   verifyRefreshToken,
 } from "../utils/index.js";
 import config from "../config/index.js";
+import passport from "../config/passport.js";
+import { encryptState, decryptState } from "../utils/oauthState.js";
+import { sendPasswordResetEmail } from "../services/mail.service.js";
 
 /**
  * @route   POST /api/auth/register
@@ -114,6 +117,13 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   if (!user) {
     throw ApiError.unauthorized("Invalid email or password");
+  }
+
+  // Check if user has a password (OAuth-only users don't)
+  if (!user.password) {
+    throw ApiError.badRequest(
+      `This account was created using ${user.provider || "OAuth"} sign-in. Please use ${user.provider || "OAuth"} to login, or set a password first.`
+    );
   }
 
   // Check password
@@ -327,7 +337,17 @@ export const forgotPassword = asyncHandler(
       },
     });
 
-    // TODO: Send password reset email
+    // Send password reset email
+    try {
+      await sendPasswordResetEmail(
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+        resetToken
+      );
+    } catch (error) {
+      console.error("Failed to send password reset email:", error);
+      // Continue even if email fails - user can still reset via token
+    }
 
     res.json({
       success: true,
@@ -459,3 +479,118 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
     data: { user },
   });
 });
+
+/**
+ * @route   GET /api/auth/google
+ * @desc    Initiate Google OAuth flow
+ * @access  Public
+ * @query   role - Optional role (STUDENT or PROFESSOR), defaults to STUDENT
+ */
+export const googleAuth = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const role = req.query.role as string;
+
+    // Validate role
+    if (role && !["STUDENT", "PROFESSOR"].includes(role)) {
+      throw ApiError.badRequest("Invalid role. Must be STUDENT or PROFESSOR");
+    }
+
+    // Encrypt role in state for CSRF protection
+    const state = encryptState(role);
+
+    // Initiate Google OAuth with state
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state,
+      session: false,
+    })(req, res, next);
+  }
+);
+
+/**
+ * @route   GET /api/auth/google/callback
+ * @desc    Google OAuth callback
+ * @access  Public
+ */
+export const googleCallback = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const state = req.query.state as string;
+
+    // Validate state parameter
+    if (!state) {
+      return res.redirect(
+        `${config.frontendUrl}/auth/callback?error=${encodeURIComponent("Missing state parameter")}&success=false`
+      );
+    }
+
+    // Decrypt and validate state
+    const decryptedState = decryptState(state);
+    if (!decryptedState) {
+      return res.redirect(
+        `${config.frontendUrl}/auth/callback?error=${encodeURIComponent("Invalid or expired state")}&success=false`
+      );
+    }
+
+    // Attach role to request for passport strategy
+    (req as any).oauthRole = decryptedState.role;
+
+    // Authenticate with Passport
+    passport.authenticate(
+      "google",
+      { session: false },
+      async (err: any, user: any, info: any) => {
+        try {
+          // Handle authentication errors
+          if (err) {
+            console.error("Google OAuth error:", err);
+            return res.redirect(
+              `${config.frontendUrl}/auth/callback?error=${encodeURIComponent("Authentication failed")}&success=false`
+            );
+          }
+
+          // User denied access or authentication failed
+          if (!user) {
+            const message = info?.message || "Authentication failed";
+            return res.redirect(
+              `${config.frontendUrl}/auth/callback?error=${encodeURIComponent(message)}&success=false`
+            );
+          }
+
+          // Check if user is blocked or inactive
+          if (user.isBlocked) {
+            return res.redirect(
+              `${config.frontendUrl}/auth/callback?error=${encodeURIComponent("Account blocked")}&success=false`
+            );
+          }
+
+          if (!user.isActive) {
+            return res.redirect(
+              `${config.frontendUrl}/auth/callback?error=${encodeURIComponent("Account inactive")}&success=false`
+            );
+          }
+
+          // Generate JWT tokens
+          const tokens = generateTokens(user.id, user.role);
+
+          // Save refresh token to database
+          await prisma.refreshToken.create({
+            data: {
+              userId: user.id,
+              token: tokens.refreshToken,
+              expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            },
+          });
+
+          // Redirect to frontend with tokens in URL fragment
+          const redirectUrl = `${config.frontendUrl}/auth/callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&success=true`;
+          return res.redirect(redirectUrl);
+        } catch (error) {
+          console.error("OAuth callback error:", error);
+          return res.redirect(
+            `${config.frontendUrl}/auth/callback?error=${encodeURIComponent("Internal server error")}&success=false`
+          );
+        }
+      }
+    )(req, res, next);
+  }
+);

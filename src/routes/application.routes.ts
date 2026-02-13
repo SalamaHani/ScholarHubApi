@@ -9,11 +9,14 @@ import {
   getAllApplications,
   getApplicationStats,
   updateApplication,
+  deleteApplication,
 } from "../controllers/index.js";
 import {
   authenticate,
   isStudent,
   isProfessor,
+  isProfessorOrAdmin,
+  isStudentOrAdmin,
   isAdmin,
   validate,
   createApplicationValidator,
@@ -57,7 +60,7 @@ router.get(
 router.put(
   "/:id",
   authenticate,
-  isStudent,
+  isStudentOrAdmin,
   createApplicationValidator,
   validate,
   updateApplication,
@@ -98,7 +101,7 @@ router.get(
 router.put(
   "/:id/evaluate",
   authenticate,
-  isProfessor,
+  isProfessorOrAdmin,
   evaluateApplicationValidator,
   validate,
   evaluateApplication,
@@ -124,5 +127,11 @@ router.get(
  * @desc    Get application statistics
  */
 router.get("/admin/stats", authenticate, isAdmin, getApplicationStats);
+
+/**
+ * @route   DELETE /api/applications/:id
+ * @desc    Delete an application
+ */
+router.delete("/:id", authenticate, idParamValidator, validate, deleteApplication);
 
 export default router;

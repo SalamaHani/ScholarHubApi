@@ -3,23 +3,9 @@ import { UserRole } from "@prisma/client";
 import { ApiError, verifyAccessToken } from "../utils/index.js";
 import prisma from "../lib/prisma.js";
 
-// Extend Express Request to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email: string;
-        role: UserRole;
-        firstName: string;
-        lastName: string;
-      };
-    }
-  }
-}
-
 /**
  * Authentication middleware - verifies JWT token
+ * Note: Express Request type is extended in src/types/express.d.ts
  */
 export const authenticate = async (
   req: Request,
@@ -161,3 +147,8 @@ export const isStudent = authorize(UserRole.STUDENT);
  * Check if user is professor or admin
  */
 export const isProfessorOrAdmin = authorize(UserRole.PROFESSOR, UserRole.ADMIN);
+
+/**
+ * Check if user is student or admin
+ */
+export const isStudentOrAdmin = authorize(UserRole.STUDENT, UserRole.ADMIN);

@@ -93,7 +93,9 @@ export const createScholarship = asyncHandler(
         questions: Array.isArray(questions) && questions.length > 0
           ? {
             create: questions.map((q: any) => ({
-              question: typeof q === "string" ? q : q.question,
+              question: q.question,
+              type: q.type || "TEXT",
+              options: Array.isArray(q.options) ? q.options : [],
             })),
           }
           : undefined,
@@ -433,7 +435,9 @@ export const updateScholarship = asyncHandler(
       // Add new questions
       (updateData as any).questions = {
         create: questions.map((q: any) => ({
-          question: typeof q === "string" ? q : q.question,
+          question: q.question,
+          type: q.type || "TEXT",
+          options: Array.isArray(q.options) ? q.options : [],
         })),
       };
     }

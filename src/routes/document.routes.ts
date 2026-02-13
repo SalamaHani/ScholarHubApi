@@ -9,6 +9,7 @@ import {
   verifyStudentDocument,
   verifyProfessorDocument,
   getPendingDocuments,
+  getUploadedFile,
 } from "../controllers/document.controller.js";
 import { authenticate } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/index.js";
@@ -18,6 +19,9 @@ import {
 } from "../middleware/uploadDocument.js";
 
 const router = Router();
+
+// Get uploaded file (public or authenticated based on your needs)
+router.get("/file/:filename", getUploadedFile);
 
 // Student document routes
 router.post(

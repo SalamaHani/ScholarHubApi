@@ -8,3 +8,4 @@ export {
     updateUserCompleteness,
     calculateAverageLanguageLevel
 } from './completeness.js';
+export { encryptState, decryptState } from './oauthState.js';

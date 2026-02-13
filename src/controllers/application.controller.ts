@@ -6,6 +6,7 @@ import {
   asyncHandler,
   updateUserCompleteness,
 } from "../utils/index.js";
+import { sendApplicationStatusEmail } from "../services/mail.service.js";
 
 /**
  * @route   POST /api/applications
@@ -130,6 +131,18 @@ export const createApplication = asyncHandler(
       },
     });
 
+    if (existingApplication) {
+      // If application exists, we allow updating it if it's still in DRAFT or PENDING status
+      if (
+        existingApplication.status !== ApplicationStatus.DRAFT &&
+        existingApplication.status !== ApplicationStatus.PENDING
+      ) {
+        throw ApiError.conflict(
+          "You have already applied for this scholarship and the application is being processed.",
+        );
+      }
+    }
+
     // Prepare application data with profile information
     let applicationData = {
       userId,
@@ -138,50 +151,107 @@ export const createApplication = asyncHandler(
       documents: documents && Array.isArray(documents) ? documents : [],
       additionalInfo: additionalInfo || "",
       status: status as ApplicationStatus,
-      answers: Array.isArray(answers) && answers.length > 0
-        ? {
-          create: answers.map((a: any) => ({
-            questionId: a.questionId,
-            answer: a.answer,
-            attachmentId: a.attachmentId,
-          })),
-        }
-        : undefined,
+      answers:
+        Array.isArray(answers) && answers.length > 0
+          ? {
+              create: answers.map((a: any) => ({
+                questionId: a.questionId,
+                answer: a.answer,
+                attachmentId: a.attachmentId,
+              })),
+            }
+          : undefined,
     } as any;
 
-    // Create application
-    const application = await prisma.application.create({
-      data: applicationData,
-      include: {
-        scholarship: {
-          select: { id: true, title: true, organization: true, deadline: true },
-        },
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phone: true,
-            studentProfile: {
-              select: {
-                id: true,
-                university: true,
-                fieldOfStudy: true,
-                currentDegree: true,
-                gpa: true,
-                profileCompleteness: true,
+    let application;
+
+    if (existingApplication) {
+      // If application exists but is editable, update it
+      // First, handle answers separately for update to replace them
+      if (Array.isArray(answers) && answers.length > 0) {
+        await (prisma as any).applicationAnswer.deleteMany({
+          where: { applicationId: existingApplication.id },
+        });
+      }
+
+      application = await (prisma as any).application.update({
+        where: { id: existingApplication.id },
+        data: applicationData,
+        include: {
+          scholarship: {
+            select: {
+              id: true,
+              title: true,
+              organization: true,
+              deadline: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              phone: true,
+              studentProfile: {
+                select: {
+                  id: true,
+                  university: true,
+                  fieldOfStudy: true,
+                  currentDegree: true,
+                  gpa: true,
+                  profileCompleteness: true,
+                },
               },
             },
           },
-        },
-        answers: {
-          include: {
-            question: true,
+          answers: {
+            include: {
+              question: true,
+            },
           },
         },
-      } as any,
-    });
+      });
+    } else {
+      // Create new application
+      application = await prisma.application.create({
+        data: applicationData,
+        include: {
+          scholarship: {
+            select: {
+              id: true,
+              title: true,
+              organization: true,
+              deadline: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              phone: true,
+              studentProfile: {
+                select: {
+                  id: true,
+                  university: true,
+                  fieldOfStudy: true,
+                  currentDegree: true,
+                  gpa: true,
+                  profileCompleteness: true,
+                },
+              },
+            },
+          },
+          answers: {
+            include: {
+              question: true,
+            },
+          },
+        } as any,
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -412,17 +482,29 @@ export const updateApplication = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const userId = req.user!.id;
-    const { coverLetter, documents, additionalInfo, status } = req.body;
+    const {
+      coverLetter,
+      documents,
+      additionalInfo,
+      status,
+      answers, // [{ questionId: string, answer?: string, attachmentId?: string }]
+    } = req.body;
 
     const application = await prisma.application.findUnique({
       where: { id },
+      include: {
+        scholarship: {
+          include: { questions: true } as any,
+        },
+      },
     });
 
     if (!application) {
       throw ApiError.notFound("Application not found");
     }
 
-    if (application.userId !== userId) {
+    const isAdmin = req.user!.role === UserRole.ADMIN;
+    if (application.userId !== userId && !isAdmin) {
       throw ApiError.forbidden("Not authorized to update this application");
     }
 
@@ -433,14 +515,58 @@ export const updateApplication = asyncHandler(
       throw ApiError.badRequest("Cannot update a finalized application");
     }
 
+    // Validate answers if provided and scholarship has questions
+    const scholarshipWithQuestions = application.scholarship as any;
+    if (
+      scholarshipWithQuestions.questions &&
+      scholarshipWithQuestions.questions.length > 0 &&
+      answers &&
+      Array.isArray(answers)
+    ) {
+      const answeredQuestionIds = answers.map((a: any) => a.questionId);
+      const missingQuestionIds = scholarshipWithQuestions.questions
+        .filter((q: any) => !answeredQuestionIds.includes(q.id))
+        .map((q: any) => q.id);
+
+      if (
+        missingQuestionIds.length > 0 &&
+        status === ApplicationStatus.PENDING
+      ) {
+        throw ApiError.badRequest(
+          "Some scholarship questions were not answered",
+          { missingQuestionIds },
+        );
+      }
+    }
+
+    // Build update data
+    const updateData: any = {};
+    if (coverLetter !== undefined) updateData.coverLetter = coverLetter;
+    if (documents !== undefined) updateData.documents = documents;
+    if (additionalInfo !== undefined)
+      updateData.additionalInfo = additionalInfo;
+    if (status !== undefined) updateData.status = status as ApplicationStatus;
+
+    // Update answers if provided
+    if (Array.isArray(answers) && answers.length > 0) {
+      // Delete existing answers
+      await (prisma as any).applicationAnswer.deleteMany({
+        where: { applicationId: id },
+      });
+
+      // Add new answers
+      updateData.answers = {
+        create: answers.map((a: any) => ({
+          questionId: a.questionId,
+          answer: a.answer,
+          attachmentId: a.attachmentId,
+        })),
+      };
+    }
+
     const updatedApplication = await prisma.application.update({
       where: { id },
-      data: {
-        coverLetter,
-        documents,
-        additionalInfo,
-        status: status as ApplicationStatus,
-      },
+      data: updateData,
       include: {
         user: {
           select: {
@@ -461,7 +587,12 @@ export const updateApplication = asyncHandler(
           },
         },
         scholarship: { select: { id: true, title: true } },
-      },
+        answers: {
+          include: {
+            question: true,
+          },
+        },
+      } as any,
     });
 
     res.json({
@@ -576,13 +707,16 @@ export const evaluateApplication = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const userId = req.user!.id;
-    const { status, evaluationNotes } = req.body;
+    const { status, evaluationNotes, evaluation } = req.body;
+    const finalEvaluationNotes = evaluationNotes || evaluation;
 
     const application = await prisma.application.findUnique({
       where: { id },
       include: {
         scholarship: { select: { createdById: true, title: true } },
-        user: { select: { id: true } },
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
       },
     });
 
@@ -590,7 +724,8 @@ export const evaluateApplication = asyncHandler(
       throw ApiError.notFound("Application not found");
     }
 
-    if (application.scholarship.createdById !== userId) {
+    const isAdmin = req.user!.role === UserRole.ADMIN;
+    if (application.scholarship.createdById !== userId && !isAdmin) {
       throw ApiError.forbidden("Not authorized to evaluate this application");
     }
 
@@ -602,13 +737,24 @@ export const evaluateApplication = asyncHandler(
       where: { id },
       data: {
         status: status as ApplicationStatus,
-        evaluationNotes,
+        evaluationNotes: finalEvaluationNotes,
         evaluatedBy: userId,
         evaluatedAt: new Date(),
       },
     });
 
     // Notify student
+    const studentName = `${application.user.firstName} ${application.user.lastName}`;
+    const studentEmail = application.user.email;
+
+    await sendApplicationStatusEmail(
+      studentEmail,
+      studentName,
+      application.scholarship.title,
+      status,
+      finalEvaluationNotes,
+    );
+
     let notificationTitle = "";
     let notificationMessage = "";
 
@@ -666,8 +812,10 @@ export const getAllApplications = asyncHandler(
         where,
         skip,
         take: Number(limit),
+
         orderBy: { submittedAt: "desc" },
         include: {
+          answers: true,
           user: {
             select: {
               id: true,
@@ -675,6 +823,7 @@ export const getAllApplications = asyncHandler(
               lastName: true,
               email: true,
               phone: true,
+              avatar: true,
               studentProfile: {
                 select: {
                   id: true,
@@ -682,14 +831,30 @@ export const getAllApplications = asyncHandler(
                   fieldOfStudy: true,
                   currentDegree: true,
                   gpa: true,
+                  graduationYear: true,
                   country: true,
+                  city: true,
+                  bio: true,
+                  languages: true,
+                  skills: true,
+                  experience: true,
+                  certifications: true,
+                  age: true,
+                  gender: true,
+                  phoneNumber: true,
+                  documents: true,
                   profileCompleteness: true,
                 },
               },
             },
           },
           scholarship: {
-            select: { id: true, title: true, organization: true },
+            select: {
+              id: true,
+              title: true,
+              organization: true,
+              questions: true,
+            },
           },
         },
       }),
@@ -750,6 +915,47 @@ export const getApplicationStats = asyncHandler(
           withdrawn,
         },
       },
+    });
+  },
+);
+
+/**
+ * @route   DELETE /api/applications/:id
+ * @desc    Delete an application (Admin only or student's own)
+ * @access  Private/Admin
+ */
+export const deleteApplication = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    const application = await prisma.application.findUnique({
+      where: { id },
+    });
+
+    if (!application) {
+      throw ApiError.notFound("Application not found");
+    }
+
+    // Only Admin can delete any application, students can only delete theirs if it's draft?
+    // Usually admin panel needs a delete action.
+    if (userRole !== UserRole.ADMIN && application.userId !== userId) {
+      throw ApiError.forbidden("Not authorized to delete this application");
+    }
+
+    // Delete associated answers first if they exist
+    await (prisma as any).applicationAnswer.deleteMany({
+      where: { applicationId: id },
+    });
+
+    await prisma.application.delete({
+      where: { id },
+    });
+
+    res.json({
+      success: true,
+      message: "Application deleted successfully",
     });
   },
 );

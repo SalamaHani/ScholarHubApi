@@ -23,6 +23,14 @@ interface Config {
     pass: string;
     from: string;
   };
+  oauth: {
+    google: {
+      clientId: string;
+      clientSecret: string;
+      callbackUrl: string;
+    };
+    stateSecret: string;
+  };
 }
 
 const config: Config = {
@@ -39,6 +47,17 @@ const config: Config = {
     user: process.env.SMTP_USER || "",
     pass: process.env.SMTP_PASS || "",
     from: process.env.FROM_EMAIL || "noreply@scholarhub.com",
+  },
+  oauth: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      callbackUrl:
+        process.env.GOOGLE_CALLBACK_URL ||
+        "http://localhost:8080/api/auth/google/callback",
+    },
+    stateSecret:
+      process.env.OAUTH_STATE_SECRET || "default-oauth-state-secret-change-me",
   },
 };
 

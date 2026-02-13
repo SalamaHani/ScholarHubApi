@@ -10,12 +10,14 @@ datasource db {
 model User {
   id                   String             @id @default(cuid())
   email                String             @unique
-  password             String
+  password             String?
   firstName            String
   lastName             String
   role                 UserRole           @default(STUDENT)
   avatar               String?
   phone                String?
+  googleId             String?            @unique
+  provider             String?            @default("local")
   isEmailVerified      Boolean            @default(false)
   isActive             Boolean            @default(true)
   isBlocked            Boolean            @default(false)
@@ -35,6 +37,7 @@ model User {
   studentProfile       StudentProfile?
   testimonials         Testimonial[]
   @@index([email])
+  @@index([googleId])
   @@index([role])
 }
 
@@ -288,6 +291,12 @@ enum DegreeLevel {
   RESEARCH
 }
 
+enum QuestionType {
+  TEXT
+  MULTIPLE_CHOICE
+  DOCUMENT
+}
+
 enum DocumentType {
   ID_CARD
   UNIVERSITY_CARD
@@ -311,6 +320,8 @@ model ScholarshipQuestion {
   id            String              @id @default(cuid())
   scholarshipId String
   question      String
+  type          QuestionType        @default(TEXT)
+  options       String[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   scholarship   Scholarship         @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)

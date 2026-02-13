@@ -8,6 +8,8 @@ import {
     forgotPassword,
     resetPassword,
     getMe,
+    googleAuth,
+    googleCallback,
 } from '../controllers/index.js';
 import { authenticate, validate, registerValidator, loginValidator, resetPasswordValidator } from '../middleware/index.js';
 
@@ -60,5 +62,18 @@ router.post('/reset-password', resetPasswordValidator, validate, resetPassword);
  * @desc    Get current user
  */
 router.get('/me', authenticate, getMe);
+
+/**
+ * @route   GET /api/auth/google
+ * @desc    Initiate Google OAuth flow
+ * @query   role - Optional, defaults to STUDENT
+ */
+router.get('/google', googleAuth);
+
+/**
+ * @route   GET /api/auth/google/callback
+ * @desc    Google OAuth callback
+ */
+router.get('/google/callback', googleCallback);
 
 export default router;
