@@ -764,7 +764,7 @@ export const deleteProfileDocument = asyncHandler(
         },
       });
 
-      const profileCompleteness = await updateUserCompleteness(
+      const { current: profileCompleteness } = await updateUserCompleteness(
         userId,
         userRole,
       );
@@ -827,7 +827,7 @@ export const deleteProfileDocument = asyncHandler(
         },
       });
 
-      const profileCompleteness = await updateUserCompleteness(
+      const { current: profileCompleteness } = await updateUserCompleteness(
         userId,
         userRole,
       );
@@ -1611,7 +1611,7 @@ export const updateStudentProfile = asyncHandler(
     });
 
     // Calculate and update profile completeness and language level
-    const profileCompleteness = await updateUserCompleteness(userId, userRole);
+    const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
 
     // Fetch final updated profile for response
     const finalProfile = await prisma.studentProfile.findUnique({
@@ -1712,7 +1712,7 @@ export const updateProfessorProfile = asyncHandler(
     });
 
     // Calculate and update profile completeness and language level
-    const profileCompleteness = await updateUserCompleteness(userId, userRole);
+    const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
 
     // Fetch final updated profile for response
     const finalProfile = await prisma.professorProfile.findUnique({
@@ -1795,7 +1795,7 @@ export const getStudentProfileDetails = asyncHandler(
     }
 
     // Recalculate completeness to ensure it's always up to date
-    const profileCompleteness = await updateUserCompleteness(userId, "STUDENT");
+    const { current: profileCompleteness } = await updateUserCompleteness(userId, "STUDENT");
 
     // Re-fetch to get updated state
     const updatedStudentProfile = await prisma.studentProfile.findUnique({
@@ -1888,7 +1888,7 @@ export const getProfessorProfileDetails = asyncHandler(
     }
 
     // Recalculate completeness to ensure it's always up to date
-    const profileCompleteness = await updateUserCompleteness(
+    const { current: profileCompleteness } = await updateUserCompleteness(
       userId,
       "PROFESSOR",
     );
