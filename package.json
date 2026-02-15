@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",
+    "@pusher/push-notifications-server": "^1.2.7",
     "@types/nodemailer": "^7.0.9",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",

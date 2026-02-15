@@ -7,6 +7,7 @@ import {
   updateUserCompleteness,
 } from "../utils/index.js";
 import { sendApplicationStatusEmail } from "../services/mail.service.js";
+import { sendPushNotification } from "../services/pusher.service.js";
 
 /**
  * @route   POST /api/applications
@@ -279,19 +280,47 @@ export const createApplication = asyncHandler(
 
 /**
  * @route   GET /api/applications
- * @desc    Get current user's applications
- * @access  Private/Student
+ * @desc    Get applications based on user role
+ *          - Student: returns their own applications
+ *          - Professor: returns applications for their scholarships
+ *          - Admin: returns all applications
+ * @access  Private
  */
 export const getMyApplications = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user!.id;
-    const { page = 1, limit = 20, status } = req.query;
+    const userRole = req.user!.role;
+    const { page = 1, limit = 20, status, scholarshipId } = req.query;
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const where: any = { userId };
-    if (status) {
-      where.status = status as ApplicationStatus;
+    let where: any = {};
+
+    // Build query based on user role
+    if (userRole === UserRole.STUDENT) {
+      // Students get their own applications
+      where.userId = userId;
+      if (status) {
+        where.status = status as ApplicationStatus;
+      }
+    } else if (userRole === UserRole.PROFESSOR) {
+      // Professors get applications for their scholarships
+      where.scholarship = { createdById: userId };
+      where.status = { not: ApplicationStatus.DRAFT }; // Don't show drafts
+      if (status) {
+        where.status = status as ApplicationStatus;
+      }
+      if (scholarshipId) {
+        where.scholarshipId = scholarshipId as string;
+      }
+    } else if (userRole === UserRole.ADMIN) {
+      // Admins get all applications
+      if (status) {
+        where.status = status as ApplicationStatus;
+      }
+      if (scholarshipId) {
+        where.scholarshipId = scholarshipId as string;
+      }
     }
 
     const [applications, total] = await Promise.all([
@@ -318,6 +347,10 @@ export const getMyApplications = asyncHandler(
           } as any,
           user: {
             select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
               studentProfile: {
                 select: {
                   id: true,
@@ -325,6 +358,19 @@ export const getMyApplications = asyncHandler(
                   fieldOfStudy: true,
                   currentDegree: true,
                   gpa: true,
+                  graduationYear: true,
+                  country: true,
+                  city: true,
+                  bio: true,
+                  languages: true,
+                  skills: true,
+                  experience: true,
+                  certifications: true,
+                  age: true,
+                  gender: true,
+                  phoneNumber: true,
+                  documents: true,
+                  profileCompleteness: true,
                 },
               },
             },
@@ -338,6 +384,7 @@ export const getMyApplications = asyncHandler(
       success: true,
       data: {
         applications,
+        userRole, // Include role so frontend knows what type of data this is
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -713,7 +760,7 @@ export const evaluateApplication = asyncHandler(
     const application = await prisma.application.findUnique({
       where: { id },
       include: {
-        scholarship: { select: { createdById: true, title: true } },
+        scholarship: { select: { id: true, createdById: true, title: true } },
         user: {
           select: { id: true, firstName: true, lastName: true, email: true },
         },
@@ -770,13 +817,29 @@ export const evaluateApplication = asyncHandler(
     }
 
     if (notificationTitle) {
+      const link = `/applications/${id}`;
+
+      // Create database notification
       await prisma.notification.create({
         data: {
           userId: application.user.id,
           title: notificationTitle,
           message: notificationMessage,
           type: "application_update",
-          link: `/applications/${id}`,
+          link,
+        },
+      });
+
+      // Send push notification
+      await sendPushNotification(application.user.id, {
+        title: notificationTitle,
+        body: notificationMessage,
+        url: link,
+        data: {
+          type: "application_update",
+          applicationId: id,
+          scholarshipId: application.scholarship.id,
+          status,
         },
       });
     }

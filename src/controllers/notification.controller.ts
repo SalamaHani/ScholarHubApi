@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { UserRole } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 import { ApiError, asyncHandler } from '../utils/index.js';
+import {
+  sendPushNotificationToUsers,
+  generateBeamsToken
+} from '../services/pusher.service.js';
 
 /**
  * @route   GET /api/notifications
@@ -151,7 +155,7 @@ export const sendNotification = asyncHandler(async (req: Request, res: Response)
         throw ApiError.badRequest('Either userIds or role must be provided');
     }
 
-    // Create notifications
+    // Create notifications in database
     const notifications = await prisma.notification.createMany({
         data: targetUserIds.map((userId) => ({
             userId,
@@ -160,6 +164,14 @@ export const sendNotification = asyncHandler(async (req: Request, res: Response)
             type,
             link,
         })),
+    });
+
+    // Send push notifications via Pusher
+    await sendPushNotificationToUsers(targetUserIds, {
+        title,
+        body: message,
+        url: link,
+        data: { type, notificationId: 'bulk-notification' },
     });
 
     res.status(201).json({
@@ -202,15 +214,31 @@ export const sendDeadlineReminders = asyncHandler(async (req: Request, res: Resp
         const userIds = scholarship.savedBy.map((s) => s.userId);
 
         if (userIds.length > 0) {
+            const notificationMessage = `The deadline for "${scholarship.title}" is approaching (${scholarship.deadline.toLocaleDateString()}).`;
+            const link = `/scholarships/${scholarship.id}`;
+
+            // Create database notifications
             await prisma.notification.createMany({
                 data: userIds.map((userId) => ({
                     userId,
-                    title: 'Deadline Reminder',
-                    message: `The deadline for "${scholarship.title}" is approaching (${scholarship.deadline.toLocaleDateString()}).`,
+                    title: 'Deadline Reminder ⏰',
+                    message: notificationMessage,
                     type: 'deadline_reminder',
-                    link: `/scholarships/${scholarship.id}`,
+                    link,
                 })),
             });
+
+            // Send push notifications
+            await sendPushNotificationToUsers(userIds, {
+                title: 'Deadline Reminder ⏰',
+                body: notificationMessage,
+                url: link,
+                data: {
+                    type: 'deadline_reminder',
+                    scholarshipId: scholarship.id
+                },
+            });
+
             notificationsSent += userIds.length;
         }
     }
@@ -219,4 +247,26 @@ export const sendDeadlineReminders = asyncHandler(async (req: Request, res: Resp
         success: true,
         message: `Sent ${notificationsSent} deadline reminders for ${upcomingScholarships.length} scholarships`,
     });
+});
+
+// ==================== PUSHER BEAMS ====================
+
+/**
+ * @route   POST /api/notifications/beams-auth
+ * @desc    Generate Pusher Beams authentication token for client
+ * @access  Private
+ */
+export const getBeamsToken = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+
+    try {
+        const beamsToken = generateBeamsToken(userId);
+
+        res.json({
+            success: true,
+            data: beamsToken,
+        });
+    } catch (error) {
+        throw ApiError.internal('Failed to generate Beams token');
+    }
 });

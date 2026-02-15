@@ -6,6 +6,7 @@ import {
     deleteNotification,
     sendNotification,
     sendDeadlineReminders,
+    getBeamsToken,
 } from '../controllers/index.js';
 import { authenticate, isAdmin, validate, idParamValidator, paginationValidator } from '../middleware/index.js';
 
@@ -36,6 +37,12 @@ router.put('/read-all', authenticate, markAllAsRead);
  * @desc    Delete notification
  */
 router.delete('/:id', authenticate, idParamValidator, validate, deleteNotification);
+
+/**
+ * @route   POST /api/notifications/beams-auth
+ * @desc    Get Pusher Beams authentication token
+ */
+router.post('/beams-auth', authenticate, getBeamsToken);
 
 // ==================== ADMIN ROUTES ====================
 

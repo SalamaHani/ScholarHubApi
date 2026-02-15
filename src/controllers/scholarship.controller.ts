@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
 import { ApiError, asyncHandler } from "../utils/index.js";
 import config from "../config/index.js";
+import { sendPushNotification } from "../services/pusher.service.js";
 
 /**
  * @route   POST /api/scholarships

@@ -37,7 +37,10 @@ router.post("/", authenticate, isStudent, createApplication);
 
 /**
  * @route   GET /api/applications
- * @desc    Get current user's applications
+ * @desc    Get applications based on user role
+ *          - Student: returns their own applications
+ *          - Professor: returns applications for their scholarships
+ *          - Admin: returns all applications
  */
 router.get("/", authenticate, paginationValidator, validate, getMyApplications);
 
