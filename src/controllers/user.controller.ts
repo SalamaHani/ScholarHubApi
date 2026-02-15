@@ -8,6 +8,11 @@ import {
   updateUserCompleteness,
   calculateAverageLanguageLevel,
 } from "../utils/index.js";
+import {
+  createNotification,
+  notifyProfileMilestones,
+} from "../services/notification.helper.js";
+import { sendProfileMilestoneEmail } from "../services/mail.service.js";
 
 // Helper function to parse array fields that might come as strings or objects
 const parseArrayField = (value: any): string[] | undefined => {
@@ -391,7 +396,32 @@ export const updateProfile = asyncHandler(
     }
 
     // Always update completeness if anything changed
-    await updateUserCompleteness(userId, userRole);
+    const { previous, current } = await updateUserCompleteness(userId, userRole);
+
+    // Notify user of profile update
+    try {
+      await createNotification([userId], {
+        title: "Profile Updated",
+        message: "Your profile has been updated successfully.",
+        type: "profile_update",
+        link: "/profile",
+      });
+
+      // Check for milestone achievements
+      await notifyProfileMilestones(userId, previous, current, userRole, async (uid, milestone) => {
+        const user = await prisma.user.findUnique({ where: { id: uid } });
+        if (user) {
+          await sendProfileMilestoneEmail(
+            user.email,
+            `${user.firstName} ${user.lastName}`,
+            milestone,
+            userRole
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Failed to send profile update notifications:", error);
+    }
 
     // Fetch updated profile
     const fullUser = await prisma.user.findUnique({
@@ -525,7 +555,31 @@ export const uploadProfileAvatar = asyncHandler(
     });
 
     // Update profile completeness after avatar upload
-    await updateUserCompleteness(userId, userRole);
+    const { previous, current } = await updateUserCompleteness(userId, userRole);
+
+    // Notify user and check milestones
+    try {
+      await createNotification([userId], {
+        title: "Avatar Updated",
+        message: "Your profile avatar has been updated successfully.",
+        type: "profile_update",
+        link: "/profile",
+      });
+
+      await notifyProfileMilestones(userId, previous, current, userRole, async (uid, milestone) => {
+        const user = await prisma.user.findUnique({ where: { id: uid } });
+        if (user) {
+          await sendProfileMilestoneEmail(
+            user.email,
+            `${user.firstName} ${user.lastName}`,
+            milestone,
+            userRole
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Failed to send avatar update notifications:", error);
+    }
 
     res.json({
       success: true,
@@ -577,7 +631,7 @@ export const uploadProfileDocument = asyncHandler(
       }
 
       // Update profile completeness
-      const profileCompleteness = await updateUserCompleteness(
+      const { current: profileCompleteness } = await updateUserCompleteness(
         userId,
         userRole,
       );
@@ -625,7 +679,7 @@ export const uploadProfileDocument = asyncHandler(
       }
 
       // Update profile completeness
-      const profileCompleteness = await updateUserCompleteness(
+      const { current: profileCompleteness } = await updateUserCompleteness(
         userId,
         userRole,
       );
@@ -1432,7 +1486,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // Update profile completeness
-  await updateUserCompleteness(id, userRole);
+  await updateUserCompleteness(id, userRole); // Returns {previous, current} but not used here
 
   res.json({
     success: true,

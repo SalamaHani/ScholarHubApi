@@ -13,6 +13,7 @@ import {
 import config from "../config/index.js";
 import passport from "../config/passport.js";
 import { encryptState, decryptState } from "../utils/oauthState.js";
+import { notifyAdmins } from "../services/notification.helper.js";
 import { sendPasswordResetEmail } from "../services/mail.service.js";
 
 /**
@@ -86,6 +87,18 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   });
 
   // TODO: Send verification email
+
+  // Notify admins of new registration
+  try {
+    await notifyAdmins({
+      title: "New User Registration",
+      message: `${user.firstName} ${user.lastName} (${user.email}) registered as ${role}`,
+      type: "new_registration",
+      link: `/admin/users/${user.id}`,
+    });
+  } catch (error) {
+    console.error("Failed to notify admins of registration:", error);
+  }
 
   res.status(201).json({
     success: true,

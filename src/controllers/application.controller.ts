@@ -6,8 +6,9 @@ import {
   asyncHandler,
   updateUserCompleteness,
 } from "../utils/index.js";
-import { sendApplicationStatusEmail } from "../services/mail.service.js";
+import { sendApplicationStatusEmail, sendNewApplicationEmail } from "../services/mail.service.js";
 import { sendPushNotification } from "../services/pusher.service.js";
+import { createNotification } from "../services/notification.helper.js";
 
 /**
  * @route   POST /api/applications
@@ -60,7 +61,7 @@ export const createApplication = asyncHandler(
     }
 
     // Calculate and update profile completeness
-    const profileCompleteness = await updateUserCompleteness(
+    const { current: profileCompleteness } = await updateUserCompleteness(
       userId,
       req.user!.role,
     );
@@ -252,6 +253,46 @@ export const createApplication = asyncHandler(
           },
         } as any,
       });
+    }
+
+    // Notify professor and student about new application
+    try {
+      const scholarship = await prisma.scholarship.findUnique({
+        where: { id: scholarshipId },
+        include: {
+          createdBy: {
+            select: { id: true, email: true, firstName: true, lastName: true },
+          },
+        },
+      });
+
+      if (scholarship?.createdBy) {
+        // Notify professor of new application
+        await createNotification([scholarship.createdBy.id], {
+          title: "New Application Received",
+          message: `${studentProfile.user.firstName} ${studentProfile.user.lastName} applied for "${scholarship.title}"`,
+          type: "new_application",
+          link: `/dashboard/applications?scholarship=${scholarshipId}`,
+        }, async () => {
+          await sendNewApplicationEmail(
+            scholarship.createdBy.email,
+            `${scholarship.createdBy.firstName} ${scholarship.createdBy.lastName}`,
+            `${studentProfile.user.firstName} ${studentProfile.user.lastName}`,
+            scholarship.title,
+            application.id
+          );
+        });
+
+        // Confirm to student
+        await createNotification([userId], {
+          title: "Application Submitted",
+          message: `Your application for "${scholarship.title}" has been submitted successfully`,
+          type: "application_confirmation",
+          link: `/applications/${application.id}`,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to send application notifications:", error);
     }
 
     res.status(201).json({
@@ -511,6 +552,41 @@ export const withdrawApplication = asyncHandler(
       where: { id },
       data: { status: ApplicationStatus.WITHDRAWN },
     });
+
+    // Notify professor and student about withdrawal
+    try {
+      const fullApplication = await prisma.application.findUnique({
+        where: { id },
+        include: {
+          scholarship: {
+            include: {
+              createdBy: { select: { id: true, firstName: true, lastName: true } }
+            }
+          },
+          user: { select: { firstName: true, lastName: true } }
+        },
+      });
+
+      if (fullApplication) {
+        // Notify professor
+        await createNotification([fullApplication.scholarship.createdBy.id], {
+          title: "Application Withdrawn",
+          message: `${fullApplication.user.firstName} ${fullApplication.user.lastName} withdrew their application for "${fullApplication.scholarship.title}"`,
+          type: "application_withdrawn",
+          link: `/dashboard/scholarships/${fullApplication.scholarship.id}/applications`,
+        });
+
+        // Confirm to student
+        await createNotification([userId], {
+          title: "Application Withdrawn",
+          message: `Your application for "${fullApplication.scholarship.title}" has been withdrawn`,
+          type: "application_withdrawn_confirmation",
+          link: `/applications`,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to send withdrawal notifications:", error);
+    }
 
     res.json({
       success: true,

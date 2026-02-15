@@ -106,10 +106,14 @@ export const calculateAverageLanguageLevel = (languages: any[]): number => {
 };
 
 /**
- * Updates the profile completeness for a user and returns the new value
+ * Updates the profile completeness for a user and returns previous and current values
  */
-export const updateUserCompleteness = async (userId: string, role: string): Promise<number> => {
-    let completeness = 0;
+export const updateUserCompleteness = async (
+    userId: string,
+    role: string
+): Promise<{ previous: number; current: number }> => {
+    let previousCompleteness = 0;
+    let currentCompleteness = 0;
 
     if (role === UserRole.STUDENT) {
         const profile = await prisma.studentProfile.findUnique({
@@ -118,7 +122,8 @@ export const updateUserCompleteness = async (userId: string, role: string): Prom
         });
 
         if (profile) {
-            completeness = calculateStudentProfileCompleteness(profile, profile.user);
+            previousCompleteness = profile.profileCompleteness || 0;
+            currentCompleteness = calculateStudentProfileCompleteness(profile, profile.user);
             const averageLanguageLevel = calculateAverageLanguageLevel(
                 (profile.languages as Array<{ name: string; proficiency: number }>) || [],
             );
@@ -126,7 +131,7 @@ export const updateUserCompleteness = async (userId: string, role: string): Prom
             await prisma.studentProfile.update({
                 where: { userId },
                 data: {
-                    profileCompleteness: completeness,
+                    profileCompleteness: currentCompleteness,
                     averageLanguageLevel
                 },
             });
@@ -138,7 +143,8 @@ export const updateUserCompleteness = async (userId: string, role: string): Prom
         });
 
         if (profile) {
-            completeness = calculateProfessorProfileCompleteness(profile, profile.user);
+            previousCompleteness = profile.profileCompleteness || 0;
+            currentCompleteness = calculateProfessorProfileCompleteness(profile, profile.user);
             const averageLanguageLevel = calculateAverageLanguageLevel(
                 (profile.languages as Array<{ name: string; proficiency: number }>) || [],
             );
@@ -146,12 +152,12 @@ export const updateUserCompleteness = async (userId: string, role: string): Prom
             await (prisma.professorProfile as any).update({
                 where: { userId },
                 data: {
-                    profileCompleteness: completeness,
+                    profileCompleteness: currentCompleteness,
                     averageLanguageLevel
                 },
             });
         }
     }
 
-    return completeness;
+    return { previous: previousCompleteness, current: currentCompleteness };
 };

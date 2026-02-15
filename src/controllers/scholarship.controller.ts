@@ -5,6 +5,8 @@ import prisma from "../lib/prisma.js";
 import { ApiError, asyncHandler } from "../utils/index.js";
 import config from "../config/index.js";
 import { sendPushNotification } from "../services/pusher.service.js";
+import { createNotification, notifyAllStudents, notifyAdmins } from "../services/notification.helper.js";
+import { sendScholarshipApprovedEmail, sendScholarshipRejectedEmail } from "../services/mail.service.js";
 
 /**
  * @route   POST /api/scholarships
@@ -111,6 +113,20 @@ export const createScholarship = asyncHandler(
         questions: true,
       } as any,
     });
+
+    // Notify admins if scholarship needs approval
+    if (userRole !== UserRole.ADMIN) {
+      try {
+        await notifyAdmins({
+          title: "New Scholarship Submission",
+          message: `${req.user!.firstName} ${req.user!.lastName} submitted "${title}" for approval`,
+          type: "scholarship_submitted",
+          link: `/admin/scholarships/${scholarship.id}`,
+        });
+      } catch (error) {
+        console.error("Failed to notify admins of scholarship submission:", error);
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -654,16 +670,35 @@ export const approveScholarship = asyncHandler(
       },
     });
 
-    // Notify professor
-    await prisma.notification.create({
-      data: {
-        userId: scholarship.createdById,
+    // Notify professor with full notification (DB + Push + Email)
+    try {
+      await createNotification([scholarship.createdById], {
         title: "Scholarship Approved",
         message: `Your scholarship "${scholarship.title}" has been approved and is now live.`,
         type: "scholarship_approved",
         link: `/scholarships/${id}`,
-      },
-    });
+      }, async (userId) => {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user) {
+          await sendScholarshipApprovedEmail(
+            user.email,
+            `${user.firstName} ${user.lastName}`,
+            scholarship.title,
+            id
+          );
+        }
+      });
+
+      // Notify all students of new scholarship
+      await notifyAllStudents({
+        title: "New Scholarship Available",
+        message: `${scholarship.title} is now accepting applications`,
+        type: "new_scholarship",
+        link: `/scholarships/${id}`,
+      });
+    } catch (error) {
+      console.error("Failed to send approval notifications:", error);
+    }
 
     res.json({
       success: true,
@@ -699,17 +734,27 @@ export const rejectScholarship = asyncHandler(
       },
     });
 
-    // Notify professor
-    await prisma.notification.create({
-      data: {
-        userId: scholarship.createdById,
+    // Notify professor with full notification (DB + Push + Email)
+    try {
+      await createNotification([scholarship.createdById], {
         title: "Scholarship Rejected",
-        message: `Your scholarship "${scholarship.title
-          }" was not approved. Reason: ${reason || "Not specified"}`,
+        message: `Your scholarship "${scholarship.title}" was not approved. Reason: ${reason || "Not specified"}`,
         type: "scholarship_rejected",
         link: `/dashboard/scholarships/${id}`,
-      },
-    });
+      }, async (userId) => {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user) {
+          await sendScholarshipRejectedEmail(
+            user.email,
+            `${user.firstName} ${user.lastName}`,
+            scholarship.title,
+            reason
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Failed to send rejection notification:", error);
+    }
 
     res.json({
       success: true,
