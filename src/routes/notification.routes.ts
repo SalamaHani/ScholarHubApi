@@ -48,7 +48,11 @@ router.post('/beams-auth', authenticate, getBeamsToken);
 
 /**
  * @route   POST /api/notifications/admin/send
- * @desc    Send notification to users
+ * @desc    Send notification to users (all users, professors only, students only)
+ * @example POST /api/notifications/admin/send
+ *          Body: { "role": "STUDENT", "title": "Test", "message": "Hello", "type": "success" }
+ *          Body: { "role": "PROFESSOR", "title": "Test", "message": "Hello", "type": "error" }
+ *          Body: { "role": "ALL", "title": "Test", "message": "Hello", "type": "warning" }
  */
 router.post('/admin/send', authenticate, isAdmin, sendNotification);
 

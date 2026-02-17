@@ -1161,15 +1161,17 @@ export const verifyProfessor = asyncHandler(
       },
     });
 
-    // Create notification for professor
-    await prisma.notification.create({
-      data: {
-        userId: id,
-        title: "Account Verified",
+    // Create notification for professor with push notification
+    try {
+      await createNotification([id], {
+        title: "Account Verified ✅",
         message: `Your professor account has been verified. ${updatedScholarships.count} pending scholarship(s) have been auto-approved.`,
-        type: "system",
-      },
-    });
+        type: "professor_verified",
+        link: "/dashboard",
+      });
+    } catch (error) {
+      console.error("Failed to send professor verification notification:", error);
+    }
 
     res.json({
       success: true,

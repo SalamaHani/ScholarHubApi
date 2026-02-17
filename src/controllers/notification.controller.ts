@@ -132,27 +132,56 @@ export const deleteNotification = asyncHandler(async (req: Request, res: Respons
 // ==================== ADMIN NOTIFICATION MANAGEMENT ====================
 
 /**
- * @route   POST /api/admin/notifications
+ * @route   POST /api/admin/notifications/send
  * @desc    Send notification to users (Admin only)
  * @access  Private/Admin
+ * @body    { userIds?: string[], role?: 'STUDENT'|'PROFESSOR'|'ADMIN'|'ALL', title: string, message: string, type?: 'success'|'error'|'warning'|'info'|'system', link?: string }
  */
 export const sendNotification = asyncHandler(async (req: Request, res: Response) => {
     const { userIds, role, title, message, type = 'system', link } = req.body;
 
+    // Validate notification type
+    const validTypes = ['success', 'error', 'warning', 'info', 'system', 'waiting'];
+    if (type && !validTypes.includes(type)) {
+        throw ApiError.badRequest(`Invalid notification type. Must be one of: ${validTypes.join(', ')}`);
+    }
+
+    // Validate required fields
+    if (!title || !message) {
+        throw ApiError.badRequest('Title and message are required');
+    }
+
     let targetUserIds: string[] = [];
+    let recipientDescription = '';
 
     if (userIds && userIds.length > 0) {
         // Send to specific users
         targetUserIds = userIds;
+        recipientDescription = `${userIds.length} specific users`;
     } else if (role) {
-        // Send to all users with a specific role
-        const users = await prisma.user.findMany({
-            where: { role: role as UserRole, isActive: true },
-            select: { id: true },
-        });
-        targetUserIds = users.map((u) => u.id);
+        if (role.toUpperCase() === 'ALL') {
+            // Send to ALL active users
+            const users = await prisma.user.findMany({
+                where: { isActive: true },
+                select: { id: true },
+            });
+            targetUserIds = users.map((u) => u.id);
+            recipientDescription = 'all users';
+        } else {
+            // Send to all users with a specific role
+            const users = await prisma.user.findMany({
+                where: { role: role as UserRole, isActive: true },
+                select: { id: true },
+            });
+            targetUserIds = users.map((u) => u.id);
+            recipientDescription = `all ${role.toLowerCase()}s`;
+        }
     } else {
         throw ApiError.badRequest('Either userIds or role must be provided');
+    }
+
+    if (targetUserIds.length === 0) {
+        throw ApiError.badRequest('No users found matching the criteria');
     }
 
     // Create notifications in database
@@ -176,8 +205,12 @@ export const sendNotification = asyncHandler(async (req: Request, res: Response)
 
     res.status(201).json({
         success: true,
-        message: `Notification sent to ${notifications.count} users`,
-        data: { count: notifications.count },
+        message: `Notification sent to ${notifications.count} users (${recipientDescription})`,
+        data: {
+            count: notifications.count,
+            recipients: recipientDescription,
+            type
+        },
     });
 });
 
