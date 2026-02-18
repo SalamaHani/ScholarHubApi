@@ -247,3 +247,75 @@ export const idParamValidator = [
         .notEmpty()
         .withMessage('ID is required'),
 ];
+
+// ==================== SETTINGS VALIDATORS ====================
+
+export const updateSiteSettingsValidator = [
+    body('siteName')
+        .optional()
+        .isString()
+        .isLength({ max: 100 })
+        .withMessage('Site name must be at most 100 characters'),
+    body('siteDescription')
+        .optional()
+        .isString()
+        .isLength({ max: 500 })
+        .withMessage('Site description must be at most 500 characters'),
+    body('siteLogoUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('Site logo URL must be a valid URL'),
+    body('contactEmail')
+        .optional()
+        .isEmail()
+        .withMessage('Contact email must be a valid email address'),
+    body('maintenanceMode')
+        .optional()
+        .isBoolean()
+        .withMessage('Maintenance mode must be a boolean'),
+];
+
+export const updateScholarshipSettingsValidator = [
+    body('autoApproveScholarships')
+        .optional()
+        .isBoolean()
+        .withMessage('autoApproveScholarships must be a boolean'),
+    body('maxScholarshipsPerProf')
+        .optional()
+        .isInt({ min: 1, max: 100 })
+        .withMessage('maxScholarshipsPerProf must be an integer between 1 and 100'),
+    body('featuredScholarshipLimit')
+        .optional()
+        .isInt({ min: 1, max: 20 })
+        .withMessage('featuredScholarshipLimit must be an integer between 1 and 20'),
+];
+
+export const updateApplicationSettingsValidator = [
+    body('maxApplicationsPerStudent')
+        .optional()
+        .isInt({ min: 1, max: 50 })
+        .withMessage('maxApplicationsPerStudent must be an integer between 1 and 50'),
+    body('allowWithdrawal')
+        .optional()
+        .isBoolean()
+        .withMessage('allowWithdrawal must be a boolean'),
+    body('deadlineBufferDays')
+        .optional()
+        .isInt({ min: 0, max: 30 })
+        .withMessage('deadlineBufferDays must be an integer between 0 and 30'),
+];
+
+export const updateNotificationSettingsValidator = [
+    body('emailNotificationsEnabled')
+        .optional()
+        .isBoolean()
+        .withMessage('emailNotificationsEnabled must be a boolean'),
+    body('pushNotificationsEnabled')
+        .optional()
+        .isBoolean()
+        .withMessage('pushNotificationsEnabled must be a boolean'),
+    body('deadlineReminderDays')
+        .optional()
+        .isInt({ min: 1, max: 30 })
+        .withMessage('deadlineReminderDays must be an integer between 1 and 30'),
+];

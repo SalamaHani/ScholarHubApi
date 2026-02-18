@@ -316,6 +316,35 @@ enum DocumentType {
   OTHER
 }
 
+model Settings {
+  id Int @id @default(1)
+
+  // Site Settings
+  siteName        String  @default("ScholarHub")
+  siteDescription String  @default("Your scholarship discovery platform")
+  siteLogoUrl     String?
+  contactEmail    String  @default("admin@scholarhub.com")
+  maintenanceMode Boolean @default(false)
+
+  // Scholarship Settings
+  autoApproveScholarships  Boolean @default(false)
+  maxScholarshipsPerProf   Int     @default(10)
+  featuredScholarshipLimit Int     @default(6)
+
+  // Application Settings
+  maxApplicationsPerStudent Int     @default(5)
+  allowWithdrawal           Boolean @default(true)
+  deadlineBufferDays        Int     @default(3)
+
+  // Notification Settings
+  emailNotificationsEnabled Boolean @default(true)
+  pushNotificationsEnabled  Boolean @default(true)
+  deadlineReminderDays      Int     @default(7)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model ScholarshipQuestion {
   id            String              @id @default(cuid())
   scholarshipId String

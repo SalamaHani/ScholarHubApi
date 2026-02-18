@@ -9,6 +9,7 @@ import savedRoutes from "./saved.routes.js";
 import notificationRoutes from "./notification.routes.js";
 import testimonialRoutes from "./testimonial.routes.js";
 import documentRoutes from "./document.routes.js";
+import settingsRoutes from "./settings.routes.js";
 
 const router = Router();
 
@@ -85,6 +86,7 @@ router.use("/notifications", notificationRoutes);
 router.use("/testimonials", testimonialRoutes);
 router.use("/documents", documentRoutes);
 router.use("/professor", professorRoutes);
+router.use("/settings", settingsRoutes);
 router.use("/profile", userRoutes);
 router.use("/avatar", userRoutes);
 

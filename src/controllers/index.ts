@@ -7,3 +7,4 @@ export * from './saved.controller.js';
 export * from './notification.controller.js';
 export * from './testimonial.controller.js';
 export * from './document.controller.js';
+export * from './settings.controller.js';
