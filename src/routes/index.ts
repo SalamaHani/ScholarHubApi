@@ -87,6 +87,7 @@ router.use("/testimonials", testimonialRoutes);
 router.use("/documents", documentRoutes);
 router.use("/professor", professorRoutes);
 router.use("/settings", settingsRoutes);
+router.use("/admin/settings", settingsRoutes);
 router.use("/profile", userRoutes);
 router.use("/avatar", userRoutes);
 

@@ -319,3 +319,11 @@ export const updateNotificationSettingsValidator = [
         .isInt({ min: 1, max: 30 })
         .withMessage('deadlineReminderDays must be an integer between 1 and 30'),
 ];
+
+// Combined validator for PUT /api/settings (all fields)
+export const updateSettingsValidator = [
+    ...updateSiteSettingsValidator,
+    ...updateScholarshipSettingsValidator,
+    ...updateApplicationSettingsValidator,
+    ...updateNotificationSettingsValidator,
+];

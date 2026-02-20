@@ -15,6 +15,7 @@ import {
     authenticate,
     isAdmin,
     validate,
+    updateSettingsValidator,
     updateSiteSettingsValidator,
     updateScholarshipSettingsValidator,
     updateApplicationSettingsValidator,
@@ -37,7 +38,7 @@ router.get('/', authenticate, isAdmin, getSettings);
  * @desc    Update any settings fields
  * @access  Private/Admin
  */
-router.put('/', authenticate, isAdmin, updateSettings);
+router.put('/', authenticate, isAdmin, updateSettingsValidator, validate, updateSettings);
 
 // ==================== SITE SETTINGS ====================
 
