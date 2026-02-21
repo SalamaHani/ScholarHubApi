@@ -18,14 +18,12 @@ const generateSlug = (name: string): string => {
  * @access  Public
  */
 export const getCategories = asyncHandler(async (req: Request, res: Response) => {
-    const { includeCount } = req.query;
-
     const categories = await prisma.category.findMany({
         where: { isActive: true },
         orderBy: { name: 'asc' },
-        include: includeCount === 'true' ? {
+        include: {
             _count: { select: { scholarships: true } },
-        } : undefined,
+        },
     });
 
     res.json({

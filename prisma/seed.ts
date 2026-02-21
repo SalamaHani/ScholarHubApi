@@ -421,6 +421,98 @@ async function main() {
   });
   console.log(`  ✅ Notification: Professor Verification`);
 
+  // ==================== CREATE PAGE CONTENT ====================
+  console.log("\nCreating page content...");
+
+  const pageContents = [
+    { pageKey: "browse-scholarships", section: "platform", title: "Browse Scholarships", subtitle: "Discover thousands of scholarships tailored for you", description: "Search and filter through our comprehensive database of scholarships from around the world.", heroText: "Find Your Perfect Scholarship", ctaLabel: "Start Browsing", ctaLink: "/scholarships" },
+    { pageKey: "saved-scholarships", section: "platform", title: "Saved Scholarships", subtitle: "Your personal scholarship shortlist", description: "Keep track of scholarships you are interested in. Save and revisit them at any time before their deadlines.", heroText: "Your Scholarship Wishlist", ctaLabel: "View Saved", ctaLink: "/saved" },
+    { pageKey: "categories", section: "platform", title: "Scholarship Categories", subtitle: "Browse by field of study", description: "Explore scholarships organized by academic discipline.", heroText: "Find Scholarships by Category", ctaLabel: "Explore Categories", ctaLink: "/categories" },
+    { pageKey: "upcoming-deadlines", section: "platform", title: "Upcoming Deadlines", subtitle: "Never miss a scholarship deadline", description: "Stay on top of your applications with our deadline tracker.", heroText: "Act Before Time Runs Out", ctaLabel: "View Deadlines", ctaLink: "/scholarships?sort=deadline" },
+    { pageKey: "application-guides", section: "resources", title: "Application Guides", subtitle: "Step-by-step guidance for successful applications", description: "Our comprehensive application guides walk you through every stage of the scholarship application process.", heroText: "Master the Application Process", ctaLabel: "Read Guides", ctaLink: "/resources/guides" },
+    { pageKey: "tips-tricks", section: "resources", title: "Tips & Tricks", subtitle: "Expert advice to strengthen your applications", description: "Learn from scholarship winners and academic advisors.", heroText: "Get the Competitive Edge", ctaLabel: "Read Tips", ctaLink: "/resources/tips" },
+    { pageKey: "faq", section: "resources", title: "Frequently Asked Questions", subtitle: "Answers to your most common questions", description: "Find answers to frequently asked questions about scholarships and the application process.", heroText: "We Have the Answers", ctaLabel: "View FAQ", ctaLink: "/faq" },
+    { pageKey: "blog", section: "resources", title: "ScholarHub Blog", subtitle: "Insights, stories, and scholarship news", description: "Stay informed with our latest articles on scholarship opportunities, student success stories, and academic advice.", heroText: "Stories That Inspire", ctaLabel: "Read Blog", ctaLink: "/blog" },
+    { pageKey: "about-us", section: "company", title: "About ScholarHub", subtitle: "Connecting students with life-changing opportunities", description: "ScholarHub was founded with the mission to make scholarship discovery accessible to every student.", heroText: "Our Mission, Your Future", ctaLabel: "Learn More", ctaLink: "/about" },
+    { pageKey: "contact", section: "company", title: "Contact Us", subtitle: "We are here to help", description: "Have questions or feedback? Our support team is ready to assist you.", heroText: "Get in Touch", ctaLabel: "Send Message", ctaLink: "/contact" },
+    { pageKey: "privacy-policy", section: "company", title: "Privacy Policy", subtitle: "How we protect your data", description: "ScholarHub is committed to protecting your personal information.", heroText: "Your Privacy Matters" },
+    { pageKey: "terms-of-service", section: "company", title: "Terms of Service", subtitle: "The rules that govern our platform", description: "By using ScholarHub you agree to these terms.", heroText: "Fair Terms for Everyone" },
+  ];
+
+  for (const pc of pageContents) {
+    await prisma.pageContent.upsert({
+      where: { pageKey: pc.pageKey },
+      update: {},
+      create: pc,
+    });
+    console.log(`  ✅ Page Content: ${pc.pageKey}`);
+  }
+
+  // ==================== CREATE FAQ ITEMS ====================
+  console.log("\nCreating FAQ items...");
+
+  // Clear existing FAQ items before re-seeding to avoid duplicates
+  await prisma.faqItem.deleteMany({ where: { pageKey: "faq" } });
+
+  const faqItems = [
+    { pageKey: "faq", question: "How do I apply for a scholarship on ScholarHub?", answer: "Browse available scholarships, click on one that matches your profile, and follow the application link to the provider's official website. You can also save scholarships to apply later.", order: 1 },
+    { pageKey: "faq", question: "Is ScholarHub free to use?", answer: "Yes, ScholarHub is completely free for students. We believe access to scholarship information should not cost anything.", order: 2 },
+    { pageKey: "faq", question: "How are scholarships verified on ScholarHub?", answer: "All scholarships are reviewed by our team of professors and administrators before being published. We check for legitimacy, completeness, and accuracy of the information provided.", order: 3 },
+    { pageKey: "faq", question: "Can I submit my own scholarship listing?", answer: "Yes, registered professors can submit scholarship listings. All submissions go through an approval process by our admin team before being made public.", order: 4 },
+    { pageKey: "faq", question: "How do I save a scholarship for later?", answer: "Click the Save button on any scholarship card or detail page. Saved scholarships appear in your Saved Scholarships section in your dashboard.", order: 5 },
+    { pageKey: "faq", question: "What documents do I typically need for scholarship applications?", answer: "Common documents include academic transcripts, passport or ID, letters of recommendation, a statement of purpose, proof of language proficiency, and a CV. Specific requirements vary by scholarship.", order: 6 },
+  ];
+
+  for (const item of faqItems) {
+    await prisma.faqItem.create({ data: item });
+    console.log(`  ✅ FAQ item #${item.order}`);
+  }
+
+  // ==================== CREATE BLOG POSTS ====================
+  console.log("\nCreating blog posts...");
+
+  const blogPosts = [
+    {
+      slug: "top-scholarships-for-stem-students-2026",
+      title: "Top Scholarships for STEM Students in 2026",
+      excerpt: "A curated list of the most prestigious and well-funded scholarships available to science, technology, engineering, and mathematics students this year.",
+      content: "## Introduction\n\nSTEM scholarships are among the most competitive and rewarding funding opportunities available to students worldwide.\n\n## Top Picks\n\n### 1. Fulbright Foreign Student Program\nThe Fulbright program remains one of the gold standards for graduate-level STEM funding.\n\n### 2. DAAD Scholarships (Germany)\nGermany continues to welcome international STEM talent with generous monthly stipends.\n\n### 3. Chevening Scholarships (UK)\nThe UK government's flagship scholarship programme is open to STEM and non-STEM fields alike.",
+      authorName: "Admin User",
+      tags: ["STEM", "scholarships", "2026"],
+      status: "PUBLISHED" as const,
+      publishedAt: new Date("2026-01-10"),
+    },
+    {
+      slug: "how-to-write-a-winning-scholarship-essay",
+      title: "How to Write a Winning Scholarship Essay",
+      excerpt: "Practical tips from scholarship winners and academic advisors on crafting a compelling personal statement that stands out.",
+      content: "## Why the Essay Matters\n\nFor many scholarships, the personal statement is the single most important part of your application.\n\n## Key Principles\n\n### 1. Be Specific\nUse concrete examples from your life and academic experience.\n\n### 2. Answer the Prompt Directly\nRead the instructions carefully and answer exactly what is being asked.\n\n### 3. Proofread Relentlessly\nHave at least two people review your essay before submitting.",
+      authorName: "Admin User",
+      tags: ["application tips", "essay", "writing"],
+      status: "PUBLISHED" as const,
+      publishedAt: new Date("2026-01-20"),
+    },
+    {
+      slug: "understanding-scholarship-eligibility-requirements",
+      title: "Understanding Scholarship Eligibility Requirements",
+      excerpt: "A comprehensive guide to decoding eligibility criteria and finding scholarships you actually qualify for.",
+      content: "## Common Eligibility Categories\n\nScholarship providers use eligibility criteria to match funding with the right candidates.\n\n### Academic Requirements\nGPA thresholds, degree levels, and field-of-study restrictions are the most common academic filters.\n\n### Nationality and Residency\nMany scholarships are limited to citizens or residents of specific countries.\n\n## Pro Tip\n\nCreate a personal eligibility checklist for each scholarship before spending time on the application.",
+      authorName: "Admin User",
+      tags: ["eligibility", "requirements", "guide"],
+      status: "DRAFT" as const,
+      publishedAt: null,
+    },
+  ];
+
+  for (const post of blogPosts) {
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: {},
+      create: { ...post, authorId: admin.id },
+    });
+    console.log(`  ✅ Blog Post: ${post.title}`);
+  }
+
   console.log("\n✨ All data seeded successfully!\n");
 
   console.log("📋 TEST CREDENTIALS:");
@@ -435,7 +527,10 @@ async function main() {
   console.log("   ✅ 4 Testimonials");
   console.log("   ✅ 2 Applications");
   console.log("   ✅ 3 Saved Scholarships");
-  console.log("   ✅ 2 Notifications\n");
+  console.log("   ✅ 2 Notifications");
+  console.log("   ✅ 12 Page Content entries");
+  console.log("   ✅ 6 FAQ Items");
+  console.log("   ✅ 3 Blog Posts (2 published, 1 draft)\n");
 }
 
 main()

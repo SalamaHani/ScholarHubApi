@@ -36,6 +36,7 @@ model User {
   scholarships         Scholarship[]      @relation("CreatedBy")
   studentProfile       StudentProfile?
   testimonials         Testimonial[]
+  blogPosts            BlogPost[]           @relation("BlogPosts")
   @@index([email])
   @@index([googleId])
   @@index([role])
@@ -316,6 +317,12 @@ enum DocumentType {
   OTHER
 }
 
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model Settings {
   id Int @id @default(1)
 
@@ -371,4 +378,59 @@ model ApplicationAnswer {
 
   @@index([applicationId])
   @@index([questionId])
+}
+
+model PageContent {
+  id          String   @id @default(cuid())
+  pageKey     String   @unique
+  section     String
+  title       String
+  subtitle    String?
+  description String?
+  heroText    String?
+  ctaLabel    String?
+  ctaLink     String?
+  metaData    Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([pageKey])
+  @@index([section])
+}
+
+model FaqItem {
+  id        String   @id @default(cuid())
+  pageKey   String
+  question  String
+  answer    String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pageKey])
+  @@index([order])
+}
+
+model BlogPost {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  excerpt     String?
+  content     String
+  coverImage  String?
+  authorName  String
+  authorId    String
+  tags        String[]
+  status      BlogPostStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  author      User           @relation("BlogPosts", fields: [authorId], references: [id])
+
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
 }

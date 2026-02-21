@@ -327,3 +327,127 @@ export const updateSettingsValidator = [
     ...updateApplicationSettingsValidator,
     ...updateNotificationSettingsValidator,
 ];
+
+// ==================== PAGE CONTENT VALIDATORS ====================
+
+export const createPageContentValidator = [
+    body('pageKey')
+        .trim()
+        .notEmpty().withMessage('Page key is required')
+        .isLength({ max: 100 }).withMessage('Page key must be less than 100 characters')
+        .matches(/^[a-z0-9-]+$/).withMessage('Page key must contain only lowercase letters, numbers, and hyphens'),
+    body('section')
+        .trim()
+        .notEmpty().withMessage('Section is required')
+        .isIn(['platform', 'resources', 'company']).withMessage('Section must be platform, resources, or company'),
+    body('title')
+        .trim()
+        .notEmpty().withMessage('Title is required')
+        .isLength({ max: 200 }).withMessage('Title must be less than 200 characters'),
+    body('subtitle')
+        .optional()
+        .trim()
+        .isLength({ max: 300 }).withMessage('Subtitle must be less than 300 characters'),
+    body('ctaLink')
+        .optional({ nullable: true })
+        .isURL().withMessage('CTA link must be a valid URL'),
+];
+
+export const updatePageContentValidator = [
+    body('section')
+        .optional()
+        .isIn(['platform', 'resources', 'company']).withMessage('Section must be platform, resources, or company'),
+    body('title')
+        .optional()
+        .trim()
+        .isLength({ max: 200 }).withMessage('Title must be less than 200 characters'),
+    body('subtitle')
+        .optional()
+        .trim()
+        .isLength({ max: 300 }).withMessage('Subtitle must be less than 300 characters'),
+    body('ctaLink')
+        .optional({ nullable: true })
+        .isURL().withMessage('CTA link must be a valid URL'),
+    body('isActive')
+        .optional()
+        .isBoolean().withMessage('isActive must be a boolean'),
+];
+
+// ==================== FAQ ITEM VALIDATORS ====================
+
+export const createFaqItemValidator = [
+    body('pageKey')
+        .trim()
+        .notEmpty().withMessage('Page key is required'),
+    body('question')
+        .trim()
+        .notEmpty().withMessage('Question is required')
+        .isLength({ max: 500 }).withMessage('Question must be less than 500 characters'),
+    body('answer')
+        .trim()
+        .notEmpty().withMessage('Answer is required'),
+    body('order')
+        .optional()
+        .isInt({ min: 0 }).withMessage('Order must be a non-negative integer'),
+];
+
+export const updateFaqItemValidator = [
+    body('question')
+        .optional()
+        .trim()
+        .isLength({ max: 500 }).withMessage('Question must be less than 500 characters'),
+    body('answer')
+        .optional()
+        .trim(),
+    body('order')
+        .optional()
+        .isInt({ min: 0 }).withMessage('Order must be a non-negative integer'),
+    body('isActive')
+        .optional()
+        .isBoolean().withMessage('isActive must be a boolean'),
+];
+
+// ==================== BLOG POST VALIDATORS ====================
+
+export const createBlogPostValidator = [
+    body('title')
+        .trim()
+        .notEmpty().withMessage('Title is required')
+        .isLength({ max: 300 }).withMessage('Title must be less than 300 characters'),
+    body('content')
+        .trim()
+        .notEmpty().withMessage('Content is required'),
+    body('excerpt')
+        .optional()
+        .trim()
+        .isLength({ max: 500 }).withMessage('Excerpt must be less than 500 characters'),
+    body('status')
+        .optional()
+        .isIn(['DRAFT', 'PUBLISHED', 'ARCHIVED']).withMessage('Status must be DRAFT, PUBLISHED, or ARCHIVED'),
+    body('tags')
+        .optional()
+        .isArray().withMessage('Tags must be an array'),
+    body('coverImage')
+        .optional({ nullable: true })
+        .isURL().withMessage('Cover image must be a valid URL'),
+];
+
+export const updateBlogPostValidator = [
+    body('title')
+        .optional()
+        .trim()
+        .isLength({ max: 300 }).withMessage('Title must be less than 300 characters'),
+    body('status')
+        .optional()
+        .isIn(['DRAFT', 'PUBLISHED', 'ARCHIVED']).withMessage('Status must be DRAFT, PUBLISHED, or ARCHIVED'),
+    body('tags')
+        .optional()
+        .isArray().withMessage('Tags must be an array'),
+    body('coverImage')
+        .optional({ nullable: true })
+        .isURL().withMessage('Cover image must be a valid URL'),
+    body('excerpt')
+        .optional()
+        .trim()
+        .isLength({ max: 500 }).withMessage('Excerpt must be less than 500 characters'),
+];

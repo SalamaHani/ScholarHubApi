@@ -1932,3 +1932,86 @@ export const getProfessorProfileDetails = asyncHandler(
     });
   },
 );
+
+/**
+ * @route   GET /api/professor/all
+ * @desc    Get all verified professors with their profiles and scholarship counts
+ * @access  Public
+ */
+export const getAllProfessors = asyncHandler(async (req: Request, res: Response) => {
+  const { page = 1, limit = 20, search, specialization } = req.query;
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const where: any = {
+    role: UserRole.PROFESSOR,
+    isActive: true,
+    isBlocked: false,
+    professorProfile: { isVerified: true },
+  };
+
+  if (search) {
+    where.OR = [
+      { firstName: { contains: search as string, mode: "insensitive" } },
+      { lastName: { contains: search as string, mode: "insensitive" } },
+      { professorProfile: { institution: { contains: search as string, mode: "insensitive" } } },
+      { professorProfile: { specialization: { contains: search as string, mode: "insensitive" } } },
+    ];
+  }
+
+  if (specialization) {
+    where.professorProfile = {
+      ...where.professorProfile,
+      specialization: { contains: specialization as string, mode: "insensitive" },
+    };
+  }
+
+  const [professors, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      skip,
+      take: Number(limit),
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        createdAt: true,
+        professorProfile: {
+          select: {
+            id: true,
+            institution: true,
+            department: true,
+            position: true,
+            specialization: true,
+            bio: true,
+            website: true,
+            skills: true,
+            country: true,
+            city: true,
+            isVerified: true,
+            verifiedAt: true,
+          },
+        },
+        _count: {
+          select: {
+            scholarships: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.count({ where }),
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      professors,
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / Number(limit)),
+    },
+  });
+});

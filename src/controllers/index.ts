@@ -8,3 +8,6 @@ export * from './notification.controller.js';
 export * from './testimonial.controller.js';
 export * from './document.controller.js';
 export * from './settings.controller.js';
+export * from './pageContent.controller.js';
+export * from './faqItem.controller.js';
+export * from './blogPost.controller.js';

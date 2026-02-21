@@ -10,6 +10,9 @@ import notificationRoutes from "./notification.routes.js";
 import testimonialRoutes from "./testimonial.routes.js";
 import documentRoutes from "./document.routes.js";
 import settingsRoutes from "./settings.routes.js";
+import pageContentRoutes from "./pageContent.routes.js";
+import faqItemRoutes from "./faqItem.routes.js";
+import blogPostRoutes from "./blogPost.routes.js";
 
 const router = Router();
 
@@ -88,6 +91,9 @@ router.use("/documents", documentRoutes);
 router.use("/professor", professorRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/admin/settings", settingsRoutes);
+router.use("/page-content", pageContentRoutes);
+router.use("/faq-items", faqItemRoutes);
+router.use("/blog-posts", blogPostRoutes);
 router.use("/profile", userRoutes);
 router.use("/avatar", userRoutes);
 
