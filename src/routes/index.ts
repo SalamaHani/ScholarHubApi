@@ -13,11 +13,12 @@ import settingsRoutes from "./settings.routes.js";
 import pageContentRoutes from "./pageContent.routes.js";
 import faqItemRoutes from "./faqItem.routes.js";
 import blogPostRoutes from "./blogPost.routes.js";
+import contactMessageRoutes from "./contactMessage.routes.js";
 
 const router = Router();
 
 // Health check
-router.get("/health", (req, res) => {
+router.get("/health", (_req, res) => {
   res.json({
     success: true,
     message: "ScholarHub API is running",
@@ -94,6 +95,7 @@ router.use("/admin/settings", settingsRoutes);
 router.use("/page-content", pageContentRoutes);
 router.use("/faq-items", faqItemRoutes);
 router.use("/blog-posts", blogPostRoutes);
+router.use("/contact-messages", contactMessageRoutes);
 router.use("/profile", userRoutes);
 router.use("/avatar", userRoutes);
 

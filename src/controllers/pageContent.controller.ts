@@ -9,9 +9,8 @@ import { ApiError, asyncHandler } from '../utils/index.js';
  */
 export const getAllPageContent = asyncHandler(async (req: Request, res: Response) => {
   const { section } = req.query;
-
-  const where: Record<string, unknown> = { isActive: true };
-  if (section) where.section = section;
+  const where: { isActive: boolean; section?: string } = { isActive: true };
+  if (section && typeof section === 'string') where.section = section;
 
   const content = await prisma.pageContent.findMany({
     where,
@@ -23,14 +22,15 @@ export const getAllPageContent = asyncHandler(async (req: Request, res: Response
 
 /**
  * @route   GET /api/page-content/:pageKey
- * @desc    Get a single page content entry by its unique page key
+ * @desc    Get a single page content entry by pageKey or id
  * @access  Public
  */
 export const getPageContentByKey = asyncHandler(async (req: Request, res: Response) => {
   const { pageKey } = req.params;
 
-  const content = await prisma.pageContent.findUnique({ where: { pageKey } });
-
+  const content = await prisma.pageContent.findFirst({
+    where: { OR: [{ pageKey }, { id: pageKey }] },
+  });
   if (!content) {
     throw ApiError.notFound(`Page content for key "${pageKey}" not found`);
   }
@@ -74,32 +74,33 @@ export const createPageContent = asyncHandler(async (req: Request, res: Response
 
 /**
  * @route   PUT /api/page-content/:pageKey
- * @desc    Update a page content entry by page key
+ * @desc    Update a page content entry by pageKey or id
  * @access  Private/Admin
  */
 export const updatePageContent = asyncHandler(async (req: Request, res: Response) => {
   const { pageKey } = req.params;
   const { section, title, subtitle, description, heroText, ctaLabel, ctaLink, metaData, isActive } = req.body;
 
-  const existing = await prisma.pageContent.findUnique({ where: { pageKey } });
+  const existing = await prisma.pageContent.findFirst({
+    where: { OR: [{ pageKey }, { id: pageKey }] },
+  });
   if (!existing) {
     throw ApiError.notFound(`Page content for key "${pageKey}" not found`);
   }
 
-  const updateData: Record<string, unknown> = {};
-  if (section !== undefined)      updateData.section = section;
-  if (title !== undefined)        updateData.title = title;
-  if (subtitle !== undefined)     updateData.subtitle = subtitle;
-  if (description !== undefined)  updateData.description = description;
-  if (heroText !== undefined)     updateData.heroText = heroText;
-  if (ctaLabel !== undefined)     updateData.ctaLabel = ctaLabel;
-  if (ctaLink !== undefined)      updateData.ctaLink = ctaLink;
-  if (metaData !== undefined)     updateData.metaData = metaData;
-  if (isActive !== undefined)     updateData.isActive = isActive;
-
   const content = await prisma.pageContent.update({
-    where: { pageKey },
-    data: updateData,
+    where: { id: existing.id },
+    data: {
+      ...(section !== undefined      && { section }),
+      ...(title !== undefined        && { title }),
+      ...(subtitle !== undefined     && { subtitle }),
+      ...(description !== undefined  && { description }),
+      ...(heroText !== undefined     && { heroText }),
+      ...(ctaLabel !== undefined     && { ctaLabel }),
+      ...(ctaLink !== undefined      && { ctaLink }),
+      ...(metaData !== undefined     && { metaData }),
+      ...(isActive !== undefined     && { isActive: Boolean(isActive) }),
+    },
   });
 
   res.json({
@@ -111,18 +112,20 @@ export const updatePageContent = asyncHandler(async (req: Request, res: Response
 
 /**
  * @route   DELETE /api/page-content/:pageKey
- * @desc    Delete a page content entry by page key
+ * @desc    Delete a page content entry by pageKey or id
  * @access  Private/Admin
  */
 export const deletePageContent = asyncHandler(async (req: Request, res: Response) => {
   const { pageKey } = req.params;
 
-  const existing = await prisma.pageContent.findUnique({ where: { pageKey } });
+  const existing = await prisma.pageContent.findFirst({
+    where: { OR: [{ pageKey }, { id: pageKey }] },
+  });
   if (!existing) {
     throw ApiError.notFound(`Page content for key "${pageKey}" not found`);
   }
 
-  await prisma.pageContent.delete({ where: { pageKey } });
+  await prisma.pageContent.delete({ where: { id: existing.id } });
 
   res.json({ success: true, message: 'Page content deleted successfully' });
 });

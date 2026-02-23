@@ -36,13 +36,28 @@ router.get("/:pageKey", getPageContentByKey);
  * @route   POST /api/page-content
  * @desc    Create a new page content entry (Admin only)
  */
-router.post("/", authenticate, isAdmin, createPageContentValidator, validate, createPageContent);
+router.post(
+  "/",
+  authenticate,
+
+  
+  isAdmin,
+  createPageContentValidator,
+  validate,
+  createPageContent,
+);
 
 /**
  * @route   PUT /api/page-content/:pageKey
  * @desc    Update page content entry (Admin only)
  */
-router.put("/:pageKey", authenticate, isAdmin, updatePageContentValidator, validate, updatePageContent);
+router.put(
+  "/:pageKey",
+  authenticate,
+  isAdmin,
+  updatePageContentValidator,
+  updatePageContent,
+);
 
 /**
  * @route   DELETE /api/page-content/:pageKey

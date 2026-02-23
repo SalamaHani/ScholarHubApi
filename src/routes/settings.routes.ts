@@ -2,8 +2,20 @@ import { Router } from 'express';
 import {
     getSettings,
     updateSettings,
+    getPlatformSettings,
+    updatePlatformSettings,
     getSiteSettings,
     updateSiteSettings,
+    getBrandingSettings,
+    updateBrandingSettings,
+    getLinksSettings,
+    updateLinksSettings,
+    getSocialSettings,
+    updateSocialSettings,
+    getSeoSettings,
+    updateSeoSettings,
+    getFooterSettings,
+    updateFooterSettings,
     getScholarshipSettings,
     updateScholarshipSettings,
     getApplicationSettings,
@@ -16,7 +28,13 @@ import {
     isAdmin,
     validate,
     updateSettingsValidator,
+    updatePlatformSettingsValidator,
     updateSiteSettingsValidator,
+    updateBrandingSettingsValidator,
+    updateLinksSettingsValidator,
+    updateSocialSettingsValidator,
+    updateSeoSettingsValidator,
+    updateFooterSettingsValidator,
     updateScholarshipSettingsValidator,
     updateApplicationSettingsValidator,
     updateNotificationSettingsValidator,
@@ -28,7 +46,7 @@ const router = Router();
 
 /**
  * @route   GET /api/settings
- * @desc    Get all settings
+ * @desc    Get all settings (grouped by section)
  * @access  Private/Admin
  */
 router.get('/', authenticate, isAdmin, getSettings);
@@ -39,6 +57,54 @@ router.get('/', authenticate, isAdmin, getSettings);
  * @access  Private/Admin
  */
 router.put('/', authenticate, isAdmin, updateSettingsValidator, validate, updateSettings);
+
+// ==================== PLATFORM SETTINGS ====================
+
+/**
+ * @route   GET /api/settings/platform
+ * @desc    Get platform-level settings
+ * @access  Private/Admin
+ */
+router.get('/platform', authenticate, isAdmin, getPlatformSettings);
+
+/**
+ * @route   PUT /api/settings/platform
+ * @desc    Update platform-level settings
+ * @access  Private/Admin
+ */
+router.put('/platform', authenticate, isAdmin, updatePlatformSettingsValidator, validate, updatePlatformSettings);
+
+// ==================== BRANDING SETTINGS ====================
+
+/**
+ * @route   GET /api/settings/branding
+ * @desc    Get branding / color settings
+ * @access  Private/Admin
+ */
+router.get('/branding', authenticate, isAdmin, getBrandingSettings);
+
+/**
+ * @route   PUT /api/settings/branding
+ * @desc    Update branding / color settings
+ * @access  Private/Admin
+ */
+router.put('/branding', authenticate, isAdmin, updateBrandingSettingsValidator, validate, updateBrandingSettings);
+
+// ==================== DEFAULT / EXTERNAL LINKS ====================
+
+/**
+ * @route   GET /api/settings/links
+ * @desc    Get default and external links
+ * @access  Private/Admin
+ */
+router.get('/links', authenticate, isAdmin, getLinksSettings);
+
+/**
+ * @route   PUT /api/settings/links
+ * @desc    Update default and external links
+ * @access  Private/Admin
+ */
+router.put('/links', authenticate, isAdmin, updateLinksSettingsValidator, validate, updateLinksSettings);
 
 // ==================== SITE SETTINGS ====================
 
@@ -55,6 +121,54 @@ router.get('/site', authenticate, isAdmin, getSiteSettings);
  * @access  Private/Admin
  */
 router.put('/site', authenticate, isAdmin, updateSiteSettingsValidator, validate, updateSiteSettings);
+
+// ==================== SOCIAL MEDIA SETTINGS ====================
+
+/**
+ * @route   GET /api/settings/social
+ * @desc    Get social media links
+ * @access  Private/Admin
+ */
+router.get('/social', authenticate, isAdmin, getSocialSettings);
+
+/**
+ * @route   PUT /api/settings/social
+ * @desc    Update social media links
+ * @access  Private/Admin
+ */
+router.put('/social', authenticate, isAdmin, updateSocialSettingsValidator, validate, updateSocialSettings);
+
+// ==================== SEO SETTINGS ====================
+
+/**
+ * @route   GET /api/settings/seo
+ * @desc    Get SEO settings
+ * @access  Private/Admin
+ */
+router.get('/seo', authenticate, isAdmin, getSeoSettings);
+
+/**
+ * @route   PUT /api/settings/seo
+ * @desc    Update SEO settings
+ * @access  Private/Admin
+ */
+router.put('/seo', authenticate, isAdmin, updateSeoSettingsValidator, validate, updateSeoSettings);
+
+// ==================== FOOTER SETTINGS ====================
+
+/**
+ * @route   GET /api/settings/footer
+ * @desc    Get footer settings
+ * @access  Private/Admin
+ */
+router.get('/footer', authenticate, isAdmin, getFooterSettings);
+
+/**
+ * @route   PUT /api/settings/footer
+ * @desc    Update footer settings
+ * @access  Private/Admin
+ */
+router.put('/footer', authenticate, isAdmin, updateFooterSettingsValidator, validate, updateFooterSettings);
 
 // ==================== SCHOLARSHIP SETTINGS ====================
 

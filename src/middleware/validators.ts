@@ -250,6 +250,39 @@ export const idParamValidator = [
 
 // ==================== SETTINGS VALIDATORS ====================
 
+export const updatePlatformSettingsValidator = [
+    body('defaultLanguage')
+        .optional()
+        .isIn(['ar', 'en'])
+        .withMessage('defaultLanguage must be "ar" or "en"'),
+    body('timezone')
+        .optional()
+        .isString()
+        .isLength({ max: 60 })
+        .withMessage('Timezone must be at most 60 characters'),
+    body('registrationEnabled')
+        .optional()
+        .isBoolean()
+        .withMessage('registrationEnabled must be a boolean'),
+    body('requireEmailVerification')
+        .optional()
+        .isBoolean()
+        .withMessage('requireEmailVerification must be a boolean'),
+    body('maxFileSizeMB')
+        .optional()
+        .isInt({ min: 1, max: 100 })
+        .withMessage('maxFileSizeMB must be an integer between 1 and 100'),
+    body('allowedFileTypes')
+        .optional()
+        .isArray()
+        .withMessage('allowedFileTypes must be an array'),
+    body('allowedFileTypes.*')
+        .optional()
+        .isString()
+        .isLength({ max: 10 })
+        .withMessage('Each file type must be a string of at most 10 characters'),
+];
+
 export const updateSiteSettingsValidator = [
     body('siteName')
         .optional()
@@ -265,14 +298,202 @@ export const updateSiteSettingsValidator = [
         .optional({ nullable: true })
         .isURL()
         .withMessage('Site logo URL must be a valid URL'),
+    body('siteFaviconUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('Site favicon URL must be a valid URL'),
     body('contactEmail')
         .optional()
         .isEmail()
         .withMessage('Contact email must be a valid email address'),
+    body('supportEmail')
+        .optional({ nullable: true })
+        .isEmail()
+        .withMessage('Support email must be a valid email address'),
+    body('supportPhone')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 30 })
+        .withMessage('Support phone must be at most 30 characters'),
     body('maintenanceMode')
         .optional()
         .isBoolean()
         .withMessage('Maintenance mode must be a boolean'),
+    body('maintenanceMessage')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 500 })
+        .withMessage('Maintenance message must be at most 500 characters'),
+    body('address')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('Address must be at most 200 characters'),
+    body('city')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 100 })
+        .withMessage('City must be at most 100 characters'),
+    body('country')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 100 })
+        .withMessage('Country must be at most 100 characters'),
+];
+
+export const updateSocialSettingsValidator = [
+    body('facebookUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('Facebook URL must be a valid URL'),
+    body('twitterUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('Twitter URL must be a valid URL'),
+    body('linkedinUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('LinkedIn URL must be a valid URL'),
+    body('instagramUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('Instagram URL must be a valid URL'),
+    body('youtubeUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('YouTube URL must be a valid URL'),
+];
+
+export const updateBrandingSettingsValidator = [
+    body('primaryColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('primaryColor must be a valid hex color (e.g. #3B82F6)'),
+    body('secondaryColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('secondaryColor must be a valid hex color'),
+    body('accentColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('accentColor must be a valid hex color'),
+    body('textColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('textColor must be a valid hex color'),
+    body('bgColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('bgColor must be a valid hex color'),
+    body('darkPrimaryColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('darkPrimaryColor must be a valid hex color'),
+    body('darkBgColor')
+        .optional()
+        .isString()
+        .matches(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/)
+        .withMessage('darkBgColor must be a valid hex color'),
+];
+
+export const updateLinksSettingsValidator = [
+    body('homeUrl')
+        .optional()
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('homeUrl must be at most 200 characters'),
+    body('privacyPolicyUrl')
+        .optional()
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('privacyPolicyUrl must be at most 200 characters'),
+    body('termsUrl')
+        .optional()
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('termsUrl must be at most 200 characters'),
+    body('cookiePolicyUrl')
+        .optional()
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('cookiePolicyUrl must be at most 200 characters'),
+    body('appStoreUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('appStoreUrl must be a valid URL'),
+    body('playStoreUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('playStoreUrl must be a valid URL'),
+    body('docsUrl')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('docsUrl must be at most 200 characters'),
+];
+
+export const updateSeoSettingsValidator = [
+    body('metaTitle')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 100 })
+        .withMessage('metaTitle must be at most 100 characters'),
+    body('metaDescription')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 300 })
+        .withMessage('metaDescription must be at most 300 characters'),
+    body('googleAnalyticsId')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 50 })
+        .withMessage('googleAnalyticsId must be at most 50 characters'),
+    body('ogTitle')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 100 })
+        .withMessage('ogTitle must be at most 100 characters'),
+    body('ogDescription')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 300 })
+        .withMessage('ogDescription must be at most 300 characters'),
+    body('ogImageUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('ogImageUrl must be a valid URL'),
+    body('twitterCard')
+        .optional()
+        .isIn(['summary', 'summary_large_image', 'app', 'player'])
+        .withMessage('twitterCard must be one of: summary, summary_large_image, app, player'),
+    body('robotsMeta')
+        .optional()
+        .isString()
+        .isLength({ max: 100 })
+        .withMessage('robotsMeta must be at most 100 characters'),
+    body('canonicalUrl')
+        .optional({ nullable: true })
+        .isURL()
+        .withMessage('canonicalUrl must be a valid URL'),
+];
+
+export const updateFooterSettingsValidator = [
+    body('footerText')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 500 })
+        .withMessage('Footer text must be at most 500 characters'),
+    body('copyrightText')
+        .optional({ nullable: true })
+        .isString()
+        .isLength({ max: 200 })
+        .withMessage('Copyright text must be at most 200 characters'),
 ];
 
 export const updateScholarshipSettingsValidator = [
@@ -288,6 +509,10 @@ export const updateScholarshipSettingsValidator = [
         .optional()
         .isInt({ min: 1, max: 20 })
         .withMessage('featuredScholarshipLimit must be an integer between 1 and 20'),
+    body('requireApprovalForEdit')
+        .optional()
+        .isBoolean()
+        .withMessage('requireApprovalForEdit must be a boolean'),
 ];
 
 export const updateApplicationSettingsValidator = [
@@ -303,6 +528,10 @@ export const updateApplicationSettingsValidator = [
         .optional()
         .isInt({ min: 0, max: 30 })
         .withMessage('deadlineBufferDays must be an integer between 0 and 30'),
+    body('allowDraftApplications')
+        .optional()
+        .isBoolean()
+        .withMessage('allowDraftApplications must be a boolean'),
 ];
 
 export const updateNotificationSettingsValidator = [
@@ -318,11 +547,25 @@ export const updateNotificationSettingsValidator = [
         .optional()
         .isInt({ min: 1, max: 30 })
         .withMessage('deadlineReminderDays must be an integer between 1 and 30'),
+    body('notifyAdminOnNewScholarship')
+        .optional()
+        .isBoolean()
+        .withMessage('notifyAdminOnNewScholarship must be a boolean'),
+    body('notifyAdminOnNewApplication')
+        .optional()
+        .isBoolean()
+        .withMessage('notifyAdminOnNewApplication must be a boolean'),
 ];
 
 // Combined validator for PUT /api/settings (all fields)
 export const updateSettingsValidator = [
+    ...updatePlatformSettingsValidator,
     ...updateSiteSettingsValidator,
+    ...updateBrandingSettingsValidator,
+    ...updateLinksSettingsValidator,
+    ...updateSocialSettingsValidator,
+    ...updateSeoSettingsValidator,
+    ...updateFooterSettingsValidator,
     ...updateScholarshipSettingsValidator,
     ...updateApplicationSettingsValidator,
     ...updateNotificationSettingsValidator,
@@ -405,6 +648,28 @@ export const updateFaqItemValidator = [
     body('isActive')
         .optional()
         .isBoolean().withMessage('isActive must be a boolean'),
+];
+
+// ==================== CONTACT MESSAGE VALIDATORS ====================
+
+export const createContactMessageValidator = [
+    body('name')
+        .trim()
+        .notEmpty().withMessage('Full name is required')
+        .isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email is required')
+        .isEmail().withMessage('Please provide a valid email address')
+        .normalizeEmail(),
+    body('subject')
+        .trim()
+        .notEmpty().withMessage('Subject is required')
+        .isLength({ min: 3, max: 200 }).withMessage('Subject must be between 3 and 200 characters'),
+    body('message')
+        .trim()
+        .notEmpty().withMessage('Message is required')
+        .isLength({ min: 10, max: 5000 }).withMessage('Message must be between 10 and 5000 characters'),
 ];
 
 // ==================== BLOG POST VALIDATORS ====================

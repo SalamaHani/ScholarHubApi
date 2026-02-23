@@ -326,27 +326,88 @@ enum BlogPostStatus {
 model Settings {
   id Int @id @default(1)
 
+  // Platform / General
+  defaultLanguage          String  @default("ar")
+  timezone                 String  @default("Asia/Gaza")
+  registrationEnabled      Boolean @default(true)
+  requireEmailVerification Boolean @default(true)
+  maxFileSizeMB            Int     @default(10)
+  allowedFileTypes         String[] // e.g. ["pdf","jpg","png","docx"]
+
   // Site Settings
-  siteName        String  @default("ScholarHub")
-  siteDescription String  @default("Your scholarship discovery platform")
-  siteLogoUrl     String?
-  contactEmail    String  @default("admin@scholarhub.com")
-  maintenanceMode Boolean @default(false)
+  siteName            String  @default("ScholarHub")
+  siteDescription     String  @default("Your scholarship discovery platform")
+  siteLogoUrl         String?
+  siteFaviconUrl      String?
+  contactEmail        String  @default("admin@scholarhub.com")
+  supportEmail        String?
+  supportPhone        String?
+  maintenanceMode     Boolean @default(false)
+  maintenanceMessage  String  @default("We are currently under maintenance. Please check back soon.")
+
+  // Address / Location
+  address    String?
+  city       String?
+  country    String?
+
+  // Social Media Links
+  facebookUrl   String?
+  twitterUrl    String?
+  linkedinUrl   String?
+  instagramUrl  String?
+  youtubeUrl    String?
+
+  // Branding / Colors
+  primaryColor   String @default("#3B82F6")
+  secondaryColor String @default("#1E40AF")
+  accentColor    String @default("#F59E0B")
+  textColor      String @default("#111827")
+  bgColor        String @default("#FFFFFF")
+  darkPrimaryColor   String @default("#60A5FA")
+  darkBgColor        String @default("#0F172A")
+
+  // Default / External Links
+  homeUrl           String @default("/")
+  privacyPolicyUrl  String @default("/privacy-policy")
+  termsUrl          String @default("/terms-of-service")
+  cookiePolicyUrl   String @default("/cookies")
+  appStoreUrl       String?
+  playStoreUrl      String?
+  docsUrl           String?
+
+  // SEO Settings
+  metaTitle         String?
+  metaDescription   String?
+  googleAnalyticsId String?
+  ogTitle           String?
+  ogDescription     String?
+  ogImageUrl        String?
+  twitterCard       String @default("summary_large_image")
+  robotsMeta        String @default("index, follow")
+  canonicalUrl      String?
+
+  // Footer
+  footerText    String?
+  copyrightText String @default("© 2026 ScholarHub. All rights reserved.")
 
   // Scholarship Settings
   autoApproveScholarships  Boolean @default(false)
   maxScholarshipsPerProf   Int     @default(10)
   featuredScholarshipLimit Int     @default(6)
+  requireApprovalForEdit   Boolean @default(true)
 
   // Application Settings
   maxApplicationsPerStudent Int     @default(5)
   allowWithdrawal           Boolean @default(true)
   deadlineBufferDays        Int     @default(3)
+  allowDraftApplications    Boolean @default(true)
 
   // Notification Settings
-  emailNotificationsEnabled Boolean @default(true)
-  pushNotificationsEnabled  Boolean @default(true)
-  deadlineReminderDays      Int     @default(7)
+  emailNotificationsEnabled   Boolean @default(true)
+  pushNotificationsEnabled    Boolean @default(true)
+  deadlineReminderDays        Int     @default(7)
+  notifyAdminOnNewScholarship Boolean @default(true)
+  notifyAdminOnNewApplication Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

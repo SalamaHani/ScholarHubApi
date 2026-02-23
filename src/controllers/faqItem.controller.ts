@@ -10,8 +10,8 @@ import { ApiError, asyncHandler } from '../utils/index.js';
 export const getAllFaqItems = asyncHandler(async (req: Request, res: Response) => {
   const { pageKey } = req.query;
 
-  const where: Record<string, unknown> = { isActive: true };
-  if (pageKey) where.pageKey = pageKey;
+  const where: { isActive: boolean; pageKey?: string } = { isActive: true };
+  if (pageKey && typeof pageKey === 'string') where.pageKey = pageKey;
 
   const faqItems = await prisma.faqItem.findMany({
     where,
@@ -50,7 +50,7 @@ export const createFaqItem = asyncHandler(async (req: Request, res: Response) =>
       pageKey,
       question,
       answer,
-      order: order ?? 0,
+      order: order !== undefined ? Number(order) : 0,
     },
   });
 
@@ -75,14 +75,16 @@ export const updateFaqItem = asyncHandler(async (req: Request, res: Response) =>
     throw ApiError.notFound('FAQ item not found');
   }
 
-  const updateData: Record<string, unknown> = {};
-  if (pageKey !== undefined)   updateData.pageKey = pageKey;
-  if (question !== undefined)  updateData.question = question;
-  if (answer !== undefined)    updateData.answer = answer;
-  if (order !== undefined)     updateData.order = order;
-  if (isActive !== undefined)  updateData.isActive = isActive;
-
-  const faqItem = await prisma.faqItem.update({ where: { id }, data: updateData });
+  const faqItem = await prisma.faqItem.update({
+    where: { id },
+    data: {
+      ...(pageKey !== undefined   && { pageKey }),
+      ...(question !== undefined  && { question }),
+      ...(answer !== undefined    && { answer }),
+      ...(order !== undefined     && { order: Number(order) }),
+      ...(isActive !== undefined  && { isActive: Boolean(isActive) }),
+    },
+  });
 
   res.json({
     success: true,
