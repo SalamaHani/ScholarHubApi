@@ -1953,11 +1953,38 @@ Loans and scholarships for international students including refugees studying in
     },
   ];
 
+  // ── Cover images (Picsum.photos — consistent per seed keyword) ──────────────
+  const coverImages: Record<string, string> = {
+    "complete-guide-to-scholarship-applications-2026":
+      "https://picsum.photos/seed/scholarship-guide/800/450",
+    "how-to-write-a-winning-scholarship-essay":
+      "https://picsum.photos/seed/essay-writing/800/450",
+    "how-to-get-strong-letters-of-recommendation":
+      "https://picsum.photos/seed/recommendation-letter/800/450",
+    "top-scholarships-for-stem-students-2026":
+      "https://picsum.photos/seed/stem-science/800/450",
+    "top-scholarships-for-arts-humanities-students-2026":
+      "https://picsum.photos/seed/arts-humanities/800/450",
+    "fully-funded-scholarships-no-gpa-requirement-2026":
+      "https://picsum.photos/seed/funded-scholarship/800/450",
+    "understanding-scholarship-eligibility-requirements":
+      "https://picsum.photos/seed/eligibility-study/800/450",
+    "scholarship-interview-preparation-guide":
+      "https://picsum.photos/seed/interview-prep/800/450",
+    "how-to-build-a-strong-cv-for-scholarship-applications":
+      "https://picsum.photos/seed/resume-cv/800/450",
+    "scholarship-application-timeline-12-month-plan":
+      "https://picsum.photos/seed/timeline-plan/800/450",
+    "scholarships-for-refugees-and-displaced-students-2026":
+      "https://picsum.photos/seed/refugees-students/800/450",
+  };
+
   for (const post of blogPosts) {
+    const coverImage = coverImages[post.slug] ?? null;
     await prisma.blogPost.upsert({
       where: { slug: post.slug },
-      update: {},
-      create: { ...post, authorId: admin.id },
+      update: { coverImage },
+      create: { ...post, authorId: admin.id, coverImage },
     });
     console.log(`  ✅ Blog Post: ${post.title}`);
   }

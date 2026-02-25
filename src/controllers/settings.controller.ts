@@ -174,6 +174,20 @@ const toGrouped = (raw: Awaited<ReturnType<typeof getOrCreateSettings>>) => ({
     },
 });
 
+// ─── Helper: flatten nested section groups into flat fields ──────────────────
+const SECTION_KEYS = ['platform', 'site', 'branding', 'links', 'social', 'seo', 'footer', 'scholarship', 'application', 'notification'] as const;
+
+const flattenBody = (body: Record<string, unknown>): Record<string, unknown> => {
+    const flat: Record<string, unknown> = { ...body };
+    for (const section of SECTION_KEYS) {
+        if (flat[section] && typeof flat[section] === 'object' && !Array.isArray(flat[section])) {
+            Object.assign(flat, flat[section] as Record<string, unknown>);
+            delete flat[section];
+        }
+    }
+    return flat;
+};
+
 // ─── Helper: build allowed-fields update data ────────────────────────────────
 const pickAllowed = (body: Record<string, unknown>): Record<string, unknown> => {
     const data: Record<string, unknown> = {};
@@ -207,7 +221,7 @@ export const getSettings = asyncHandler(async (_req: Request, res: Response) => 
  * @access  Private/Admin
  */
 export const updateSettings = asyncHandler(async (req: Request, res: Response) => {
-    const data = pickAllowed(req.body as Record<string, unknown>);
+    const data = pickAllowed(flattenBody(req.body as Record<string, unknown>));
     const raw = await prisma.settings.upsert({
         where: { id: 1 },
         create: { ...DEFAULT_SETTINGS, ...data },

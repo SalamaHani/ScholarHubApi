@@ -118,6 +118,15 @@ export const updateScholarshipValidator = [
         .trim()
         .isLength({ max: 200 })
         .withMessage('Title must be less than 200 characters'),
+    body('description')
+        .optional()
+        .trim(),
+    body('organization')
+        .optional()
+        .trim(),
+    body('country')
+        .optional()
+        .trim(),
     body('deadline')
         .optional()
         .isISO8601()
@@ -126,6 +135,36 @@ export const updateScholarshipValidator = [
         .optional()
         .isURL()
         .withMessage('Application link must be a valid URL'),
+    body('requirements')
+        .optional()
+        .trim(),
+    body('eligibility')
+        .optional()
+        .trim(),
+    body('fundingType')
+        .optional()
+        .isIn(['FULL', 'PARTIAL', 'TUITION_ONLY', 'STIPEND_ONLY'])
+        .withMessage('Invalid funding type'),
+    body('degreeLevel')
+        .optional()
+        .isArray({ min: 1 })
+        .withMessage('Degree level must be an array with at least one value'),
+    body('fieldOfStudy')
+        .optional()
+        .isArray({ min: 1 })
+        .withMessage('Field of study must be an array with at least one value'),
+    body('language')
+        .optional()
+        .trim(),
+    body('studyMode')
+        .optional()
+        .trim()
+        .isIn(['ONLINE', 'ON_CAMPUS', 'HYBRID'])
+        .withMessage('Invalid study mode'),
+    body('questions')
+        .optional()
+        .isArray()
+        .withMessage('Questions must be an array'),
 ];
 
 // ==================== APPLICATION VALIDATORS ====================
@@ -175,6 +214,22 @@ export const createCategoryValidator = [
         .trim()
         .notEmpty()
         .withMessage('Category name is required')
+        .isLength({ max: 100 })
+        .withMessage('Category name must be less than 100 characters'),
+    body('description')
+        .optional()
+        .trim()
+        .isLength({ max: 500 })
+        .withMessage('Description must be less than 500 characters'),
+];
+
+export const updateCategoryValidator = [
+    param('id')
+        .notEmpty()
+        .withMessage('Category ID is required'),
+    body('name')
+        .optional()
+        .trim()
         .isLength({ max: 100 })
         .withMessage('Category name must be less than 100 characters'),
     body('description')
@@ -635,6 +690,10 @@ export const createFaqItemValidator = [
 ];
 
 export const updateFaqItemValidator = [
+    body('pageKey')
+        .optional()
+        .trim()
+        .notEmpty().withMessage('Page key cannot be empty'),
     body('question')
         .optional()
         .trim()
@@ -688,6 +747,7 @@ export const createBlogPostValidator = [
         .isLength({ max: 500 }).withMessage('Excerpt must be less than 500 characters'),
     body('status')
         .optional()
+        .customSanitizer((val: unknown) => (typeof val === 'string' ? val.toUpperCase() : val))
         .isIn(['DRAFT', 'PUBLISHED', 'ARCHIVED']).withMessage('Status must be DRAFT, PUBLISHED, or ARCHIVED'),
     body('tags')
         .optional()
@@ -704,6 +764,7 @@ export const updateBlogPostValidator = [
         .isLength({ max: 300 }).withMessage('Title must be less than 300 characters'),
     body('status')
         .optional()
+        .customSanitizer((val: unknown) => (typeof val === 'string' ? val.toUpperCase() : val))
         .isIn(['DRAFT', 'PUBLISHED', 'ARCHIVED']).withMessage('Status must be DRAFT, PUBLISHED, or ARCHIVED'),
     body('tags')
         .optional()
