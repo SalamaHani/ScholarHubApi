@@ -1,19 +1,101 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import config from '../config/index.js';
 
-const transporter = nodemailer.createTransport({
-    host: config.smtp.host,
-    port: config.smtp.port,
-    secure: config.smtp.port === 465,
-    auth: {
-        user: config.smtp.user,
-        pass: config.smtp.pass,
-    },
-});
+// Lazy client — only created when a key is present to avoid crash on startup
+let _resend: Resend | null = null;
+const getResend = (): Resend | null => {
+    if (!config.resend.apiKey) return null;
+    if (!_resend) _resend = new Resend(config.resend.apiKey);
+    return _resend;
+};
 
-/**
- * Send email notification when application status changes
- */
+const FROM = config.resend.from;
+const BASE_URL = config.frontendUrl;
+const YEAR = new Date().getFullYear();
+
+// ─── Shared layout ────────────────────────────────────────────────────────────
+
+const emailWrapper = (body: string) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f3f4f6; color: #1f2937; padding: 40px 16px;
+    }
+    .wrapper { max-width: 600px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .logo { font-size: 26px; font-weight: 800; color: #4f46e5; text-decoration: none; letter-spacing: -0.5px; }
+    .logo span { color: #10b981; }
+    .card {
+      background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 40px 36px;
+    }
+    .badge {
+      display: inline-block; padding: 5px 14px; border-radius: 9999px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #fff; margin-bottom: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #111827; }
+    p  { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 14px; }
+    .btn {
+      display: inline-block; background: #4f46e5; color: #fff !important;
+      padding: 13px 28px; border-radius: 10px; text-decoration: none;
+      font-weight: 600; font-size: 15px; margin-top: 20px;
+    }
+    .info-box {
+      background: #f9fafb; border-left: 4px solid #d1d5db;
+      border-radius: 8px; padding: 16px 20px; margin: 24px 0;
+    }
+    .info-box p { margin: 0; font-size: 14px; color: #4b5563; }
+    .warn-box {
+      background: #fef3c7; border-left: 4px solid #f59e0b;
+      border-radius: 8px; padding: 16px 20px; margin: 24px 0;
+    }
+    .warn-box p { margin: 0; font-size: 14px; color: #92400e; }
+    .token-box {
+      background: #f3f4f6; border-radius: 8px; padding: 12px 16px;
+      font-family: 'Courier New', monospace; font-size: 13px;
+      word-break: break-all; color: #374151; margin: 16px 0;
+    }
+    .progress-bar { background: #e5e7eb; border-radius: 9999px; height: 10px; overflow: hidden; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 28px; font-size: 13px; color: #9ca3af; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <a href="${BASE_URL}" class="logo">Scholar<span>Hub</span></a>
+    </div>
+    <div class="card">${body}</div>
+    <div class="footer">
+      <p>© ${YEAR} ScholarHub. All rights reserved.</p>
+      <p>Questions? <a href="mailto:support@scholarhub.com" style="color:#4f46e5;">support@scholarhub.com</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+const send = async (to: string, subject: string, html: string, ctx: string) => {
+    const client = getResend();
+    if (!client) {
+        console.warn(`[Resend] RESEND_API_KEY not set — skipping email (${ctx}) → ${to}`);
+        return;
+    }
+    const { error } = await client.emails.send({ from: FROM, to, subject, html });
+    if (error) {
+        console.error(`[Resend] Failed (${ctx}) → ${to}:`, error);
+    } else {
+        console.log(`[Resend] Sent (${ctx}) → ${to}`);
+    }
+};
+
+// ─── 1. Application Status Update ────────────────────────────────────────────
+
 export const sendApplicationStatusEmail = async (
     email: string,
     name: string,
@@ -21,286 +103,95 @@ export const sendApplicationStatusEmail = async (
     status: string,
     notes?: string
 ) => {
-    let statusColor = '#3b82f6'; // Default blue
-    let statusText = status.replace('_', ' ');
-    let message = '';
+    const map: Record<string, { color: string; label: string; msg: string }> = {
+        ACCEPTED:     { color: '#10b981', label: 'Accepted',     msg: `Congratulations! Your application for <strong>${scholarshipTitle}</strong> has been accepted.` },
+        REJECTED:     { color: '#ef4444', label: 'Not Selected', msg: `Thank you for your interest. Your application for <strong>${scholarshipTitle}</strong> was not selected at this time.` },
+        UNDER_REVIEW: { color: '#f59e0b', label: 'Under Review', msg: `Your application for <strong>${scholarshipTitle}</strong> is now under review by our committee.` },
+    };
+    const s = map[status] ?? { color: '#3b82f6', label: status.replace(/_/g, ' '), msg: `There has been an update to your application for <strong>${scholarshipTitle}</strong>.` };
 
-    if (status === 'ACCEPTED') {
-        statusColor = '#10b981'; // Green
-        message = `Congratulations! Your application for <strong>${scholarshipTitle}</strong> has been accepted.`;
-    } else if (status === 'REJECTED') {
-        statusColor = '#ef4444'; // Red
-        message = `Thank you for your interest. We regret to inform you that your application for <strong>${scholarshipTitle}</strong> was not selected at this time.`;
-    } else if (status === 'UNDER_REVIEW') {
-        statusColor = '#f59e0b'; // Amber
-        message = `Your application for <strong>${scholarshipTitle}</strong> is now under review by our committee.`;
-    } else {
-        message = `There has been an update to your application for <strong>${scholarshipTitle}</strong>. Your application is now in <strong>${statusText}</strong> status.`;
-    }
+    const html = emailWrapper(`
+        <div class="badge" style="background:${s.color};">${s.label}</div>
+        <h1>Hello, ${name}</h1>
+        <p>${s.msg}</p>
+        ${notes ? `<div class="info-box"><p style="font-weight:600;margin-bottom:8px;font-size:13px;text-transform:uppercase;">Committee Feedback</p><p style="margin-top:4px;">${notes}</p></div>` : ''}
+        <a href="${BASE_URL}/applications" class="btn">View Application</a>
+    `);
 
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #4f46e5; text-decoration: none; }
-        .content { background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 600; text-transform: uppercase; color: white; background-color: ${statusColor}; margin-bottom: 20px; }
-        h1 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px; }
-        p { margin-bottom: 16px; font-size: 16px; }
-        .notes { background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #d1d5db; margin-top: 24px; }
-        .footer { text-align: center; margin-top: 32px; font-size: 14px; color: #6b7280; }
-        .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 24px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <a href="${config.frontendUrl}" class="logo">ScholarHub</a>
-        </div>
-        <div class="content">
-          <div class="status-badge">${statusText}</div>
-          <h1>Hello, ${name}</h1>
-          <p>${message}</p>
-          
-          ${notes ? `
-          <div class="notes">
-            <p style="margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #4b5563;">COMMITTEE FEEDBACK:</p>
-            <p style="margin-bottom: 0;">${notes}</p>
-          </div>
-          ` : ''}
-          
-          <a href="${config.frontendUrl}/applications" class="button">View Application Status</a>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ScholarHub. All rights reserved.</p>
-          <p>You received this email because you applied for a scholarship on ScholarHub.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-    try {
-        await transporter.sendMail({
-            from: `"${config.smtp.from}" <${config.smtp.user}>`,
-            to: email,
-            subject: `Application Status Update: ${scholarshipTitle}`,
-            html: htmlContent,
-        });
-        console.log(`Status email sent to ${email} for scholarship ${scholarshipTitle}`);
-    } catch (error) {
-        console.error('Error sending status email:', error);
-        // Don't throw error to avoid breaking the application status update flow
-    }
+    try { await send(email, `Application Update: ${scholarshipTitle}`, html, 'application-status'); }
+    catch (err) { console.error('[Resend] sendApplicationStatusEmail:', err); }
 };
 
-/**
- * Send password reset email
- */
+// ─── 2. Password Reset ────────────────────────────────────────────────────────
+
 export const sendPasswordResetEmail = async (
     email: string,
     name: string,
     resetToken: string
 ) => {
-    const resetUrl = `${config.frontendUrl}/reset-password?token=${resetToken}`;
+    const resetUrl = `${BASE_URL}/reset-password?token=${resetToken}`;
 
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #4f46e5; text-decoration: none; }
-        .content { background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        h1 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px; color: #111827; }
-        p { margin-bottom: 16px; font-size: 16px; color: #374151; }
-        .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 24px 0; }
-        .button:hover { background: #4338ca; }
-        .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin: 24px 0; }
-        .warning-box p { margin: 0; font-size: 14px; color: #92400e; }
-        .footer { text-align: center; margin-top: 32px; font-size: 14px; color: #6b7280; }
-        .token-box { background: #f3f4f6; padding: 12px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; word-break: break-all; margin: 16px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <a href="${config.frontendUrl}" class="logo">🎓 ScholarHub</a>
+    const html = emailWrapper(`
+        <h1>Password Reset Request</h1>
+        <p>Hello ${name},</p>
+        <p>We received a request to reset your ScholarHub password. Click below to create a new one:</p>
+        <a href="${resetUrl}" class="btn">Reset My Password</a>
+        <p style="margin-top:24px;font-size:14px;color:#6b7280;">If the button doesn't work, copy this link into your browser:</p>
+        <div class="token-box">${resetUrl}</div>
+        <div class="warn-box">
+          <p><strong>⚠️ Security Notice:</strong> This link expires in <strong>1 hour</strong>. If you didn't request a reset, you can safely ignore this email.</p>
         </div>
-        <div class="content">
-          <h1>Password Reset Request</h1>
-          <p>Hello ${name},</p>
-          <p>We received a request to reset your password for your ScholarHub account. Click the button below to create a new password:</p>
+        <p>Best regards,<br>The ScholarHub Team</p>
+    `);
 
-          <a href="${resetUrl}" class="button">Reset Password</a>
-
-          <p>If the button doesn't work, copy and paste this link into your browser:</p>
-          <div class="token-box">${resetUrl}</div>
-
-          <div class="warning-box">
-            <p><strong>⚠️ Security Notice:</strong> This password reset link will expire in 1 hour. If you didn't request a password reset, please ignore this email or contact support if you have concerns about your account security.</p>
-          </div>
-
-          <p>Best regards,<br>The ScholarHub Team</p>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ScholarHub. All rights reserved.</p>
-          <p>If you have any questions, contact us at support@scholarhub.com</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-    try {
-        await transporter.sendMail({
-            from: `"ScholarHub" <${config.smtp.user}>`,
-            to: email,
-            subject: 'Password Reset Request - ScholarHub',
-            html: htmlContent,
-        });
-        console.log(`Password reset email sent to ${email}`);
-    } catch (error) {
-        console.error('Error sending password reset email:', error);
-        throw new Error('Failed to send password reset email');
-    }
+    try { await send(email, 'Reset Your ScholarHub Password', html, 'password-reset'); }
+    catch (err) { console.error('[Resend] sendPasswordResetEmail:', err); throw new Error('Failed to send password reset email'); }
 };
 
-/**
- * Send scholarship approved email
- */
+// ─── 3. Scholarship Approved ──────────────────────────────────────────────────
+
 export const sendScholarshipApprovedEmail = async (
     email: string,
     name: string,
     scholarshipTitle: string,
     scholarshipId: string
 ) => {
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #4f46e5; text-decoration: none; }
-        .content { background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 600; text-transform: uppercase; color: white; background-color: #10b981; margin-bottom: 20px; }
-        h1 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px; }
-        p { margin-bottom: 16px; font-size: 16px; }
-        .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 24px; }
-        .footer { text-align: center; margin-top: 32px; font-size: 14px; color: #6b7280; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <a href="${config.frontendUrl}" class="logo">ScholarHub</a>
-        </div>
-        <div class="content">
-          <div class="status-badge">APPROVED</div>
-          <h1>Congratulations, ${name}!</h1>
-          <p>Your scholarship "<strong>${scholarshipTitle}</strong>" has been approved and is now live on ScholarHub.</p>
-          <p>Students can now view and apply for your scholarship. You'll receive notifications when new applications are submitted.</p>
-          <a href="${config.frontendUrl}/scholarships/${scholarshipId}" class="button">View Scholarship</a>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ScholarHub. All rights reserved.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+    const html = emailWrapper(`
+        <div class="badge" style="background:#10b981;">Approved</div>
+        <h1>Congratulations, ${name}!</h1>
+        <p>Your scholarship <strong>"${scholarshipTitle}"</strong> has been approved and is now live on ScholarHub.</p>
+        <p>Students can now view and apply. You'll be notified when new applications arrive.</p>
+        <a href="${BASE_URL}/scholarships/${scholarshipId}" class="btn">View Scholarship</a>
+    `);
 
-    try {
-        await transporter.sendMail({
-            from: `"${config.smtp.from}" <${config.smtp.user}>`,
-            to: email,
-            subject: `Scholarship Approved: ${scholarshipTitle}`,
-            html: htmlContent,
-        });
-        console.log(`Scholarship approved email sent to ${email}`);
-    } catch (error) {
-        console.error('Error sending scholarship approved email:', error);
-    }
+    try { await send(email, `Scholarship Approved: ${scholarshipTitle}`, html, 'scholarship-approved'); }
+    catch (err) { console.error('[Resend] sendScholarshipApprovedEmail:', err); }
 };
 
-/**
- * Send scholarship rejected email
- */
+// ─── 4. Scholarship Rejected ──────────────────────────────────────────────────
+
 export const sendScholarshipRejectedEmail = async (
     email: string,
     name: string,
     scholarshipTitle: string,
     reason?: string
 ) => {
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #4f46e5; text-decoration: none; }
-        .content { background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 600; text-transform: uppercase; color: white; background-color: #ef4444; margin-bottom: 20px; }
-        h1 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px; }
-        p { margin-bottom: 16px; font-size: 16px; }
-        .reason-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin: 24px 0; }
-        .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 24px; }
-        .footer { text-align: center; margin-top: 32px; font-size: 14px; color: #6b7280; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <a href="${config.frontendUrl}" class="logo">ScholarHub</a>
-        </div>
-        <div class="content">
-          <div class="status-badge">NOT APPROVED</div>
-          <h1>Hello, ${name}</h1>
-          <p>Thank you for submitting your scholarship "<strong>${scholarshipTitle}</strong>" to ScholarHub.</p>
-          <p>After review, we were unable to approve this scholarship at this time.</p>
-          ${reason ? `
-          <div class="reason-box">
-            <p style="margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #92400e;">REASON:</p>
-            <p style="margin-bottom: 0; color: #92400e;">${reason}</p>
-          </div>
-          ` : ''}
-          <p>You can edit and resubmit your scholarship after addressing the feedback.</p>
-          <a href="${config.frontendUrl}/dashboard/scholarships" class="button">Go to Dashboard</a>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ScholarHub. All rights reserved.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+    const html = emailWrapper(`
+        <div class="badge" style="background:#ef4444;">Not Approved</div>
+        <h1>Hello, ${name}</h1>
+        <p>Thank you for submitting <strong>"${scholarshipTitle}"</strong> to ScholarHub.</p>
+        <p>After review, we were unable to approve this scholarship at this time.</p>
+        ${reason ? `<div class="warn-box"><p style="font-weight:600;margin-bottom:6px;font-size:13px;text-transform:uppercase;">Reason</p><p style="margin-top:4px;">${reason}</p></div>` : ''}
+        <p>You can edit and resubmit your scholarship after addressing the feedback.</p>
+        <a href="${BASE_URL}/dashboard/scholarships" class="btn">Go to Dashboard</a>
+    `);
 
-    try {
-        await transporter.sendMail({
-            from: `"${config.smtp.from}" <${config.smtp.user}>`,
-            to: email,
-            subject: `Scholarship Update: ${scholarshipTitle}`,
-            html: htmlContent,
-        });
-        console.log(`Scholarship rejected email sent to ${email}`);
-    } catch (error) {
-        console.error('Error sending scholarship rejected email:', error);
-    }
+    try { await send(email, `Scholarship Update: ${scholarshipTitle}`, html, 'scholarship-rejected'); }
+    catch (err) { console.error('[Resend] sendScholarshipRejectedEmail:', err); }
 };
 
-/**
- * Send new application notification to professor
- */
+// ─── 5. New Application → Professor ──────────────────────────────────────────
+
 export const sendNewApplicationEmail = async (
     email: string,
     professorName: string,
@@ -308,135 +199,117 @@ export const sendNewApplicationEmail = async (
     scholarshipTitle: string,
     applicationId: string
 ) => {
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #4f46e5; text-decoration: none; }
-        .content { background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 600; text-transform: uppercase; color: white; background-color: #3b82f6; margin-bottom: 20px; }
-        h1 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px; }
-        p { margin-bottom: 16px; font-size: 16px; }
-        .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 24px; }
-        .footer { text-align: center; margin-top: 32px; font-size: 14px; color: #6b7280; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <a href="${config.frontendUrl}" class="logo">ScholarHub</a>
-        </div>
-        <div class="content">
-          <div class="status-badge">NEW APPLICATION</div>
-          <h1>Hello, ${professorName}</h1>
-          <p><strong>${studentName}</strong> has submitted an application for your scholarship "<strong>${scholarshipTitle}</strong>".</p>
-          <p>You can review the application and provide your evaluation in your dashboard.</p>
-          <a href="${config.frontendUrl}/dashboard/applications" class="button">Review Application</a>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ScholarHub. All rights reserved.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+    const html = emailWrapper(`
+        <div class="badge" style="background:#3b82f6;">New Application</div>
+        <h1>Hello, ${professorName}</h1>
+        <p><strong>${studentName}</strong> has submitted an application for your scholarship <strong>"${scholarshipTitle}"</strong>.</p>
+        <p>Review the application and provide your evaluation from your dashboard.</p>
+        <a href="${BASE_URL}/dashboard/applications/${applicationId}" class="btn">Review Application</a>
+    `);
 
-    try {
-        await transporter.sendMail({
-            from: `"${config.smtp.from}" <${config.smtp.user}>`,
-            to: email,
-            subject: `New Application Received: ${scholarshipTitle}`,
-            html: htmlContent,
-        });
-        console.log(`New application email sent to ${email}`);
-    } catch (error) {
-        console.error('Error sending new application email:', error);
-    }
+    try { await send(email, `New Application: ${scholarshipTitle}`, html, 'new-application'); }
+    catch (err) { console.error('[Resend] sendNewApplicationEmail:', err); }
 };
 
-/**
- * Send profile milestone achievement email
- */
+// ─── 6. Interview Scheduled ───────────────────────────────────────────────────
+
+export const sendInterviewScheduledEmail = async (
+    email: string,
+    studentName: string,
+    scholarshipTitle: string,
+    scheduledAt: Date,
+    platform: string,
+    meetingLink?: string,
+    location?: string,
+    duration?: number,
+    notes?: string
+) => {
+    const dateStr = scheduledAt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = scheduledAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const platformLabel = platform.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const locationOrLink = meetingLink
+        ? `<p style="margin:4px 0;"><strong>Link:</strong> <a href="${meetingLink}" style="color:#4f46e5;">${meetingLink}</a></p>`
+        : location
+        ? `<p style="margin:4px 0;"><strong>Location:</strong> ${location}</p>`
+        : '';
+
+    const html = emailWrapper(`
+        <div class="badge" style="background:#4f46e5;">Interview Scheduled</div>
+        <h1>Hello, ${studentName}</h1>
+        <p>You have been invited to an interview for the scholarship <strong>"${scholarshipTitle}"</strong>.</p>
+        <div class="info-box">
+          <p style="font-weight:600;margin-bottom:10px;font-size:13px;text-transform:uppercase;">Interview Details</p>
+          <p style="margin:4px 0;"><strong>Date:</strong> ${dateStr}</p>
+          <p style="margin:4px 0;"><strong>Time:</strong> ${timeStr}</p>
+          <p style="margin:4px 0;"><strong>Platform:</strong> ${platformLabel}</p>
+          <p style="margin:4px 0;"><strong>Duration:</strong> ${duration ?? 60} minutes</p>
+          ${locationOrLink}
+        </div>
+        ${notes ? `<div class="warn-box"><p style="font-weight:600;margin-bottom:6px;font-size:13px;text-transform:uppercase;">Notes from the Committee</p><p style="margin-top:4px;">${notes}</p></div>` : ''}
+        <p>Please make sure to be available at the scheduled time. Good luck!</p>
+        <a href="${BASE_URL}/applications" class="btn">View My Applications</a>
+    `);
+
+    try { await send(email, `Interview Scheduled: ${scholarshipTitle}`, html, 'interview-scheduled'); }
+    catch (err) { console.error('[Resend] sendInterviewScheduledEmail:', err); }
+};
+
+// ─── 7. Custom Admin Email (reply to contact message) ────────────────────────
+
+export const sendCustomEmail = async (
+    to: string,
+    subject: string,
+    replyMessage: string,
+    recipientName?: string
+) => {
+    const html = emailWrapper(`
+        <div class="badge" style="background:#4f46e5;">Message from ScholarHub</div>
+        <h1>Hello${recipientName ? `, ${recipientName}` : ''}</h1>
+        <div class="info-box">
+          <p style="white-space:pre-line;">${replyMessage}</p>
+        </div>
+        <p>Best regards,<br>The ScholarHub Team</p>
+        <a href="${BASE_URL}/contact" class="btn">Visit ScholarHub</a>
+    `);
+
+    try { await send(to, subject, html, 'admin-custom-email'); }
+    catch (err) { console.error('[Resend] sendCustomEmail:', err); throw new Error('Failed to send email'); }
+};
+
+// ─── 8. Profile Milestone ─────────────────────────────────────────────────────
+
 export const sendProfileMilestoneEmail = async (
     email: string,
     name: string,
     milestone: number,
     role: string
 ) => {
-    let message = '';
-    let nextStep = '';
+    const milestones: Record<number, { msg: string; next: string }> = {
+        100: {
+            msg: 'Your profile is now <strong>100% complete</strong>. You\'re all set!',
+            next: role === 'STUDENT'
+                ? 'You can now apply for scholarships with the best chances of being selected.'
+                : 'Your complete profile helps students trust and connect with your opportunities.',
+        },
+        75: { msg: 'Your profile is <strong>75% complete</strong>. Almost there!',    next: 'Just a few more details to reach 100%.' },
+        50: { msg: 'Your profile is <strong>50% complete</strong>. Keep going!',       next: 'Continue to unlock all ScholarHub features.' },
+    };
+    const m = milestones[milestone] ?? {
+        msg: `Your profile is <strong>${milestone}% complete</strong>. Good start!`,
+        next: 'Add more information to improve your profile.',
+    };
 
-    if (milestone === 100) {
-        message = `Congratulations! Your profile is now 100% complete. You're all set to make the most of ScholarHub!`;
-        nextStep = role === 'STUDENT'
-            ? 'You can now apply for scholarships and get the best chances of being selected.'
-            : 'Your complete profile will help students trust and connect with your scholarship opportunities.';
-    } else if (milestone === 75) {
-        message = `Great progress! Your profile is now 75% complete. You're almost there!`;
-        nextStep = 'Just a few more details to reach 100% completion.';
-    } else if (milestone === 50) {
-        message = `You're halfway there! Your profile is now 50% complete.`;
-        nextStep = 'Keep going to unlock all features of ScholarHub.';
-    } else {
-        message = `Good start! Your profile is now ${milestone}% complete.`;
-        nextStep = 'Continue adding more information to improve your profile.';
-    }
+    const html = emailWrapper(`
+        <div class="badge" style="background:#10b981;">${milestone}% Complete</div>
+        <h1>Great work, ${name}!</h1>
+        <p>${m.msg}</p>
+        <div class="progress-bar">
+          <div style="background:linear-gradient(90deg,#4f46e5,#10b981);height:100%;width:${milestone}%;border-radius:9999px;"></div>
+        </div>
+        <p>${m.next}</p>
+        <a href="${BASE_URL}/profile" class="btn">Complete Your Profile</a>
+    `);
 
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #4f46e5; text-decoration: none; }
-        .content { background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .milestone-badge { display: inline-block; padding: 8px 16px; border-radius: 9999px; font-size: 18px; font-weight: 700; color: white; background-color: #10b981; margin-bottom: 20px; }
-        h1 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px; }
-        p { margin-bottom: 16px; font-size: 16px; }
-        .progress-bar { background: #e5e7eb; border-radius: 9999px; height: 12px; margin: 24px 0; overflow: hidden; }
-        .progress-fill { background: linear-gradient(90deg, #4f46e5 0%, #10b981 100%); height: 100%; width: ${milestone}%; transition: width 0.5s ease; }
-        .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 24px; }
-        .footer { text-align: center; margin-top: 32px; font-size: 14px; color: #6b7280; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <a href="${config.frontendUrl}" class="logo">ScholarHub</a>
-        </div>
-        <div class="content">
-          <div class="milestone-badge">${milestone}% COMPLETE</div>
-          <h1>Great work, ${name}!</h1>
-          <p>${message}</p>
-          <div class="progress-bar">
-            <div class="progress-fill"></div>
-          </div>
-          <p>${nextStep}</p>
-          <a href="${config.frontendUrl}/profile" class="button">Continue Your Profile</a>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ScholarHub. All rights reserved.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-    try {
-        await transporter.sendMail({
-            from: `"${config.smtp.from}" <${config.smtp.user}>`,
-            to: email,
-            subject: `Profile ${milestone}% Complete - ScholarHub`,
-            html: htmlContent,
-        });
-        console.log(`Profile milestone email sent to ${email} for ${milestone}%`);
-    } catch (error) {
-        console.error('Error sending profile milestone email:', error);
-    }
+    try { await send(email, `Profile ${milestone}% Complete — ScholarHub`, html, 'profile-milestone'); }
+    catch (err) { console.error('[Resend] sendProfileMilestoneEmail:', err); }
 };

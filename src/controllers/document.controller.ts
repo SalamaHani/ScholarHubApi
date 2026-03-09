@@ -1,11 +1,10 @@
 import { ApiError, asyncHandler } from "../utils/index.js";
 import prisma from "../lib/prisma.js";
-import path from "path";
-import { fileURLToPath } from "url";
-import fs from "fs/promises";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, "../../uploads/documents");
+import {
+  uploadFile,
+  deleteFile,
+  getSignedDownloadUrl,
+} from "../services/storage.service.js";
 
 // Upload student document
 export const uploadStudentDocument = asyncHandler(async (req, res) => {
@@ -23,10 +22,17 @@ export const uploadStudentDocument = asyncHandler(async (req, res) => {
     throw ApiError.notFound("Student profile not found");
   }
 
+  const fileUrl = await uploadFile(
+    req.file.buffer,
+    req.file.originalname,
+    req.file.mimetype,
+    "documents",
+  );
+
   const updatedProfile = await prisma.studentProfile.update({
     where: { userId },
     data: {
-      documents: [...profile.documents, req.file.filename],
+      documents: [...profile.documents, fileUrl],
     },
   });
 
@@ -34,7 +40,7 @@ export const uploadStudentDocument = asyncHandler(async (req, res) => {
     success: true,
     message: "Document uploaded successfully",
     data: {
-      filename: req.file.filename,
+      url: fileUrl,
       originalName: req.file.originalname,
       size: req.file.size,
       documents: updatedProfile.documents,
@@ -58,10 +64,19 @@ export const uploadProfessorDocument = asyncHandler(async (req, res) => {
     throw ApiError.notFound("Professor profile not found");
   }
 
+  const fileUrl = await uploadFile(
+    req.file.buffer,
+    req.file.originalname,
+    req.file.mimetype,
+    "documents",
+  );
+  if (!fileUrl) {
+    throw ApiError.internal("Failed to upload document");
+  }
   const updatedProfile = await prisma.professorProfile.update({
     where: { userId },
     data: {
-      documents: [...profile.documents, req.file.filename],
+      documents: [...profile.documents, fileUrl],
     },
   });
 
@@ -69,7 +84,7 @@ export const uploadProfessorDocument = asyncHandler(async (req, res) => {
     success: true,
     message: "Document uploaded successfully",
     data: {
-      filename: req.file.filename,
+      url: fileUrl,
       originalName: req.file.originalname,
       size: req.file.size,
       documents: updatedProfile.documents,
@@ -117,7 +132,7 @@ export const getProfessorDocuments = asyncHandler(async (req, res) => {
   });
 });
 
-// Get uploaded file (download)
+// Get uploaded file — redirect to the CDN URL
 export const getUploadedFile = asyncHandler(async (req, res) => {
   const { filename } = req.params;
 
@@ -125,48 +140,36 @@ export const getUploadedFile = asyncHandler(async (req, res) => {
     throw ApiError.badRequest("Filename is required");
   }
 
-  const sanitizedFilename = path.basename(filename);
-  const filePath = path.join(uploadsDir, sanitizedFilename);
+  res.redirect(decodeURIComponent(filename));
+});
 
-  try {
-    await fs.access(filePath);
-  } catch (error) {
-    throw ApiError.notFound("File not found");
+// Download a document by its S3 URL with the original filename
+export const downloadDocument = asyncHandler(async (req, res) => {
+  const fileUrl = decodeURIComponent(req.query.url as string);
+
+  if (!fileUrl) {
+    throw ApiError.badRequest("File URL is required");
   }
 
-  const ext = path.extname(sanitizedFilename).toLowerCase();
-  let contentType = "application/octet-stream";
+  const { url, filename } = await getSignedDownloadUrl(fileUrl);
 
-  const mimeTypes: Record<string, string> = {
-    ".pdf": "application/pdf",
-    ".doc": "application/msword",
-    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ".xls": "application/vnd.ms-excel",
-    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".gif": "image/gif",
-  };
-
-  if (mimeTypes[ext]) {
-    contentType = mimeTypes[ext];
-  }
-
-  res.setHeader("Content-Type", contentType);
-  res.setHeader("Content-Disposition", `inline; filename="${sanitizedFilename}"`);
-
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      throw ApiError.internal("Error sending file");
-    }
-  });
+  res.redirect(url);
+  // Alternatively, set the header so clients get the filename hint:
+  // res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  // res.redirect(url);
+  void filename; // used in the presigned URL's ResponseContentDisposition
 });
 
 // Delete student document
 export const deleteStudentDocument = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
-  const { documentId } = req.params;
+
+  const docUrl: string =
+    req.body.documentUrl ?? (req.query.documentUrl as string);
+
+  if (!docUrl) {
+    throw ApiError.badRequest("documentUrl is required");
+  }
 
   const profile = await prisma.studentProfile.findUnique({
     where: { userId },
@@ -176,22 +179,16 @@ export const deleteStudentDocument = asyncHandler(async (req, res) => {
     throw ApiError.notFound("Student profile not found");
   }
 
-  if (!profile.documents.includes(documentId)) {
+  if (!profile.documents.includes(docUrl)) {
     throw ApiError.notFound("Document not found in profile");
   }
 
-  const filePath = path.join(uploadsDir, documentId);
-
-  try {
-    await fs.unlink(filePath);
-  } catch (error) {
-    console.error("Error deleting file:", error);
-  }
+  await deleteFile(docUrl);
 
   const updatedProfile = await prisma.studentProfile.update({
     where: { userId },
     data: {
-      documents: profile.documents.filter((doc) => doc !== documentId),
+      documents: profile.documents.filter((doc) => doc !== docUrl),
     },
   });
 
@@ -207,7 +204,13 @@ export const deleteStudentDocument = asyncHandler(async (req, res) => {
 // Delete professor document
 export const deleteProfessorDocument = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
-  const { documentId } = req.params;
+
+  const docUrl: string =
+    req.body.documentUrl ?? (req.query.documentUrl as string);
+
+  if (!docUrl) {
+    throw ApiError.badRequest("documentUrl is required");
+  }
 
   const profile = await prisma.professorProfile.findUnique({
     where: { userId },
@@ -217,22 +220,16 @@ export const deleteProfessorDocument = asyncHandler(async (req, res) => {
     throw ApiError.notFound("Professor profile not found");
   }
 
-  if (!profile.documents.includes(documentId)) {
+  if (!profile.documents.includes(docUrl)) {
     throw ApiError.notFound("Document not found in profile");
   }
 
-  const filePath = path.join(uploadsDir, documentId);
-
-  try {
-    await fs.unlink(filePath);
-  } catch (error) {
-    console.error("Error deleting file:", error);
-  }
+  await deleteFile(docUrl);
 
   const updatedProfile = await prisma.professorProfile.update({
     where: { userId },
     data: {
-      documents: profile.documents.filter((doc) => doc !== documentId),
+      documents: profile.documents.filter((doc) => doc !== docUrl),
     },
   });
 
@@ -245,17 +242,157 @@ export const deleteProfessorDocument = asyncHandler(async (req, res) => {
   });
 });
 
+// ── Unified role-agnostic handlers ───────────────────────────────────────────
+
+// GET /api/documents  — returns the current user's documents (any role)
+export const getMyDocuments = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+  const role = req.user?.role;
+
+  let documents: string[] = [];
+
+  if (role === "STUDENT") {
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId },
+    });
+    documents = profile?.documents ?? [];
+  } else if (role === "PROFESSOR") {
+    const profile = await prisma.professorProfile.findUnique({
+      where: { userId },
+    });
+    documents = profile?.documents ?? [];
+  } else {
+    throw ApiError.forbidden(
+      "Only students and professors can manage documents",
+    );
+  }
+
+  res.status(200).json({ success: true, data: { documents } });
+});
+
+// POST /api/documents/upload  — upload for any role
+export const uploadMyDocument = asyncHandler(async (req, res) => {
+  const userId = req.user!.id;
+  const role = req.user?.role;
+
+  if (!req.file) throw ApiError.badRequest("No file uploaded");
+
+  const fileUrl = await uploadFile(
+    req.file.buffer,
+    req.file.originalname,
+    req.file.mimetype,
+    "documents",
+  );
+
+  let documents: string[] = [];
+
+  if (role === "STUDENT") {
+    let profile = await prisma.studentProfile.findUnique({ where: { userId } });
+    if (!profile) {
+      profile = await prisma.studentProfile.create({
+        data: { userId, documents: [fileUrl] },
+      });
+    } else {
+      profile = await prisma.studentProfile.update({
+        where: { userId },
+        data: { documents: [...profile.documents, fileUrl] },
+      });
+    }
+    documents = profile.documents;
+  } else if (role === "PROFESSOR") {
+    let profile = await prisma.professorProfile.findUnique({
+      where: { userId },
+    });
+    if (!profile) {
+      profile = await prisma.professorProfile.create({
+        data: { userId, institution: "", documents: [fileUrl] },
+      });
+    } else {
+      profile = await prisma.professorProfile.update({
+        where: { userId },
+        data: { documents: [...profile.documents, fileUrl] },
+      });
+    }
+    documents = profile.documents;
+  } else {
+    throw ApiError.forbidden(
+      "Only students and professors can upload documents",
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Document uploaded successfully",
+    data: {
+      url: fileUrl,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      documents,
+    },
+  });
+});
+
+// DELETE /api/documents  — delete by documentUrl (body or query) for any role
+export const deleteMyDocument = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+  const role = req.user?.role;
+  const docUrl: string =
+    req.body.documentUrl ?? (req.query.documentUrl as string);
+
+  if (!docUrl) throw ApiError.badRequest("documentUrl is required");
+
+  let documents: string[] = [];
+
+  if (role === "STUDENT") {
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId },
+    });
+    if (!profile) throw ApiError.notFound("Student profile not found");
+    if (!profile.documents.includes(docUrl))
+      throw ApiError.notFound("Document not found");
+    await deleteFile(docUrl);
+    const updated = await prisma.studentProfile.update({
+      where: { userId },
+      data: { documents: profile.documents.filter((d) => d !== docUrl) },
+    });
+    documents = updated.documents;
+  } else if (role === "PROFESSOR") {
+    const profile = await prisma.professorProfile.findUnique({
+      where: { userId },
+    });
+    if (!profile) throw ApiError.notFound("Professor profile not found");
+    if (!profile.documents.includes(docUrl))
+      throw ApiError.notFound("Document not found");
+    await deleteFile(docUrl);
+    const updated = await prisma.professorProfile.update({
+      where: { userId },
+      data: { documents: profile.documents.filter((d) => d !== docUrl) },
+    });
+    documents = updated.documents;
+  } else {
+    throw ApiError.forbidden(
+      "Only students and professors can delete documents",
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Document deleted successfully",
+    data: { documents },
+  });
+});
+
 // Verify student document (admin only)
-export const verifyStudentDocument = asyncHandler(async (req, res) => {
+export const verifyStudentDocument = asyncHandler(async (_req, _res) => {
   throw ApiError.badRequest("Document verification not yet implemented");
 });
 
 // Verify professor document (admin only)
-export const verifyProfessorDocument = asyncHandler(async (req, res) => {
+export const verifyProfessorDocument = asyncHandler(async (_req, _res) => {
   throw ApiError.badRequest("Document verification not yet implemented");
 });
 
 // Get pending documents (admin only)
-export const getPendingDocuments = asyncHandler(async (req, res) => {
+export const getPendingDocuments = asyncHandler(async (_req, _res) => {
   throw ApiError.badRequest("Pending documents not yet implemented");
 });

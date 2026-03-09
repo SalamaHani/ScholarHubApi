@@ -17,6 +17,7 @@ import {
   updateProfessorProfile,
   getStudentProfileDetails,
   getProfessorProfileDetails,
+  uploadProfessorDocument,
 } from "../controllers/index.js";
 import {
   authenticate,
@@ -88,7 +89,7 @@ router.post(
   authenticate,
   uploadDocument.single("document"),
   handleUploadError,
-  uploadProfileDocument,
+  uploadProfessorDocument,
 );
 
 /**

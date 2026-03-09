@@ -1,26 +1,12 @@
 import multer from "multer";
 import path from "path";
-import { fileURLToPath } from "url";
 import { ApiError } from "../utils/index.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Use memory storage — file is uploaded to DO Spaces in the controller
+const storage = multer.memoryStorage();
 
-// Configure storage for documents
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../uploads/documents"));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const sanitizedName = file.originalname
-      .replace(/[^a-zA-Z0-9.-]/g, "_")
-      .toLowerCase();
-    cb(null, `doc-${uniqueSuffix}-${sanitizedName}`);
-  },
-});
-
-// File filter - allow documents
-const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
+// File filter - allow documents and images
+const fileFilter = (_req: any, file: Express.Multer.File, cb: any) => {
   const allowedMimes = [
     "application/pdf",
     "application/msword",
@@ -72,8 +58,8 @@ export const uploadDocument = multer({
 // Error handler for multer
 export const handleDocumentUploadError = (
   err: any,
-  req: any,
-  res: any,
+  _req: any,
+  _res: any,
   next: any
 ) => {
   if (err instanceof multer.MulterError) {

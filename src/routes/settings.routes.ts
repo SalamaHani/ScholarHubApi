@@ -49,7 +49,7 @@ const router = Router();
  * @desc    Get all settings (grouped by section)
  * @access  Private/Admin
  */
-router.get('/', authenticate, isAdmin, getSettings);
+router.get('/', authenticate, getSettings);
 
 /**
  * @route   PUT /api/settings

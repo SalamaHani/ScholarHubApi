@@ -4,8 +4,13 @@ import prisma from '../lib/prisma.js';
 import { ApiError, asyncHandler } from '../utils/index.js';
 import {
   sendPushNotificationToUsers,
-  generateBeamsToken
+  generateBeamsToken,
+  triggerUserEvent,
+  triggerUsersEvent,
+  authenticatePusherChannel,
+  userChannel,
 } from '../services/pusher.service.js';
+import { sendCustomEmail } from '../services/mail.service.js';
 
 /**
  * @route   GET /api/notifications
@@ -75,6 +80,9 @@ export const markAsRead = asyncHandler(async (req: Request, res: Response) => {
         data: { isRead: true },
     });
 
+    // Real-time: tell the client this notification is now read
+    await triggerUserEvent(userId, 'notification-read', { id });
+
     res.json({
         success: true,
         message: 'Notification marked as read',
@@ -93,6 +101,9 @@ export const markAllAsRead = asyncHandler(async (req: Request, res: Response) =>
         where: { userId, isRead: false },
         data: { isRead: true },
     });
+
+    // Real-time: tell the client all notifications are now read
+    await triggerUserEvent(userId, 'all-notifications-read', {});
 
     res.json({
         success: true,
@@ -123,6 +134,9 @@ export const deleteNotification = asyncHandler(async (req: Request, res: Respons
 
     await prisma.notification.delete({ where: { id } });
 
+    // Real-time: tell the client to remove this notification
+    await triggerUserEvent(userId, 'notification-deleted', { id });
+
     res.json({
         success: true,
         message: 'Notification deleted',
@@ -138,11 +152,18 @@ export const deleteNotification = asyncHandler(async (req: Request, res: Respons
  * @body    { userIds?: string[], role?: 'STUDENT'|'PROFESSOR'|'ADMIN'|'ALL', title: string, message: string, type?: 'success'|'error'|'warning'|'info'|'system', link?: string }
  */
 export const sendNotification = asyncHandler(async (req: Request, res: Response) => {
-    const { userIds, role, title, message, type = 'system', link } = req.body;
+    const { userIds, title, message, link } = req.body;
+
+    // Accept both `role` and `targetRole` from the payload
+    const role: string | undefined = req.body.role ?? req.body.targetRole;
+
+    // Normalize type to lowercase so "SUCCESS" and "success" both work
+    const rawType: string = req.body.type ?? 'system';
+    const type = rawType.toLowerCase();
 
     // Validate notification type
     const validTypes = ['success', 'error', 'warning', 'info', 'system', 'waiting'];
-    if (type && !validTypes.includes(type)) {
+    if (!validTypes.includes(type)) {
         throw ApiError.badRequest(`Invalid notification type. Must be one of: ${validTypes.join(', ')}`);
     }
 
@@ -195,7 +216,15 @@ export const sendNotification = asyncHandler(async (req: Request, res: Response)
         })),
     });
 
-    // Send push notifications via Pusher
+    // Real-time WebSocket: push to all target users instantly
+    await triggerUsersEvent(targetUserIds, 'new-notification', {
+        title,
+        message,
+        type,
+        link,
+    });
+
+    // Browser push notifications via Pusher Beams
     await sendPushNotificationToUsers(targetUserIds, {
         title,
         body: message,
@@ -261,7 +290,15 @@ export const sendDeadlineReminders = asyncHandler(async (req: Request, res: Resp
                 })),
             });
 
-            // Send push notifications
+            // Real-time WebSocket
+            await triggerUsersEvent(userIds, 'new-notification', {
+                title: 'Deadline Reminder ⏰',
+                message: notificationMessage,
+                type: 'deadline_reminder',
+                link,
+            });
+
+            // Browser push notifications
             await sendPushNotificationToUsers(userIds, {
                 title: 'Deadline Reminder ⏰',
                 body: notificationMessage,
@@ -280,6 +317,62 @@ export const sendDeadlineReminders = asyncHandler(async (req: Request, res: Resp
         success: true,
         message: `Sent ${notificationsSent} deadline reminders for ${upcomingScholarships.length} scholarships`,
     });
+});
+
+// ==================== ADMIN EMAIL ====================
+
+/**
+ * @route   POST /api/admin/notifications/email
+ * @desc    Send a custom email to any address (reply to contact messages)
+ * @access  Private/Admin
+ * @body    { to: string, subject: string, message: string, name?: string }
+ */
+export const sendEmail = asyncHandler(async (req: Request, res: Response) => {
+    const { to, subject, message, name } = req.body;
+
+    if (!to || !subject || !message) {
+        throw ApiError.badRequest('to, subject, and message are required');
+    }
+
+    // Basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to)) {
+        throw ApiError.badRequest('Invalid email address');
+    }
+
+    await sendCustomEmail(to, subject, message, name);
+
+    res.json({
+        success: true,
+        message: `Email sent to ${to}`,
+    });
+});
+
+// ==================== PUSHER CHANNELS AUTH ====================
+
+/**
+ * @route   POST /api/notifications/pusher/auth
+ * @desc    Authenticate a user for their private Pusher channel.
+ *          The frontend Pusher client sends { socket_id, channel_name }.
+ *          We verify the channel belongs to the authenticated user, then sign it.
+ * @access  Private
+ */
+export const pusherAuth = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const { socket_id, channel_name } = req.body;
+
+    if (!socket_id || !channel_name) {
+        throw ApiError.badRequest('socket_id and channel_name are required');
+    }
+
+    // Only allow users to auth their own private channel
+    const expectedChannel = userChannel(userId);
+    if (channel_name !== expectedChannel) {
+        throw ApiError.forbidden('Not authorized for this channel');
+    }
+
+    const auth = authenticatePusherChannel(socket_id, channel_name);
+    res.json(auth);
 });
 
 // ==================== PUSHER BEAMS ====================

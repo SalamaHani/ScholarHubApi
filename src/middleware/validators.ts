@@ -777,3 +777,58 @@ export const updateBlogPostValidator = [
         .trim()
         .isLength({ max: 500 }).withMessage('Excerpt must be less than 500 characters'),
 ];
+
+// ==================== INTERVIEW VALIDATORS ====================
+
+const INTERVIEW_PLATFORMS = ['ZOOM', 'GOOGLE_MEET', 'MICROSOFT_TEAMS', 'SKYPE', 'IN_PERSON', 'PHONE', 'OTHER'];
+
+export const scheduleInterviewValidator = [
+    body('applicationId')
+        .trim()
+        .notEmpty().withMessage('Application ID is required'),
+    body('scheduledAt')
+        .notEmpty().withMessage('Scheduled date/time is required')
+        .isISO8601().withMessage('Scheduled date must be a valid ISO 8601 date'),
+    body('platform')
+        .optional()
+        .customSanitizer((val: unknown) => (typeof val === 'string' ? val.toUpperCase() : val))
+        .isIn(INTERVIEW_PLATFORMS).withMessage(`Platform must be one of: ${INTERVIEW_PLATFORMS.join(', ')}`),
+    body('meetingLink')
+        .optional({ nullable: true })
+        .isURL().withMessage('Meeting link must be a valid URL'),
+    body('location')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 300 }).withMessage('Location must be less than 300 characters'),
+    body('duration')
+        .optional()
+        .isInt({ min: 5, max: 480 }).withMessage('Duration must be between 5 and 480 minutes'),
+    body('notes')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 1000 }).withMessage('Notes must be less than 1000 characters'),
+];
+
+export const updateInterviewValidator = [
+    body('scheduledAt')
+        .optional()
+        .isISO8601().withMessage('Scheduled date must be a valid ISO 8601 date'),
+    body('platform')
+        .optional()
+        .customSanitizer((val: unknown) => (typeof val === 'string' ? val.toUpperCase() : val))
+        .isIn(INTERVIEW_PLATFORMS).withMessage(`Platform must be one of: ${INTERVIEW_PLATFORMS.join(', ')}`),
+    body('meetingLink')
+        .optional({ nullable: true })
+        .isURL().withMessage('Meeting link must be a valid URL'),
+    body('location')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 300 }).withMessage('Location must be less than 300 characters'),
+    body('duration')
+        .optional()
+        .isInt({ min: 5, max: 480 }).withMessage('Duration must be between 5 and 480 minutes'),
+    body('notes')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 1000 }).withMessage('Notes must be less than 1000 characters'),
+];

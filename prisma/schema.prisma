@@ -193,9 +193,30 @@ model Application {
   scholarship     Scholarship       @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   answers         ApplicationAnswer[]
+  interview       Interview?
   @@unique([userId, scholarshipId])
   @@index([userId])
   @@index([scholarshipId])
+  @@index([status])
+}
+
+model Interview {
+  id            String          @id @default(cuid())
+  applicationId String          @unique
+  scheduledAt   DateTime
+  platform      InterviewPlatform @default(OTHER)
+  meetingLink   String?
+  location      String?
+  notes         String?
+  duration      Int             @default(60)
+  status        InterviewStatus @default(SCHEDULED)
+  cancelReason  String?
+  scheduledBy   String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  application   Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledAt])
   @@index([status])
 }
 
@@ -263,10 +284,28 @@ enum UserRole {
 enum ApplicationStatus {
   PENDING
   UNDER_REVIEW
+  INTERVIEW_SCHEDULED
   ACCEPTED
   REJECTED
   WITHDRAWN
   DRAFT
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum InterviewPlatform {
+  ZOOM
+  GOOGLE_MEET
+  MICROSOFT_TEAMS
+  SKYPE
+  IN_PERSON
+  PHONE
+  OTHER
 }
 
 enum ScholarshipStatus {

@@ -14,6 +14,7 @@ import pageContentRoutes from "./pageContent.routes.js";
 import faqItemRoutes from "./faqItem.routes.js";
 import blogPostRoutes from "./blogPost.routes.js";
 import contactMessageRoutes from "./contactMessage.routes.js";
+import interviewRoutes from "./interview.routes.js";
 
 const router = Router();
 
@@ -87,6 +88,7 @@ router.use("/applications", applicationRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/saved", savedRoutes);
 router.use("/notifications", notificationRoutes);
+router.use("/admin/notifications", notificationRoutes);
 router.use("/testimonials", testimonialRoutes);
 router.use("/documents", documentRoutes);
 router.use("/professor", professorRoutes);
@@ -96,6 +98,7 @@ router.use("/page-content", pageContentRoutes);
 router.use("/faq-items", faqItemRoutes);
 router.use("/blog-posts", blogPostRoutes);
 router.use("/contact-messages", contactMessageRoutes);
+router.use("/interviews", interviewRoutes);
 router.use("/profile", userRoutes);
 router.use("/avatar", userRoutes);
 

@@ -1,12 +1,20 @@
 import { Request, Response } from "express";
-import { ApplicationStatus, UserRole, ScholarshipStatus } from "@prisma/client";
+import {
+  ApplicationStatus,
+  UserRole,
+  ScholarshipStatus,
+  InterviewStatus,
+} from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import {
   ApiError,
   asyncHandler,
   updateUserCompleteness,
 } from "../utils/index.js";
-import { sendApplicationStatusEmail, sendNewApplicationEmail } from "../services/mail.service.js";
+import {
+  sendApplicationStatusEmail,
+  sendNewApplicationEmail,
+} from "../services/mail.service.js";
 import { sendPushNotification } from "../services/pusher.service.js";
 import { createNotification } from "../services/notification.helper.js";
 
@@ -268,27 +276,31 @@ export const createApplication = asyncHandler(
 
       if (scholarship?.createdBy) {
         // Notify professor of new application
-        await createNotification([scholarship.createdBy.id], {
-          title: "New Application Received",
-          message: `${studentProfile.user.firstName} ${studentProfile.user.lastName} applied for "${scholarship.title}"`,
-          type: "new_application",
-          link: `/dashboard/applications?scholarship=${scholarshipId}`,
-        }, async () => {
-          await sendNewApplicationEmail(
-            scholarship.createdBy.email,
-            `${scholarship.createdBy.firstName} ${scholarship.createdBy.lastName}`,
-            `${studentProfile.user.firstName} ${studentProfile.user.lastName}`,
-            scholarship.title,
-            application.id
-          );
-        });
+        await createNotification(
+          [scholarship.createdBy.id],
+          {
+            title: "New Application Received",
+            message: `${studentProfile.user.firstName} ${studentProfile.user.lastName} applied for "${scholarship.title}"`,
+            type: "new_application",
+            link: `/dashboard/applications`,
+          },
+          async () => {
+            await sendNewApplicationEmail(
+              scholarship.createdBy.email,
+              `${scholarship.createdBy.firstName} ${scholarship.createdBy.lastName}`,
+              `${studentProfile.user.firstName} ${studentProfile.user.lastName}`,
+              scholarship.title,
+              application.id,
+            );
+          },
+        );
 
         // Confirm to student
         await createNotification([userId], {
           title: "Application Submitted",
           message: `Your application for "${scholarship.title}" has been submitted successfully`,
           type: "application_confirmation",
-          link: `/applications/${application.id}`,
+          link: `/applications`,
         });
       }
     } catch (error) {
@@ -491,6 +503,7 @@ export const getApplicationById = asyncHandler(
             question: true,
           },
         },
+        interview: true,
       } as any,
     });
 
@@ -560,10 +573,12 @@ export const withdrawApplication = asyncHandler(
         include: {
           scholarship: {
             include: {
-              createdBy: { select: { id: true, firstName: true, lastName: true } }
-            }
+              createdBy: {
+                select: { id: true, firstName: true, lastName: true },
+              },
+            },
           },
-          user: { select: { firstName: true, lastName: true } }
+          user: { select: { firstName: true, lastName: true } },
         },
       });
 
@@ -573,7 +588,7 @@ export const withdrawApplication = asyncHandler(
           title: "Application Withdrawn",
           message: `${fullApplication.user.firstName} ${fullApplication.user.lastName} withdrew their application for "${fullApplication.scholarship.title}"`,
           type: "application_withdrawn",
-          link: `/dashboard/scholarships/${fullApplication.scholarship.id}/applications`,
+          link: `/dashboard/applications`,
         });
 
         // Confirm to student
@@ -893,7 +908,7 @@ export const evaluateApplication = asyncHandler(
     }
 
     if (notificationTitle) {
-      const link = `/applications/${id}`;
+      const link = `/applications`;
 
       // Create database notification
       await prisma.notification.create({
@@ -1021,7 +1036,7 @@ export const getAllApplications = asyncHandler(
  * @access  Private/Admin
  */
 export const getApplicationStats = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     const [total, pending, underReview, accepted, rejected, withdrawn] =
       await Promise.all([
         prisma.application.count(),

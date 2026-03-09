@@ -1,12 +1,107 @@
 import PushNotifications from "@pusher/push-notifications-server";
+import Pusher from "pusher";
+import config from "../config/index.js";
 
-/**
- * Pusher Beams Configuration
- */
+// ─── Pusher Beams (browser push notifications) ────────────────────────────────
+
 const beamsClient = new PushNotifications({
   instanceId: process.env.PUSHER_INSTANCE_ID!,
   secretKey: process.env.PUSHER_SECRET_KEY!,
 });
+
+// ─── Pusher Channels (real-time WebSocket) ────────────────────────────────────
+
+let _channels: Pusher | null = null;
+
+const getChannels = (): Pusher | null => {
+  if (!config.pusher.appId || !config.pusher.key || !config.pusher.secret) {
+    return null;
+  }
+  if (!_channels) {
+    _channels = new Pusher({
+      appId: config.pusher.appId,
+      key: config.pusher.key,
+      secret: config.pusher.secret,
+      cluster: config.pusher.cluster,
+      useTLS: true,
+    });
+  }
+  return _channels;
+};
+
+// ─── Channel name helpers ─────────────────────────────────────────────────────
+
+/** Private channel name for a single user: `private-user-{userId}` */
+export const userChannel = (userId: string) => `private-user-${userId}`;
+
+// ─── Trigger helpers ──────────────────────────────────────────────────────────
+
+/**
+ * Trigger a real-time event on one user's private channel (WebSocket).
+ *
+ * Events used:
+ *   new-notification      — new notification created
+ *   notification-read     — single notification marked as read
+ *   all-notifications-read — all notifications marked as read
+ *   notification-deleted  — notification deleted
+ */
+export const triggerUserEvent = async (
+  userId: string,
+  event: string,
+  data: Record<string, any>,
+): Promise<void> => {
+  const channels = getChannels();
+  if (!channels) {
+    console.warn("[Pusher Channels] Not configured — skipping real-time event");
+    return;
+  }
+  try {
+    await channels.trigger(userChannel(userId), event, data);
+  } catch (error) {
+    console.error("[Pusher Channels] triggerUserEvent error:", error);
+  }
+};
+
+/**
+ * Trigger the same event on multiple users' private channels.
+ * Pusher supports up to 100 channels per trigger call — chunked automatically.
+ */
+export const triggerUsersEvent = async (
+  userIds: string[],
+  event: string,
+  data: Record<string, any>,
+): Promise<void> => {
+  const channels = getChannels();
+  if (!channels) {
+    console.warn("[Pusher Channels] Not configured — skipping real-time event");
+    return;
+  }
+  try {
+    const chunkSize = 100;
+    for (let i = 0; i < userIds.length; i += chunkSize) {
+      const chunk = userIds.slice(i, i + chunkSize).map(userChannel);
+      await channels.trigger(chunk, event, data);
+    }
+  } catch (error) {
+    console.error("[Pusher Channels] triggerUsersEvent error:", error);
+  }
+};
+
+/**
+ * Authenticate a Pusher private channel subscription.
+ * The frontend Pusher client calls POST /api/notifications/pusher/auth
+ * with { socket_id, channel_name } — this function signs the auth token.
+ */
+export const authenticatePusherChannel = (
+  socketId: string,
+  channelName: string,
+): { auth: string } => {
+  const channels = getChannels();
+  if (!channels) throw new Error("Pusher Channels not configured");
+  return channels.authorizeChannel(socketId, channelName);
+};
+
+// ─── Pusher Beams helpers ─────────────────────────────────────────────────────
 
 export interface PushNotificationData {
   title: string;
@@ -17,19 +112,12 @@ export interface PushNotificationData {
   data?: Record<string, any>;
 }
 
-/**
- * Send push notification to specific users
- * @param userIds - Array of user IDs to send notification to
- * @param notification - Notification data
- */
 export const sendPushNotificationToUsers = async (
   userIds: string[],
   notification: PushNotificationData,
 ): Promise<void> => {
   try {
-    // Convert user IDs to Pusher interests (user-{userId})
     const interests = userIds.map((id) => `user-${id}`);
-
     const publishResponse = await beamsClient.publishToInterests(interests, {
       web: {
         notification: {
@@ -41,19 +129,12 @@ export const sendPushNotificationToUsers = async (
         data: notification.data,
       },
     });
-
     console.log("Push notification sent:", publishResponse.publishId);
   } catch (error) {
     console.error("Error sending push notification:", error);
-    // Don't throw error - push notifications are not critical
   }
 };
 
-/**
- * Send push notification to a single user
- * @param userId - User ID to send notification to
- * @param notification - Notification data
- */
 export const sendPushNotification = async (
   userId: string,
   notification: PushNotificationData,
@@ -61,11 +142,6 @@ export const sendPushNotification = async (
   return sendPushNotificationToUsers([userId], notification);
 };
 
-/**
- * Send push notification to a group/interest
- * @param interest - Interest name (e.g., "all-students", "all-professors")
- * @param notification - Notification data
- */
 export const sendPushNotificationToInterest = async (
   interest: string,
   notification: PushNotificationData,
@@ -82,22 +158,15 @@ export const sendPushNotificationToInterest = async (
         data: notification.data,
       },
     });
-
     console.log("Push notification sent to interest:", publishResponse.publishId);
   } catch (error) {
     console.error("Error sending push notification to interest:", error);
   }
 };
 
-/**
- * Generate Beams token for a user (for client-side authentication)
- * @param userId - User ID
- * @returns Beams token
- */
 export const generateBeamsToken = (userId: string): any => {
   try {
-    const beamsToken = beamsClient.generateToken(userId);
-    return beamsToken;
+    return beamsClient.generateToken(userId);
   } catch (error) {
     console.error("Error generating Beams token:", error);
     throw error;
@@ -105,6 +174,12 @@ export const generateBeamsToken = (userId: string): any => {
 };
 
 export default {
+  // Channels (WebSocket — real-time, no polling)
+  userChannel,
+  triggerUserEvent,
+  triggerUsersEvent,
+  authenticatePusherChannel,
+  // Beams (browser push)
   sendPushNotification,
   sendPushNotificationToUsers,
   sendPushNotificationToInterest,

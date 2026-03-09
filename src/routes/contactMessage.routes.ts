@@ -43,12 +43,12 @@ router.get('/', authenticate, isAdmin, getAllContactMessages);
 router.get('/:id', authenticate, isAdmin, idParamValidator, validate, getContactMessageById);
 
 /**
- * @route   PUT /api/contact-messages/:id/read
+ * @route   PATCH /api/contact-messages/:id/read
  * @desc    Mark a message as read or unread
  * @body    { isRead: boolean }
  * @access  Private/Admin
  */
-router.put('/:id/read', authenticate, isAdmin, idParamValidator, validate, markContactMessageRead);
+router.patch('/:id/read', authenticate, isAdmin, idParamValidator, validate, markContactMessageRead);
 
 /**
  * @route   DELETE /api/contact-messages/:id
