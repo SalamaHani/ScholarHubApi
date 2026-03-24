@@ -8,13 +8,14 @@ COPY package*.json ./
 RUN npm ci --ignore-scripts
 
 # Copy source and build
-COPY tsconfig.json ./
+COPY tsconfig.json tsconfig.seed.json ./
 COPY prisma ./prisma
 COPY src ./src
 
 # Provide a dummy DATABASE_URL so prisma generate can validate the schema
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" npx prisma generate
 RUN npm run build
+RUN npx tsc -p tsconfig.seed.json
 
 # ── Stage 2: Production ───────────────────────────────────────────────────────
 FROM node:20-alpine AS production

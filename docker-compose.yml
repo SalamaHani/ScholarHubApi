@@ -8,18 +8,21 @@ services:
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: SalamaHani123
-      POSTGRES_DB: scholarhub
-      POSTGRES_PORT: 5432
-    ports:
-      - "5432:5432"
-    env_file:
-      - ./.env
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-scholarhub}
+    # DO NOT expose 5432 on production — only the api service needs it via the internal network.
+    # Uncomment the next two lines only for local development:
+    # ports:
+    #   - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d scholarhub"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-scholarhub}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,35 +42,18 @@ services:
       target: production
     container_name: scholarhub_api
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       PORT: 8080
-      DATABASE_URL: postgresql://postgres:SalamaHani123@postgres:5432/scholarhub?schema=public
-      JWT_SECRET: scholarhub_dev_secret_key_2026
-      JWT_REFRESH_SECRET: scholarhub_refresh_secret_2026
-      JWT_EXPIRES_IN: 7d
-      JWT_REFRESH_EXPIRES_IN: 30d
-      FRONTEND_URL: http://localhost:3000
-      GOOGLE_CLIENT_ID: 122961524244-hk4ddfr5172rhfa4os9ep6v42nt8jfpt.apps.googleusercontent.com
-      GOOGLE_CLIENT_SECRET: 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
-      GOOGLE_CALLBACK_URL: http://localhost:8080/api/auth/google/callback
-      OAUTH_STATE_SECRET: c758ef6d025ff51a0758cdfb2c341d7304a6861c5aa7a37fec0518ac87e866ee
-      RESEND_API_KEY: re_HcerdHCo_D8FEsFsGscSqHN1ZuBa5to6n
-      FROM_EMAIL: "ScholarHub <noreply@scholarhub.com>"
-      PUSHER_INSTANCE_ID: b4f9c400-baed-4cb0-972f-9ceb7fd8141c
-      PUSHER_SECRET_KEY: 6FD8140870C545B851278E657080D7673DDAABDAA067611F0DA2CA28511B9788
-      PUSHER_APP_ID: your_app_id
-      PUSHER_KEY: your_key
-      PUSHER_SECRET: your_secret
-      PUSHER_CLUSTER: mt1
-      AWS_ACCESS_KEY_ID: AKIA4QXAGFDJNYZD5QEJ
-      AWS_SECRET_ACCESS_KEY: ROzSBGR/Tx9ql3dFnJiDGx1j8b6DSYsl3lr2EbhY
-      AWS_S3_BUCKET: scholarhub-nodejs
-      AWS_S3_REGION: us-east-1
-      AWS_S3_CDN_URL: ""
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-scholarhub}?schema=public
     volumes:
       - uploads_data:/app/uploads
-    command: sh -c "npx prisma migrate deploy && node dist/index.js"
+    # prisma db push syncs the schema without requiring committed migration files.
+    # Once you run `prisma migrate dev --name init` locally and commit the migrations/
+    # directory, change this to: npx prisma migrate deploy && node dist/index.js
+    command: sh -c "npx prisma db push && node dist/seed.js && node dist/index.js"
     depends_on:
       postgres:
         condition: service_healthy
