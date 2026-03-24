@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { UserRole } from "@prisma/client";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import prisma from "../lib/prisma.js";
 import {
   ApiError,
@@ -13,6 +16,8 @@ import {
   notifyProfileMilestones,
 } from "../services/notification.helper.js";
 import { sendProfileMilestoneEmail } from "../services/mail.service.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Helper function to parse array fields that might come as strings or objects
 const parseArrayField = (value: any): string[] | undefined => {
@@ -597,7 +602,7 @@ export const uploadProfileAvatar = asyncHandler(
  * @desc    Upload profile document
  * @access  Private
  */
-export const uploadProfileDocument = asyncHandler(
+const _uploadProfileDocumentLocal = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -606,52 +611,46 @@ export const uploadProfileDocument = asyncHandler(
       throw ApiError.badRequest("No document file provided");
     }
 
-    const documentPath = `/uploads/documents/${req.file.filename}`;
+    // Save buffer to disk (uploadDocument middleware uses memoryStorage)
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(req.file.originalname);
+    const filename = `doc-${uniqueSuffix}${ext}`;
+    const uploadsDir = path.join(__dirname, "../../uploads/documents");
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    fs.writeFileSync(path.join(uploadsDir, filename), req.file.buffer);
+
+    const documentPath = `/uploads/documents/${filename}`;
 
     if (userRole === "STUDENT") {
       let studentProfile = await prisma.studentProfile.findUnique({
         where: { userId },
       });
 
-      // Create empty profile if it doesn't exist
       if (!studentProfile) {
         studentProfile = await prisma.studentProfile.create({
-          data: {
-            userId,
-            documents: [documentPath],
-          },
+          data: { userId, documents: [documentPath] },
         });
       } else {
         studentProfile = await prisma.studentProfile.update({
           where: { userId },
-          data: {
-            documents: [...(studentProfile.documents || []), documentPath],
-          },
+          data: { documents: [...(studentProfile.documents || []), documentPath] },
         });
       }
 
-      // Update profile completeness
-      const { current: profileCompleteness } = await updateUserCompleteness(
-        userId,
-        userRole,
-      );
+      const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
 
       return res.json({
         success: true,
         message: "Document uploaded successfully",
         data: {
-          profile: studentProfile,
           documents: studentProfile.documents,
           profileCompleteness,
           progressMessage: `Profile is ${profileCompleteness}% complete`,
           progressStatus:
-            profileCompleteness === 100
-              ? "COMPLETE"
-              : profileCompleteness >= 70
-                ? "GOOD"
-                : profileCompleteness >= 40
-                  ? "PARTIAL"
-                  : "INCOMPLETE",
+            profileCompleteness === 100 ? "COMPLETE"
+            : profileCompleteness >= 70 ? "GOOD"
+            : profileCompleteness >= 40 ? "PARTIAL"
+            : "INCOMPLETE",
           documentUrl: documentPath,
         },
       });
@@ -660,48 +659,40 @@ export const uploadProfileDocument = asyncHandler(
         where: { userId },
       });
 
-      // Create empty profile if it doesn't exist
       if (!professorProfile) {
         professorProfile = await prisma.professorProfile.create({
-          data: {
-            userId,
-            institution: "",
-            documents: [documentPath],
-          },
+          data: { userId, institution: "", documents: [documentPath] },
         });
       } else {
         professorProfile = await prisma.professorProfile.update({
           where: { userId },
-          data: {
-            documents: [...(professorProfile.documents || []), documentPath],
-          },
+          data: { documents: [...(professorProfile.documents || []), documentPath] },
         });
       }
 
-      // Update profile completeness
-      const { current: profileCompleteness } = await updateUserCompleteness(
-        userId,
-        userRole,
-      );
+      const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
 
       return res.json({
         success: true,
         message: "Document uploaded successfully",
         data: {
-          profile: professorProfile,
           documents: professorProfile.documents,
           profileCompleteness,
           progressMessage: `Profile is ${profileCompleteness}% complete`,
           progressStatus:
-            profileCompleteness === 100
-              ? "COMPLETE"
-              : profileCompleteness >= 70
-                ? "GOOD"
-                : profileCompleteness >= 40
-                  ? "PARTIAL"
-                  : "INCOMPLETE",
+            profileCompleteness === 100 ? "COMPLETE"
+            : profileCompleteness >= 70 ? "GOOD"
+            : profileCompleteness >= 40 ? "PARTIAL"
+            : "INCOMPLETE",
           documentUrl: documentPath,
         },
+      });
+    } else if (userRole === "ADMIN") {
+      // Admin uploads are stored on disk but not linked to a profile
+      return res.json({
+        success: true,
+        message: "Document uploaded successfully",
+        data: { documentUrl: documentPath },
       });
     }
 

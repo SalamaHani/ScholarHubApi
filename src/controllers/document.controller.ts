@@ -7,45 +7,84 @@ import {
 } from "../services/storage.service.js";
 
 // Upload student document
-export const uploadStudentDocument = asyncHandler(async (req, res) => {
+export const uploadProfileDocument = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
+  const role = req.user?.role;
+  if (role == "STUDENT") {
+    if (!req.file) {
+      throw ApiError.badRequest("No file uploaded");
+    }
 
-  if (!req.file) {
-    throw ApiError.badRequest("No file uploaded");
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw ApiError.notFound("Student profile not found");
+    }
+
+    const fileUrl = await uploadFile(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      "documents",
+    );
+
+    const updatedProfile = await prisma.studentProfile.update({
+      where: { userId },
+      data: {
+        documents: [...profile.documents, fileUrl],
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Document uploaded successfully",
+      data: {
+        url: fileUrl,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        documents: updatedProfile.documents,
+      },
+    });
+  } else {
+    if (!req.file) {
+      throw ApiError.badRequest("No file uploaded");
+    }
+    const profile = await prisma.professorProfile.findUnique({
+      where: { userId },
+    });
+    if (!profile) {
+      throw ApiError.notFound(" User profile not found");
+    }
+
+    const fileUrl = await uploadFile(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      "documents",
+    );
+    if (!fileUrl) {
+      throw ApiError.internal("Failed to upload document");
+    }
+    const updatedProfile = await prisma.professorProfile.update({
+      where: { userId },
+      data: {
+        documents: [...profile.documents, fileUrl],
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Document uploaded successfully",
+      data: {
+        url: fileUrl,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        documents: updatedProfile.documents,
+      },
+    });
   }
-
-  const profile = await prisma.studentProfile.findUnique({
-    where: { userId },
-  });
-
-  if (!profile) {
-    throw ApiError.notFound("Student profile not found");
-  }
-
-  const fileUrl = await uploadFile(
-    req.file.buffer,
-    req.file.originalname,
-    req.file.mimetype,
-    "documents",
-  );
-
-  const updatedProfile = await prisma.studentProfile.update({
-    where: { userId },
-    data: {
-      documents: [...profile.documents, fileUrl],
-    },
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Document uploaded successfully",
-    data: {
-      url: fileUrl,
-      originalName: req.file.originalname,
-      size: req.file.size,
-      documents: updatedProfile.documents,
-    },
-  });
 });
 
 // Upload professor document
@@ -55,13 +94,11 @@ export const uploadProfessorDocument = asyncHandler(async (req, res) => {
   if (!req.file) {
     throw ApiError.badRequest("No file uploaded");
   }
-
   const profile = await prisma.professorProfile.findUnique({
     where: { userId },
   });
-
   if (!profile) {
-    throw ApiError.notFound("Professor profile not found");
+    throw ApiError.notFound(" User profile not found");
   }
 
   const fileUrl = await uploadFile(

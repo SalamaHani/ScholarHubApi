@@ -4,10 +4,17 @@ import config from "../config/index.js";
 
 // ─── Pusher Beams (browser push notifications) ────────────────────────────────
 
-const beamsClient = new PushNotifications({
-  instanceId: process.env.PUSHER_INSTANCE_ID!,
-  secretKey: process.env.PUSHER_SECRET_KEY!,
-});
+let _beamsClient: PushNotifications | null = null;
+
+const getBeamsClient = (): PushNotifications | null => {
+  const instanceId = process.env.PUSHER_INSTANCE_ID;
+  const secretKey = process.env.PUSHER_SECRET_KEY;
+  if (!instanceId || !secretKey) return null;
+  if (!_beamsClient) {
+    _beamsClient = new PushNotifications({ instanceId, secretKey });
+  }
+  return _beamsClient;
+};
 
 // ─── Pusher Channels (real-time WebSocket) ────────────────────────────────────
 
@@ -116,9 +123,14 @@ export const sendPushNotificationToUsers = async (
   userIds: string[],
   notification: PushNotificationData,
 ): Promise<void> => {
+  const beams = getBeamsClient();
+  if (!beams) {
+    console.warn("[Pusher Beams] Not configured — skipping push notification");
+    return;
+  }
   try {
     const interests = userIds.map((id) => `user-${id}`);
-    const publishResponse = await beamsClient.publishToInterests(interests, {
+    const publishResponse = await beams.publishToInterests(interests, {
       web: {
         notification: {
           title: notification.title,
@@ -146,8 +158,13 @@ export const sendPushNotificationToInterest = async (
   interest: string,
   notification: PushNotificationData,
 ): Promise<void> => {
+  const beams = getBeamsClient();
+  if (!beams) {
+    console.warn("[Pusher Beams] Not configured — skipping push notification");
+    return;
+  }
   try {
-    const publishResponse = await beamsClient.publishToInterests([interest], {
+    const publishResponse = await beams.publishToInterests([interest], {
       web: {
         notification: {
           title: notification.title,
@@ -165,8 +182,10 @@ export const sendPushNotificationToInterest = async (
 };
 
 export const generateBeamsToken = (userId: string): any => {
+  const beams = getBeamsClient();
+  if (!beams) throw new Error("Pusher Beams not configured");
   try {
-    return beamsClient.generateToken(userId);
+    return beams.generateToken(userId);
   } catch (error) {
     console.error("Error generating Beams token:", error);
     throw error;
@@ -184,5 +203,4 @@ export default {
   sendPushNotificationToUsers,
   sendPushNotificationToInterest,
   generateBeamsToken,
-  beamsClient,
 };

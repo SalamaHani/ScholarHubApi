@@ -9,7 +9,10 @@
       "Bash(npm run build:*)",
       "Bash(npx prisma db push:*)",
       "Bash(npm run db:seed:*)",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "Bash(docker build -t scholarhub-api .)",
+      "Bash(docker pull postgres:16-alpine)",
+      "Bash(docker pull nginx:1.27-alpine)"
     ]
   }
 }

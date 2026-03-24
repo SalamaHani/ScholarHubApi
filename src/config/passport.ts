@@ -5,8 +5,9 @@ import prisma from "../lib/prisma.js";
 import { UserRole } from "@prisma/client";
 
 /**
- * Configure Google OAuth Strategy
+ * Configure Google OAuth Strategy (only if credentials are provided)
  */
+if (config.oauth.google.clientId && config.oauth.google.clientSecret) {
 passport.use(
   new GoogleStrategy(
     {
@@ -126,6 +127,7 @@ passport.use(
     }
   )
 );
+} // end if Google OAuth configured
 
 /**
  * Serialize user for session (not used in JWT auth, but required by Passport)

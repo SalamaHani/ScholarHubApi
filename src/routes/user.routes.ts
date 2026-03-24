@@ -3,7 +3,6 @@ import {
   getProfile,
   updateProfile,
   uploadProfileAvatar,
-  uploadProfileDocument,
   deleteProfileDocument,
   changePassword,
   getAllUsers,
@@ -17,8 +16,8 @@ import {
   updateProfessorProfile,
   getStudentProfileDetails,
   getProfessorProfileDetails,
-  uploadProfessorDocument,
 } from "../controllers/index.js";
+import { uploadProfileDocument } from "../controllers/document.controller.js";
 import {
   authenticate,
   isAdmin,
@@ -89,7 +88,7 @@ router.post(
   authenticate,
   uploadDocument.single("document"),
   handleUploadError,
-  uploadProfessorDocument,
+  uploadProfileDocument,
 );
 
 /**

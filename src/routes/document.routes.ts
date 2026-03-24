@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  uploadStudentDocument,
   uploadProfessorDocument,
   getStudentDocuments,
   getProfessorDocuments,
@@ -14,8 +13,9 @@ import {
   getMyDocuments,
   uploadMyDocument,
   deleteMyDocument,
+  uploadProfileDocument,
 } from "../controllers/document.controller.js";
-import { authenticate } from "../middleware/auth.js";
+import { authenticate, isStudent, isProfessor } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/index.js";
 import {
   uploadDocument,
@@ -47,29 +47,31 @@ router.get("/download", authenticate, downloadDocument);
 router.post(
   "/student/upload",
   authenticate,
+  isStudent,
   uploadDocument.single("file"),
   handleDocumentUploadError,
-  uploadStudentDocument
+  uploadProfileDocument
 );
 
-router.get("/student", authenticate, getStudentDocuments);
+router.get("/student", authenticate, isStudent, getStudentDocuments);
 
 // Usage: DELETE /documents/student?documentUrl=<s3-url>  OR body: { documentUrl }
-router.delete("/student", authenticate, deleteStudentDocument);
+router.delete("/student", authenticate, isStudent, deleteStudentDocument);
 
 // Professor document routes
 router.post(
   "/professor/upload",
   authenticate,
+  isProfessor,
   uploadDocument.single("file"),
   handleDocumentUploadError,
-  uploadProfessorDocument
+  uploadProfileDocument
 );
 
-router.get("/professor", authenticate, getProfessorDocuments);
+router.get("/professor", authenticate, isProfessor, getProfessorDocuments);
 
 // Usage: DELETE /documents/professor?documentUrl=<s3-url>  OR body: { documentUrl }
-router.delete("/professor", authenticate, deleteProfessorDocument);
+router.delete("/professor", authenticate, isProfessor, deleteProfessorDocument);
 
 // Admin document verification routes
 router.put(

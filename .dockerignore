@@ -1,6 +1,7 @@
 node_modules
 dist
-.env
 uploads
+nginx
+docker-compose.yml
 *.log
 *.md
