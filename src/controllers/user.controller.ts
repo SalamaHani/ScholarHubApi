@@ -401,29 +401,31 @@ export const updateProfile = asyncHandler(
     }
 
     // Always update completeness if anything changed
-    const { previous, current } = await updateUserCompleteness(userId, userRole);
+    const { previous, current } = await updateUserCompleteness(
+      userId,
+      userRole,
+    );
 
     // Notify user of profile update
     try {
-      await createNotification([userId], {
-        title: "Profile Updated",
-        message: "Your profile has been updated successfully.",
-        type: "profile_update",
-        link: "/profile",
-      });
-
       // Check for milestone achievements
-      await notifyProfileMilestones(userId, previous, current, userRole, async (uid, milestone) => {
-        const user = await prisma.user.findUnique({ where: { id: uid } });
-        if (user) {
-          await sendProfileMilestoneEmail(
-            user.email,
-            `${user.firstName} ${user.lastName}`,
-            milestone,
-            userRole
-          );
-        }
-      });
+      await notifyProfileMilestones(
+        userId,
+        previous,
+        current,
+        userRole,
+        async (uid, milestone) => {
+          const user = await prisma.user.findUnique({ where: { id: uid } });
+          if (user) {
+            await sendProfileMilestoneEmail(
+              user.email,
+              `${user.firstName} ${user.lastName}`,
+              milestone,
+              userRole,
+            );
+          }
+        },
+      );
     } catch (error) {
       console.error("Failed to send profile update notifications:", error);
     }
@@ -560,28 +562,30 @@ export const uploadProfileAvatar = asyncHandler(
     });
 
     // Update profile completeness after avatar upload
-    const { previous, current } = await updateUserCompleteness(userId, userRole);
+    const { previous, current } = await updateUserCompleteness(
+      userId,
+      userRole,
+    );
 
     // Notify user and check milestones
     try {
-      await createNotification([userId], {
-        title: "Avatar Updated",
-        message: "Your profile avatar has been updated successfully.",
-        type: "profile_update",
-        link: "/profile",
-      });
-
-      await notifyProfileMilestones(userId, previous, current, userRole, async (uid, milestone) => {
-        const user = await prisma.user.findUnique({ where: { id: uid } });
-        if (user) {
-          await sendProfileMilestoneEmail(
-            user.email,
-            `${user.firstName} ${user.lastName}`,
-            milestone,
-            userRole
-          );
-        }
-      });
+      await notifyProfileMilestones(
+        userId,
+        previous,
+        current,
+        userRole,
+        async (uid, milestone) => {
+          const user = await prisma.user.findUnique({ where: { id: uid } });
+          if (user) {
+            await sendProfileMilestoneEmail(
+              user.email,
+              `${user.firstName} ${user.lastName}`,
+              milestone,
+              userRole,
+            );
+          }
+        },
+      );
     } catch (error) {
       console.error("Failed to send avatar update notifications:", error);
     }
@@ -616,7 +620,8 @@ const _uploadProfileDocumentLocal = asyncHandler(
     const ext = path.extname(req.file.originalname);
     const filename = `doc-${uniqueSuffix}${ext}`;
     const uploadsDir = path.join(__dirname, "../../uploads/documents");
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    if (!fs.existsSync(uploadsDir))
+      fs.mkdirSync(uploadsDir, { recursive: true });
     fs.writeFileSync(path.join(uploadsDir, filename), req.file.buffer);
 
     const documentPath = `/uploads/documents/${filename}`;
@@ -633,11 +638,16 @@ const _uploadProfileDocumentLocal = asyncHandler(
       } else {
         studentProfile = await prisma.studentProfile.update({
           where: { userId },
-          data: { documents: [...(studentProfile.documents || []), documentPath] },
+          data: {
+            documents: [...(studentProfile.documents || []), documentPath],
+          },
         });
       }
 
-      const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
+      const { current: profileCompleteness } = await updateUserCompleteness(
+        userId,
+        userRole,
+      );
 
       return res.json({
         success: true,
@@ -647,10 +657,13 @@ const _uploadProfileDocumentLocal = asyncHandler(
           profileCompleteness,
           progressMessage: `Profile is ${profileCompleteness}% complete`,
           progressStatus:
-            profileCompleteness === 100 ? "COMPLETE"
-            : profileCompleteness >= 70 ? "GOOD"
-            : profileCompleteness >= 40 ? "PARTIAL"
-            : "INCOMPLETE",
+            profileCompleteness === 100
+              ? "COMPLETE"
+              : profileCompleteness >= 70
+                ? "GOOD"
+                : profileCompleteness >= 40
+                  ? "PARTIAL"
+                  : "INCOMPLETE",
           documentUrl: documentPath,
         },
       });
@@ -666,11 +679,16 @@ const _uploadProfileDocumentLocal = asyncHandler(
       } else {
         professorProfile = await prisma.professorProfile.update({
           where: { userId },
-          data: { documents: [...(professorProfile.documents || []), documentPath] },
+          data: {
+            documents: [...(professorProfile.documents || []), documentPath],
+          },
         });
       }
 
-      const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
+      const { current: profileCompleteness } = await updateUserCompleteness(
+        userId,
+        userRole,
+      );
 
       return res.json({
         success: true,
@@ -680,10 +698,13 @@ const _uploadProfileDocumentLocal = asyncHandler(
           profileCompleteness,
           progressMessage: `Profile is ${profileCompleteness}% complete`,
           progressStatus:
-            profileCompleteness === 100 ? "COMPLETE"
-            : profileCompleteness >= 70 ? "GOOD"
-            : profileCompleteness >= 40 ? "PARTIAL"
-            : "INCOMPLETE",
+            profileCompleteness === 100
+              ? "COMPLETE"
+              : profileCompleteness >= 70
+                ? "GOOD"
+                : profileCompleteness >= 40
+                  ? "PARTIAL"
+                  : "INCOMPLETE",
           documentUrl: documentPath,
         },
       });
@@ -868,7 +889,7 @@ export const changePassword = asyncHandler(
     // Check if user has a password (OAuth users might not)
     if (!user.password) {
       throw ApiError.badRequest(
-        "This account was created using OAuth. Please set a password first."
+        "This account was created using OAuth. Please set a password first.",
       );
     }
 
@@ -1161,7 +1182,10 @@ export const verifyProfessor = asyncHandler(
         link: "/dashboard",
       });
     } catch (error) {
-      console.error("Failed to send professor verification notification:", error);
+      console.error(
+        "Failed to send professor verification notification:",
+        error,
+      );
     }
 
     res.json({
@@ -1604,7 +1628,10 @@ export const updateStudentProfile = asyncHandler(
     });
 
     // Calculate and update profile completeness and language level
-    const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
+    const { current: profileCompleteness } = await updateUserCompleteness(
+      userId,
+      userRole,
+    );
 
     // Fetch final updated profile for response
     const finalProfile = await prisma.studentProfile.findUnique({
@@ -1705,7 +1732,10 @@ export const updateProfessorProfile = asyncHandler(
     });
 
     // Calculate and update profile completeness and language level
-    const { current: profileCompleteness } = await updateUserCompleteness(userId, userRole);
+    const { current: profileCompleteness } = await updateUserCompleteness(
+      userId,
+      userRole,
+    );
 
     // Fetch final updated profile for response
     const finalProfile = await prisma.professorProfile.findUnique({
@@ -1788,7 +1818,10 @@ export const getStudentProfileDetails = asyncHandler(
     }
 
     // Recalculate completeness to ensure it's always up to date
-    const { current: profileCompleteness } = await updateUserCompleteness(userId, "STUDENT");
+    const { current: profileCompleteness } = await updateUserCompleteness(
+      userId,
+      "STUDENT",
+    );
 
     // Re-fetch to get updated state
     const updatedStudentProfile = await prisma.studentProfile.findUnique({
@@ -1929,80 +1962,93 @@ export const getProfessorProfileDetails = asyncHandler(
  * @desc    Get all verified professors with their profiles and scholarship counts
  * @access  Public
  */
-export const getAllProfessors = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, search, specialization } = req.query;
+export const getAllProfessors = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { page = 1, limit = 20, search, specialization } = req.query;
 
-  const skip = (Number(page) - 1) * Number(limit);
+    const skip = (Number(page) - 1) * Number(limit);
 
-  const where: any = {
-    role: UserRole.PROFESSOR,
-    isActive: true,
-    isBlocked: false,
-    professorProfile: { isVerified: true },
-  };
-
-  if (search) {
-    where.OR = [
-      { firstName: { contains: search as string, mode: "insensitive" } },
-      { lastName: { contains: search as string, mode: "insensitive" } },
-      { professorProfile: { institution: { contains: search as string, mode: "insensitive" } } },
-      { professorProfile: { specialization: { contains: search as string, mode: "insensitive" } } },
-    ];
-  }
-
-  if (specialization) {
-    where.professorProfile = {
-      ...where.professorProfile,
-      specialization: { contains: specialization as string, mode: "insensitive" },
+    const where: any = {
+      role: UserRole.PROFESSOR,
+      isActive: true,
+      isBlocked: false,
+      professorProfile: { isVerified: true },
     };
-  }
 
-  const [professors, total] = await Promise.all([
-    prisma.user.findMany({
-      where,
-      skip,
-      take: Number(limit),
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        avatar: true,
-        createdAt: true,
-        professorProfile: {
-          select: {
-            id: true,
-            institution: true,
-            department: true,
-            position: true,
-            specialization: true,
-            bio: true,
-            website: true,
-            skills: true,
-            country: true,
-            city: true,
-            isVerified: true,
-            verifiedAt: true,
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search as string, mode: "insensitive" } },
+        { lastName: { contains: search as string, mode: "insensitive" } },
+        {
+          professorProfile: {
+            institution: { contains: search as string, mode: "insensitive" },
           },
         },
-        _count: {
-          select: {
-            scholarships: true,
+        {
+          professorProfile: {
+            specialization: { contains: search as string, mode: "insensitive" },
           },
         },
+      ];
+    }
+
+    if (specialization) {
+      where.professorProfile = {
+        ...where.professorProfile,
+        specialization: {
+          contains: specialization as string,
+          mode: "insensitive",
+        },
+      };
+    }
+
+    const [professors, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: Number(limit),
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+          createdAt: true,
+          professorProfile: {
+            select: {
+              id: true,
+              institution: true,
+              department: true,
+              position: true,
+              specialization: true,
+              bio: true,
+              website: true,
+              skills: true,
+              country: true,
+              city: true,
+              isVerified: true,
+              verifiedAt: true,
+            },
+          },
+          _count: {
+            select: {
+              scholarships: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        professors,
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit)),
       },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.user.count({ where }),
-  ]);
-
-  res.json({
-    success: true,
-    data: {
-      professors,
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      totalPages: Math.ceil(total / Number(limit)),
-    },
-  });
-});
+    });
+  },
+);
