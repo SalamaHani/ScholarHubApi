@@ -26,7 +26,7 @@ ENV NODE_ENV=production
 
 # Default DATABASE_URL pointing to the postgres Docker service.
 # Override this via docker-compose environment or -e flag.
-ENV DATABASE_URL=""
+
 
 # Install openssl for Prisma engine compatibility
 RUN apk add --no-cache openssl
