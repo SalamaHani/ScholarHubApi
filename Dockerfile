@@ -26,7 +26,7 @@ ENV NODE_ENV=production
 
 # Default DATABASE_URL pointing to the postgres Docker service.
 # Override this via docker-compose environment or -e flag.
-ENV DATABASE_URL="postgresql://postgres:SalamaHani123@postgres:5432/scholarhub?schema=public"
+ENV DATABASE_URL=""
 
 # Install openssl for Prisma engine compatibility
 RUN apk add --no-cache openssl
@@ -46,6 +46,6 @@ RUN mkdir -p uploads/avatars uploads/documents
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -qO- http://localhost:8080/api/health 
+  CMD wget -qO- http://localhost:8080/api/health || exit 1
 
 CMD ["node", "dist/index.js"]
