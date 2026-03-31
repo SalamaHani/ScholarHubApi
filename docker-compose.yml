@@ -13,8 +13,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-scholarhub}
     # DO NOT expose 5432 on production — only the api service needs it via the internal network.
     # Uncomment the next two lines only for local development:
-    ports:
-      - "5432:5432" 
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
