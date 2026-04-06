@@ -75,8 +75,6 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - uploads_data:/app/uploads:ro
       - nginx_logs:/var/log/nginx
-      - certbot_www:/var/www/certbot:ro
-      - certbot_certs:/etc/letsencrypt:ro
     depends_on:
       - api
     networks:
@@ -87,23 +85,11 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # ── Certbot (Let's Encrypt SSL) ───────────────────────────────────────────────
-  certbot:
-    image: certbot/certbot:latest
-    container_name: scholarhub_certbot
-    volumes:
-      - certbot_www:/var/www/certbot
-      - certbot_certs:/etc/letsencrypt
-    # Renew every 12 hours (cert expires every 90 days, renewed at 60 days)
-    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
-
 # ── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
   postgres_data:
   uploads_data:
   nginx_logs:
-  certbot_www:
-  certbot_certs:
 
 # ── Networks ──────────────────────────────────────────────────────────────────
 networks:
