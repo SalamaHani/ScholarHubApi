@@ -32,6 +32,7 @@ const allowedOrigins = [
   "http://127.0.0.1:3001",
   "http://127.0.0.1:3002",
   "http://127.0.0.1:3003",
+  "https://scholar-hub-one.vercel.app",
   config.frontendUrl,
 ];
 
