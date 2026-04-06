@@ -1,7 +1,39 @@
+# Dependencies — reinstalled inside Docker
 node_modules
+
+# Build output — recompiled inside Docker
 dist
+
+# Local uploads — stored in Docker volume
 uploads
+
+# Nginx config — mounted as volume, not baked in
 nginx
+
+# Compose file — not needed inside image
 docker-compose.yml
-*.log
+
+# Environment — injected at runtime
+.env
+.env.local
+.env.production
+
+# Docs and logs
 *.md
+*.log
+logs/
+
+# IDE and OS
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Loose scripts
+seed-notifications.js
