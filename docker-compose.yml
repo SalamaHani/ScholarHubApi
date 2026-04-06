@@ -11,8 +11,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-scholarhub}
-    # DO NOT expose 5432 on production — only the api service needs it via the internal network.
-    # Uncomment the next two lines only for local development:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -47,9 +45,6 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-scholarhub}?schema=public
     volumes:
       - uploads_data:/app/uploads
-    # prisma db push syncs the schema without requiring committed migration files.
-    # Once you run `prisma migrate dev --name init` locally and commit the migrations/
-    # directory, change this to: npx prisma migrate deploy && node dist/index.js
     command: sh -c "npx prisma db push && node dist/seed.js && node dist/index.js"
     depends_on:
       postgres:
@@ -75,6 +70,8 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - uploads_data:/app/uploads:ro
       - nginx_logs:/var/log/nginx
+      - certbot_www:/var/www/certbot:ro
+      - certbot_certs:/etc/letsencrypt:ro
     depends_on:
       - api
     networks:
@@ -85,11 +82,22 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # ── Certbot (Let's Encrypt HTTPS) ─────────────────────────────────────────────
+  certbot:
+    image: certbot/certbot:latest
+    container_name: scholarhub_certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
+
 # ── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
   postgres_data:
   uploads_data:
   nginx_logs:
+  certbot_www:
+  certbot_certs:
 
 # ── Networks ──────────────────────────────────────────────────────────────────
 networks:
