@@ -74,7 +74,7 @@ const emailWrapper = (body: string) => `
     <div class="card">${body}</div>
     <div class="footer">
       <p>© ${YEAR} ScholarHub. All rights reserved.</p>
-      <p>Questions? <a href="mailto:support@scholarhub.com" style="color:#4f46e5;">support@scholarhub.com</a></p>
+      <p>Questions? <a href="mailto:support@scholarhub.palshop.app" style="color:#4f46e5;">support@scholarhub.palshop.app</a></p>
     </div>
   </div>
 </body>

@@ -190,11 +190,7 @@ export const downloadDocument = asyncHandler(async (req, res) => {
 
   const { url, filename } = await getSignedDownloadUrl(fileUrl);
 
-  res.redirect(url);
-  // Alternatively, set the header so clients get the filename hint:
-  // res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  // res.redirect(url);
-  void filename; // used in the presigned URL's ResponseContentDisposition
+  res.json({ success: true, data: { url, filename } });
 });
 
 // Delete student document
