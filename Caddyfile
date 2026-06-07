@@ -1,0 +1,24 @@
+scholarhub.palshop.app {
+    # Automatic HTTPS via Let's Encrypt (cert obtained & renewed automatically)
+
+    encode gzip zstd
+
+    # Security headers (mirrors previous nginx config)
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Max upload size (10MB docs, 5MB avatars -> 15M, matches old nginx limit)
+    request_body {
+        max_size 15MB
+    }
+
+    reverse_proxy api:8080 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}

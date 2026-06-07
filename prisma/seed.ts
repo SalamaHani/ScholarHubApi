@@ -20,8 +20,8 @@ async function main() {
     create: {
       email: "admin@scholarhub.com",
       password: adminPassword,
-      firstName: "Admin",
-      lastName: "User",
+      firstName: "المسؤول",
+      lastName: "العام",
       role: UserRole.ADMIN,
       isEmailVerified: true,
     },
@@ -37,15 +37,15 @@ async function main() {
     create: {
       email: "professor@university.edu",
       password: profPassword,
-      firstName: "Dr. Ahmed",
-      lastName: "Hassan",
+      firstName: "د. أحمد",
+      lastName: "حسن",
       role: UserRole.PROFESSOR,
       isEmailVerified: true,
       professorProfile: {
         create: {
-          institution: "Gaza University",
-          department: "Computer Science",
-          position: "Associate Professor",
+          institution: "جامعة غزة",
+          department: "علوم الحاسوب",
+          position: "أستاذ مشارك",
           isVerified: true,
           verifiedAt: new Date(),
         },
@@ -63,18 +63,18 @@ async function main() {
     create: {
       email: "student@example.com",
       password: studentPassword,
-      firstName: "Sarah",
-      lastName: "Mohammed",
+      firstName: "سارة",
+      lastName: "محمد",
       role: UserRole.STUDENT,
       isEmailVerified: true,
       studentProfile: {
         create: {
-          university: "Gaza University",
-          fieldOfStudy: "Computer Science",
+          university: "جامعة غزة",
+          fieldOfStudy: "علوم الحاسوب",
           currentDegree: DegreeLevel.BACHELOR,
           gpa: 3.8,
           graduationYear: 2026,
-          country: "Palestine",
+          country: "فلسطين",
         },
       },
     },
@@ -87,7 +87,7 @@ async function main() {
     where: { id: 1 },
     update: {
       // Platform
-      defaultLanguage: "en",
+      defaultLanguage: "ar",
       timezone: "UTC",
       registrationEnabled: true,
       requireEmailVerification: true,
@@ -95,10 +95,10 @@ async function main() {
       allowedFileTypes: [],
       // Site
       siteName: "ScholarHub",
-      siteDescription: "Connecting students with scholarship opportunities worldwide.",
+      siteDescription: "نربط الطلاب بفرص المنح الدراسية حول العالم.",
       contactEmail: "admin@scholarhub.com",
       maintenanceMode: false,
-      maintenanceMessage: "We are currently under maintenance. Please check back soon.",
+      maintenanceMessage: "نحن حالياً في وضع الصيانة. يُرجى العودة قريباً.",
       // Branding
       primaryColor: "#3B82F6",
       secondaryColor: "#1E40AF",
@@ -113,15 +113,15 @@ async function main() {
       termsUrl: "/terms-of-service",
       cookiePolicyUrl: "/cookies",
       // SEO
-      metaTitle: "ScholarHub - Find Scholarships for Students Worldwide",
-      metaDescription: "ScholarHub helps students worldwide discover and access scholarship opportunities for academic and professional growth.",
-      ogTitle: "ScholarHub - Find Scholarships for Students Worldwide",
-      ogDescription: "Empowering students worldwide to discover scholarship opportunities for academic and professional growth.",
+      metaTitle: "ScholarHub - ابحث عن المنح الدراسية للطلاب حول العالم",
+      metaDescription: "تساعد ScholarHub الطلاب حول العالم على اكتشاف فرص المنح الدراسية والوصول إليها لتحقيق النمو الأكاديمي والمهني.",
+      ogTitle: "ScholarHub - ابحث عن المنح الدراسية للطلاب حول العالم",
+      ogDescription: "نُمكّن الطلاب حول العالم من اكتشاف فرص المنح الدراسية للنمو الأكاديمي والمهني.",
       twitterCard: "summary_large_image",
       robotsMeta: "index, follow",
       // Footer
-      footerText: "Connecting students with scholarship opportunities worldwide.",
-      copyrightText: "© 2026 ScholarHub. All rights reserved.",
+      footerText: "نربط الطلاب بفرص المنح الدراسية حول العالم.",
+      copyrightText: "© 2026 ScholarHub. جميع الحقوق محفوظة.",
       // Scholarship
       autoApproveScholarships: false,
       maxScholarshipsPerProf: 10,
@@ -140,17 +140,17 @@ async function main() {
       notifyAdminOnNewApplication: true,
     },
     create: {
-      defaultLanguage: "en",
+      defaultLanguage: "ar",
       timezone: "UTC",
       registrationEnabled: true,
       requireEmailVerification: true,
       maxFileSizeMB: 10,
       allowedFileTypes: [],
       siteName: "ScholarHub",
-      siteDescription: "Connecting students with scholarship opportunities worldwide.",
+      siteDescription: "نربط الطلاب بفرص المنح الدراسية حول العالم.",
       contactEmail: "admin@scholarhub.com",
       maintenanceMode: false,
-      maintenanceMessage: "We are currently under maintenance. Please check back soon.",
+      maintenanceMessage: "نحن حالياً في وضع الصيانة. يُرجى العودة قريباً.",
       primaryColor: "#3B82F6",
       secondaryColor: "#1E40AF",
       accentColor: "#F59E0B",
@@ -162,14 +162,14 @@ async function main() {
       privacyPolicyUrl: "/privacy-policy",
       termsUrl: "/terms-of-service",
       cookiePolicyUrl: "/cookies",
-      metaTitle: "ScholarHub - Find Scholarships for Students Worldwide",
-      metaDescription: "ScholarHub helps students worldwide discover and access scholarship opportunities for academic and professional growth.",
-      ogTitle: "ScholarHub - Find Scholarships for Students Worldwide",
-      ogDescription: "Empowering students worldwide to discover scholarship opportunities for academic and professional growth.",
+      metaTitle: "ScholarHub - ابحث عن المنح الدراسية للطلاب حول العالم",
+      metaDescription: "تساعد ScholarHub الطلاب حول العالم على اكتشاف فرص المنح الدراسية والوصول إليها لتحقيق النمو الأكاديمي والمهني.",
+      ogTitle: "ScholarHub - ابحث عن المنح الدراسية للطلاب حول العالم",
+      ogDescription: "نُمكّن الطلاب حول العالم من اكتشاف فرص المنح الدراسية للنمو الأكاديمي والمهني.",
       twitterCard: "summary_large_image",
       robotsMeta: "index, follow",
-      footerText: "Connecting students with scholarship opportunities worldwide.",
-      copyrightText: "© 2026 ScholarHub. All rights reserved.",
+      footerText: "نربط الطلاب بفرص المنح الدراسية حول العالم.",
+      copyrightText: "© 2026 ScholarHub. جميع الحقوق محفوظة.",
       autoApproveScholarships: false,
       maxScholarshipsPerProf: 10,
       featuredScholarshipLimit: 6,
@@ -191,58 +191,58 @@ async function main() {
   console.log("\nCreating categories...");
   const categories = [
     {
-      name: "STEM",
+      name: "العلوم والتكنولوجيا",
       slug: "stem",
-      description: "Science, Technology, Engineering, Mathematics",
+      description: "العلوم والتكنولوجيا والهندسة والرياضيات",
       icon: "🔬",
       color: "#3B82F6",
     },
     {
-      name: "Arts & Humanities",
+      name: "الفنون والعلوم الإنسانية",
       slug: "arts-humanities",
-      description: "Art, Literature, History, Philosophy",
+      description: "الفنون والأدب والتاريخ والفلسفة",
       icon: "🎨",
       color: "#8B5CF6",
     },
     {
-      name: "Business",
+      name: "إدارة الأعمال",
       slug: "business",
-      description: "Business, Management, Economics",
+      description: "إدارة الأعمال والإدارة والاقتصاد",
       icon: "💼",
       color: "#10B981",
     },
     {
-      name: "Medicine & Health",
+      name: "الطب والصحة",
       slug: "medicine-health",
-      description: "Medical and Health Sciences",
+      description: "العلوم الطبية والصحية",
       icon: "⚕️",
       color: "#EF4444",
     },
     {
-      name: "Social Sciences",
+      name: "العلوم الاجتماعية",
       slug: "social-sciences",
-      description: "Psychology, Sociology, Political Science",
+      description: "علم النفس وعلم الاجتماع والعلوم السياسية",
       icon: "🌍",
       color: "#F59E0B",
     },
     {
-      name: "Engineering",
+      name: "الهندسة",
       slug: "engineering",
-      description: "All Engineering Fields",
+      description: "جميع التخصصات الهندسية",
       icon: "⚙️",
       color: "#6366F1",
     },
     {
-      name: "Law",
+      name: "القانون",
       slug: "law",
-      description: "Legal Studies",
+      description: "الدراسات القانونية",
       icon: "⚖️",
       color: "#78716C",
     },
     {
-      name: "Education",
+      name: "التربية والتعليم",
       slug: "education",
-      description: "Teaching and Education",
+      description: "التدريس والتعليم",
       icon: "📚",
       color: "#EC4899",
     },
@@ -261,110 +261,110 @@ async function main() {
   console.log("\nCreating scholarships...");
   const scholarships = [
     {
-      title: "Fulbright Foreign Student Program",
+      title: "برنامج فولبرايت للطلاب الأجانب",
       description:
-        "The Fulbright Program is the flagship international educational exchange program sponsored by the U.S. government. It provides funding for graduate students, young professionals, and artists to study, conduct research, or teach English in the United States.",
-      organization: "U.S. Department of State",
-      country: "United States",
-      fieldOfStudy: ["All Fields"],
+        "برنامج فولبرايت هو البرنامج الدولي الرائد للتبادل التعليمي الذي ترعاه الحكومة الأمريكية. يوفر تمويلاً لطلاب الدراسات العليا والمهنيين الشباب والفنانين للدراسة أو إجراء البحوث أو تدريس اللغة الإنجليزية في الولايات المتحدة.",
+      organization: "وزارة الخارجية الأمريكية",
+      country: "الولايات المتحدة",
+      fieldOfStudy: ["جميع التخصصات"],
       degreeLevel: [DegreeLevel.MASTER, DegreeLevel.PHD],
       fundingType: FundingType.FULL,
       deadline: new Date("2026-05-15"),
       applicationLink: "https://foreign.fulbrightonline.org/",
       requirements:
-        "Bachelor's degree, English proficiency, strong academic record",
+        "درجة البكالوريوس، إتقان اللغة الإنجليزية، سجل أكاديمي قوي",
       eligibility:
-        "Open to all nationalities. Palestinian students are encouraged to apply.",
+        "متاحة لجميع الجنسيات. يُشجَّع الطلاب الفلسطينيون على التقديم.",
       benefits:
-        "Tuition, living expenses, health insurance, round-trip airfare",
+        "الرسوم الدراسية، نفقات المعيشة، التأمين الصحي، تذاكر السفر ذهاباً وإياباً",
       isFeatured: true,
     },
     {
-      title: "Chevening Scholarships",
+      title: "منح تشيفنينغ",
       description:
-        "Chevening Scholarships are the UK government's global scholarship programme, funded by the Foreign, Commonwealth and Development Office and partner organisations.",
-      organization: "UK Government",
-      country: "United Kingdom",
-      fieldOfStudy: ["All Fields"],
+        "منح تشيفنينغ هي البرنامج العالمي للمنح الدراسية للحكومة البريطانية، الممول من وزارة الخارجية والكومنولث والتنمية والمنظمات الشريكة.",
+      organization: "الحكومة البريطانية",
+      country: "المملكة المتحدة",
+      fieldOfStudy: ["جميع التخصصات"],
       degreeLevel: [DegreeLevel.MASTER],
       fundingType: FundingType.FULL,
       deadline: new Date("2026-11-01"),
       applicationLink: "https://www.chevening.org/",
       requirements:
-        "2 years work experience, Bachelor's degree, English proficiency",
+        "خبرة عمل سنتين، درجة البكالوريوس، إتقان اللغة الإنجليزية",
       eligibility:
-        "Citizens of Chevening-eligible countries including Palestine",
+        "مواطنو الدول المؤهلة لتشيفنينغ بما في ذلك فلسطين",
       benefits:
-        "University tuition fees, monthly stipend, travel costs, arrival allowance",
+        "الرسوم الجامعية، راتب شهري، تكاليف السفر، بدل الوصول",
       isFeatured: true,
     },
     {
-      title: "DAAD Scholarships",
+      title: "منح DAAD الألمانية",
       description:
-        "The DAAD (German Academic Exchange Service) offers scholarships for international students to pursue master's or PhD studies at top German universities.",
-      organization: "German Academic Exchange Service",
-      country: "Germany",
-      fieldOfStudy: ["All Fields"],
+        "تقدم DAAD (الهيئة الألمانية للتبادل الأكاديمي) منحاً دراسية للطلاب الدوليين لمتابعة دراسات الماجستير أو الدكتوراه في أفضل الجامعات الألمانية.",
+      organization: "الهيئة الألمانية للتبادل الأكاديمي",
+      country: "ألمانيا",
+      fieldOfStudy: ["جميع التخصصات"],
       degreeLevel: [DegreeLevel.MASTER, DegreeLevel.PHD],
       fundingType: FundingType.FULL,
       deadline: new Date("2026-10-15"),
       applicationLink: "https://www.daad.de/",
       requirements:
-        "Bachelor's degree, academic excellence, language proficiency",
-      eligibility: "Open to graduates from all countries",
-      benefits: "Monthly payments, travel allowance, health insurance",
+        "درجة البكالوريوس، التميز الأكاديمي، إتقان اللغة",
+      eligibility: "متاحة للخريجين من جميع الدول",
+      benefits: "مدفوعات شهرية، بدل سفر، تأمين صحي",
       isFeatured: true,
     },
     {
-      title: "Turkish Scholarships (Türkiye Burslari)",
+      title: "المنح التركية (Türkiye Burslari)",
       description:
-        "A comprehensive scholarship program by the Republic of Turkey for international students.",
-      organization: "Republic of Turkey",
-      country: "Turkey",
-      fieldOfStudy: ["All Fields"],
+        "برنامج منح دراسية شامل من جمهورية تركيا للطلاب الدوليين.",
+      organization: "جمهورية تركيا",
+      country: "تركيا",
+      fieldOfStudy: ["جميع التخصصات"],
       degreeLevel: [DegreeLevel.BACHELOR, DegreeLevel.MASTER, DegreeLevel.PHD],
       fundingType: FundingType.FULL,
       deadline: new Date("2026-02-20"),
       applicationLink: "https://turkiyeburslari.gov.tr/",
       requirements:
-        "Academic excellence, age requirements vary by degree level",
-      eligibility: "Non-Turkish citizens, including Palestinians",
+        "التميز الأكاديمي، شروط العمر تختلف حسب الدرجة الدراسية",
+      eligibility: "غير المواطنين الأتراك، بما فيهم الفلسطينيون",
       benefits:
-        "Tuition, accommodation, monthly stipend, Turkish language course, health insurance",
+        "الرسوم الدراسية، السكن، راتب شهري، دورة لغة تركية، تأمين صحي",
       isFeatured: false,
     },
     {
-      title: "Erasmus Mundus Joint Masters",
+      title: "ماجستير إيراسموس موندوس المشترك",
       description:
-        "High-level integrated master's programmes delivered by consortia of higher education institutions across Europe and beyond.",
-      organization: "European Union",
-      country: "Europe",
-      fieldOfStudy: ["Various Specializations"],
+        "برامج ماجستير متكاملة عالية المستوى تقدمها تحالفات من مؤسسات التعليم العالي في جميع أنحاء أوروبا وما وراءها.",
+      organization: "الاتحاد الأوروبي",
+      country: "أوروبا",
+      fieldOfStudy: ["تخصصات متنوعة"],
       degreeLevel: [DegreeLevel.MASTER],
       fundingType: FundingType.FULL,
       deadline: new Date("2026-01-30"),
       applicationLink: "https://erasmus-plus.ec.europa.eu/",
       requirements:
-        "Bachelor's degree, English proficiency, program-specific requirements",
-      eligibility: "Open to students worldwide",
-      benefits: "Tuition, travel, living costs, installation costs",
+        "درجة البكالوريوس، إتقان اللغة الإنجليزية، شروط خاصة بالبرنامج",
+      eligibility: "متاحة للطلاب حول العالم",
+      benefits: "الرسوم الدراسية، السفر، نفقات المعيشة، تكاليف الإقامة",
       isFeatured: false,
     },
     {
-      title: "MEXT Scholarship (Japan)",
+      title: "منحة MEXT اليابانية",
       description:
-        "Japanese government scholarship for international students wishing to study at Japanese universities.",
-      organization: "Japanese Government",
-      country: "Japan",
-      fieldOfStudy: ["All Fields"],
+        "منحة من الحكومة اليابانية للطلاب الدوليين الراغبين في الدراسة بالجامعات اليابانية.",
+      organization: "الحكومة اليابانية",
+      country: "اليابان",
+      fieldOfStudy: ["جميع التخصصات"],
       degreeLevel: [DegreeLevel.BACHELOR, DegreeLevel.MASTER, DegreeLevel.PHD],
       fundingType: FundingType.FULL,
       deadline: new Date("2026-04-15"),
       applicationLink: "https://www.studyinjapan.go.jp/",
       requirements:
-        "Age requirements, academic excellence, health requirements",
-      eligibility: "Citizens of countries with diplomatic relations with Japan",
-      benefits: "Tuition exemption, monthly allowance, travel costs",
+        "شروط العمر، التميز الأكاديمي، الشروط الصحية",
+      eligibility: "مواطنو الدول التي لها علاقات دبلوماسية مع اليابان",
+      benefits: "إعفاء من الرسوم الدراسية، بدل شهري، تكاليف السفر",
       isFeatured: false,
     },
   ];
@@ -396,30 +396,30 @@ async function main() {
   const testimonials = [
     {
       quote:
-        "Education is the most powerful weapon which you can use to change the world.",
-      author: "Nelson Mandela",
-      role: "Global Leader & Visionary",
+        "التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم.",
+      author: "نيلسون مانديلا",
+      role: "قائد عالمي وصاحب رؤية",
       gradient: "from-emerald-400 to-blue-500",
     },
     {
       quote:
-        "The beautiful thing about learning is that no one can take it away from you.",
-      author: "B.B. King",
-      role: "Legendary Artist",
+        "الشيء الجميل في التعلم أن لا أحد يستطيع أن ينتزعه منك.",
+      author: "بي. بي. كينغ",
+      role: "فنان أسطوري",
       gradient: "from-amber-400 to-rose-500",
     },
     {
       quote:
-        "Invest in yourself. Education pays the best interest for your future career.",
-      author: "Benjamin Franklin",
-      role: "Polymath & Statesman",
+        "استثمر في نفسك. التعليم يدفع أفضل عائد لمسيرتك المهنية المستقبلية.",
+      author: "بنجامين فرانكلين",
+      role: "موسوعي ورجل دولة",
       gradient: "from-blue-400 to-indigo-600",
     },
     {
       quote:
-        "Scholarship is the key that unlocks the doors of opportunity and excellence.",
-      author: "Academic Board",
-      role: "ScholarHub Philosophy",
+        "المنحة الدراسية هي المفتاح الذي يفتح أبواب الفرصة والتميز.",
+      author: "المجلس الأكاديمي",
+      role: "فلسفة ScholarHub",
       gradient: "from-emerald-600 to-blue-600",
     },
   ];
@@ -440,11 +440,11 @@ async function main() {
   console.log("Creating professional applications...");
 
   const fulbrightScholarship = await prisma.scholarship.findFirst({
-    where: { title: "Fulbright Foreign Student Program" },
+    where: { title: "برنامج فولبرايت للطلاب الأجانب" },
   });
 
   const chevenigScholarship = await prisma.scholarship.findFirst({
-    where: { title: "Chevening Scholarships" },
+    where: { title: "منح تشيفنينغ" },
   });
 
   if (fulbrightScholarship) {
@@ -458,12 +458,12 @@ async function main() {
           scholarshipId: fulbrightScholarship.id,
           status: "UNDER_REVIEW",
           coverLetter:
-            "I am passionate about advancing my education in Computer Science to contribute to technological innovation in Palestine. The Fulbright Program will provide me with world-class educational opportunities and cultural exchange that will shape my career.",
+            "أنا شغوفة بمواصلة دراستي في علوم الحاسوب للمساهمة في الابتكار التكنولوجي في فلسطين. سيوفر لي برنامج فولبرايت فرصاً تعليمية عالمية المستوى وتبادلاً ثقافياً سيشكّل مسيرتي المهنية.",
           documents: [
-            "Passport",
-            "Transcripts",
-            "Letter of Recommendation",
-            "Statement of Purpose",
+            "جواز السفر",
+            "كشف الدرجات",
+            "خطاب توصية",
+            "بيان الغرض",
           ],
           submittedAt: new Date("2026-01-15"),
         },
@@ -483,7 +483,7 @@ async function main() {
           scholarshipId: chevenigScholarship.id,
           status: "DRAFT",
           coverLetter:
-            "I aim to pursue a Master's degree in Computer Science at a prestigious UK university to develop advanced technical skills and contribute to innovation.",
+            "أهدف إلى متابعة درجة الماجستير في علوم الحاسوب في جامعة بريطانية مرموقة لتطوير مهارات تقنية متقدمة والمساهمة في الابتكار.",
           documents: [],
           submittedAt: new Date(),
         },
@@ -522,9 +522,9 @@ async function main() {
   await prisma.notification.create({
     data: {
       userId: student.id,
-      title: "Application Status Update",
+      title: "تحديث حالة الطلب",
       message:
-        "Your Fulbright application has been moved to review stage. Check back soon for updates.",
+        "تم نقل طلب فولبرايت الخاص بك إلى مرحلة المراجعة. تحقق قريباً لمعرفة آخر التحديثات.",
       type: "application_update",
       link: `/applications/${student.id}`,
       isRead: false,
@@ -535,9 +535,9 @@ async function main() {
   await prisma.notification.create({
     data: {
       userId: professor.id,
-      title: "Account Verified",
+      title: "تم التحقق من الحساب",
       message:
-        "Your professor account has been verified. You can now post scholarships.",
+        "تم التحقق من حساب الأستاذ الخاص بك. يمكنك الآن نشر المنح الدراسية.",
       type: "system",
       isRead: false,
     },
@@ -548,18 +548,18 @@ async function main() {
   console.log("\nCreating page content...");
 
   const pageContents = [
-    { pageKey: "browse-scholarships", section: "platform", title: "Browse Scholarships", subtitle: "Discover thousands of scholarships tailored for you", description: "Search and filter through our comprehensive database of scholarships from around the world.", heroText: "Find Your Perfect Scholarship", ctaLabel: "Start Browsing", ctaLink: "/scholarships" },
-    { pageKey: "saved-scholarships", section: "platform", title: "Saved Scholarships", subtitle: "Your personal scholarship shortlist", description: "Keep track of scholarships you are interested in. Save and revisit them at any time before their deadlines.", heroText: "Your Scholarship Wishlist", ctaLabel: "View Saved", ctaLink: "/saved" },
-    { pageKey: "categories", section: "platform", title: "Scholarship Categories", subtitle: "Browse by field of study", description: "Explore scholarships organized by academic discipline.", heroText: "Find Scholarships by Category", ctaLabel: "Explore Categories", ctaLink: "/categories" },
-    { pageKey: "upcoming-deadlines", section: "platform", title: "Upcoming Deadlines", subtitle: "Never miss a scholarship deadline", description: "Stay on top of your applications with our deadline tracker.", heroText: "Act Before Time Runs Out", ctaLabel: "View Deadlines", ctaLink: "/scholarships?sort=deadline" },
-    { pageKey: "application-guides", section: "resources", title: "Application Guides", subtitle: "Step-by-step guidance for successful applications", description: "Our comprehensive application guides walk you through every stage of the scholarship application process.", heroText: "Master the Application Process", ctaLabel: "Read Guides", ctaLink: "/resources/guides" },
-    { pageKey: "tips-tricks", section: "resources", title: "Tips & Tricks", subtitle: "Expert advice to strengthen your applications", description: "Learn from scholarship winners and academic advisors.", heroText: "Get the Competitive Edge", ctaLabel: "Read Tips", ctaLink: "/resources/tips" },
-    { pageKey: "faq", section: "resources", title: "Frequently Asked Questions", subtitle: "Answers to your most common questions", description: "Find answers to frequently asked questions about scholarships and the application process.", heroText: "We Have the Answers", ctaLabel: "View FAQ", ctaLink: "/faq" },
-    { pageKey: "blog", section: "resources", title: "ScholarHub Blog", subtitle: "Insights, stories, and scholarship news", description: "Stay informed with our latest articles on scholarship opportunities, student success stories, and academic advice.", heroText: "Stories That Inspire", ctaLabel: "Read Blog", ctaLink: "/blog" },
-    { pageKey: "about-us", section: "company", title: "About ScholarHub", subtitle: "Connecting students with life-changing opportunities", description: "ScholarHub was founded with the mission to make scholarship discovery accessible to every student.", heroText: "Our Mission, Your Future", ctaLabel: "Learn More", ctaLink: "/about" },
-    { pageKey: "contact", section: "company", title: "Contact Us", subtitle: "We are here to help", description: "Have questions or feedback? Our support team is ready to assist you.", heroText: "Get in Touch", ctaLabel: "Send Message", ctaLink: "/contact" },
-    { pageKey: "privacy-policy", section: "company", title: "Privacy Policy", subtitle: "How we protect your data", description: "ScholarHub is committed to protecting your personal information.", heroText: "Your Privacy Matters" },
-    { pageKey: "terms-of-service", section: "company", title: "Terms of Service", subtitle: "The rules that govern our platform", description: "By using ScholarHub you agree to these terms.", heroText: "Fair Terms for Everyone" },
+    { pageKey: "browse-scholarships", section: "platform", title: "تصفّح المنح الدراسية", subtitle: "اكتشف آلاف المنح الدراسية المُصمَّمة خصيصاً لك", description: "ابحث وفلتر قاعدة بياناتنا الشاملة للمنح الدراسية من حول العالم.", heroText: "ابحث عن منحتك الدراسية المثالية", ctaLabel: "ابدأ التصفّح", ctaLink: "/scholarships" },
+    { pageKey: "saved-scholarships", section: "platform", title: "المنح المحفوظة", subtitle: "قائمتك الشخصية المختصرة للمنح الدراسية", description: "تابع المنح الدراسية التي تهمك. احفظها وارجع إليها في أي وقت قبل مواعيد التقديم.", heroText: "قائمة أمنياتك من المنح", ctaLabel: "عرض المحفوظات", ctaLink: "/saved" },
+    { pageKey: "categories", section: "platform", title: "تصنيفات المنح الدراسية", subtitle: "تصفّح حسب مجال الدراسة", description: "استكشف المنح الدراسية مُصنَّفةً حسب التخصص الأكاديمي.", heroText: "ابحث عن المنح حسب التصنيف", ctaLabel: "استكشف التصنيفات", ctaLink: "/categories" },
+    { pageKey: "upcoming-deadlines", section: "platform", title: "المواعيد القادمة", subtitle: "لا تفوّت أي موعد تقديم لمنحة دراسية", description: "كن على اطلاع دائم بطلباتك مع متتبع المواعيد لدينا.", heroText: "تصرّف قبل نفاد الوقت", ctaLabel: "عرض المواعيد", ctaLink: "/scholarships?sort=deadline" },
+    { pageKey: "application-guides", section: "resources", title: "أدلة التقديم", subtitle: "إرشاد خطوة بخطوة لتقديم ناجح", description: "تأخذك أدلتنا الشاملة في كل مرحلة من مراحل عملية التقديم على المنح الدراسية.", heroText: "أتقن عملية التقديم", ctaLabel: "اقرأ الأدلة", ctaLink: "/resources/guides" },
+    { pageKey: "tips-tricks", section: "resources", title: "نصائح وحيل", subtitle: "نصائح الخبراء لتعزيز طلباتك", description: "تعلّم من الفائزين بالمنح الدراسية والمستشارين الأكاديميين.", heroText: "احصل على الميزة التنافسية", ctaLabel: "اقرأ النصائح", ctaLink: "/resources/tips" },
+    { pageKey: "faq", section: "resources", title: "الأسئلة الشائعة", subtitle: "إجابات لأكثر أسئلتك شيوعاً", description: "اعثر على إجابات للأسئلة الشائعة حول المنح الدراسية وعملية التقديم.", heroText: "لدينا الإجابات", ctaLabel: "عرض الأسئلة الشائعة", ctaLink: "/faq" },
+    { pageKey: "blog", section: "resources", title: "مدوّنة ScholarHub", subtitle: "رؤى وقصص وأخبار المنح الدراسية", description: "ابقَ على اطلاع بأحدث مقالاتنا حول فرص المنح الدراسية، وقصص نجاح الطلاب، والنصائح الأكاديمية.", heroText: "قصص تُلهم", ctaLabel: "اقرأ المدوّنة", ctaLink: "/blog" },
+    { pageKey: "about-us", section: "company", title: "عن ScholarHub", subtitle: "نربط الطلاب بفرص تُغيّر مساراتهم", description: "تأسست ScholarHub بمهمة جعل البحث عن المنح الدراسية في متناول كل طالب.", heroText: "مهمتنا، مستقبلك", ctaLabel: "تعرّف علينا أكثر", ctaLink: "/about" },
+    { pageKey: "contact", section: "company", title: "اتصل بنا", subtitle: "نحن هنا للمساعدة", description: "هل لديك أسئلة أو ملاحظات؟ فريق الدعم لدينا جاهز لمساعدتك.", heroText: "تواصل معنا", ctaLabel: "أرسل رسالة", ctaLink: "/contact" },
+    { pageKey: "privacy-policy", section: "company", title: "سياسة الخصوصية", subtitle: "كيف نحمي بياناتك", description: "تلتزم ScholarHub بحماية معلوماتك الشخصية.", heroText: "خصوصيتك تهمنا" },
+    { pageKey: "terms-of-service", section: "company", title: "شروط الخدمة", subtitle: "القواعد التي تحكم منصتنا", description: "باستخدامك لـ ScholarHub فإنك توافق على هذه الشروط.", heroText: "شروط عادلة للجميع" },
   ];
 
   for (const pc of pageContents) {
@@ -1339,12 +1339,12 @@ async function main() {
   await prisma.faqItem.deleteMany({ where: { pageKey: "faq" } });
 
   const faqItems = [
-    { pageKey: "faq", question: "How do I apply for a scholarship on ScholarHub?", answer: "Browse available scholarships, click on one that matches your profile, and follow the application link to the provider's official website. You can also save scholarships to apply later.", order: 1 },
-    { pageKey: "faq", question: "Is ScholarHub free to use?", answer: "Yes, ScholarHub is completely free for students. We believe access to scholarship information should not cost anything.", order: 2 },
-    { pageKey: "faq", question: "How are scholarships verified on ScholarHub?", answer: "All scholarships are reviewed by our team of professors and administrators before being published. We check for legitimacy, completeness, and accuracy of the information provided.", order: 3 },
-    { pageKey: "faq", question: "Can I submit my own scholarship listing?", answer: "Yes, registered professors can submit scholarship listings. All submissions go through an approval process by our admin team before being made public.", order: 4 },
-    { pageKey: "faq", question: "How do I save a scholarship for later?", answer: "Click the Save button on any scholarship card or detail page. Saved scholarships appear in your Saved Scholarships section in your dashboard.", order: 5 },
-    { pageKey: "faq", question: "What documents do I typically need for scholarship applications?", answer: "Common documents include academic transcripts, passport or ID, letters of recommendation, a statement of purpose, proof of language proficiency, and a CV. Specific requirements vary by scholarship.", order: 6 },
+    { pageKey: "faq", question: "كيف أتقدّم لمنحة دراسية على ScholarHub؟", answer: "تصفّح المنح الدراسية المتاحة، واضغط على المنحة التي تناسب ملفك، واتبع رابط التقديم إلى الموقع الرسمي للجهة المانحة. يمكنك أيضاً حفظ المنح للتقديم عليها لاحقاً.", order: 1 },
+    { pageKey: "faq", question: "هل استخدام ScholarHub مجاني؟", answer: "نعم، ScholarHub مجانية تماماً للطلاب. نؤمن بأن الوصول إلى معلومات المنح الدراسية يجب ألا يكلف شيئاً.", order: 2 },
+    { pageKey: "faq", question: "كيف يتم التحقق من المنح الدراسية على ScholarHub؟", answer: "تتم مراجعة جميع المنح الدراسية من قِبَل فريقنا من الأساتذة والمشرفين قبل نشرها. نتحقق من الشرعية والاكتمال ودقة المعلومات المقدّمة.", order: 3 },
+    { pageKey: "faq", question: "هل يمكنني تقديم منحة دراسية خاصة بي؟", answer: "نعم، يمكن للأساتذة المسجّلين تقديم قوائم منح دراسية. تمر جميع التقديمات بعملية موافقة من قِبَل فريق الإدارة قبل نشرها للعامة.", order: 4 },
+    { pageKey: "faq", question: "كيف أحفظ منحة دراسية لوقت لاحق؟", answer: "اضغط على زر الحفظ على أي بطاقة منحة دراسية أو صفحة تفاصيل. تظهر المنح المحفوظة في قسم 'المنح المحفوظة' في لوحة التحكم الخاصة بك.", order: 5 },
+    { pageKey: "faq", question: "ما الوثائق التي أحتاجها عادةً للتقديم على المنح الدراسية؟", answer: "تشمل الوثائق الشائعة كشوف الدرجات الأكاديمية، جواز السفر أو الهوية، خطابات التوصية، بيان الغرض، إثبات إتقان اللغة، والسيرة الذاتية. تختلف المتطلبات المحددة حسب المنحة.", order: 6 },
   ];
 
   for (const item of faqItems) {
@@ -1359,153 +1359,153 @@ async function main() {
     // ── GUIDES ──────────────────────────────────────────────────────────────
     {
       slug: "complete-guide-to-scholarship-applications-2026",
-      title: "The Complete Guide to Scholarship Applications in 2026",
-      excerpt: "Everything you need to know to find, prepare, and submit a winning scholarship application — from start to finish.",
-      content: `## Introduction
+      title: "الدليل الشامل للتقديم على المنح الدراسية في 2026",
+      excerpt: "كل ما تحتاج معرفته للبحث عن منحة دراسية، والتحضير لها، وتقديم طلب فائز — من البداية إلى النهاية.",
+      content: `## مقدمة
 
-Applying for scholarships can feel overwhelming, but with the right strategy it becomes manageable. This guide walks you through every stage of the process.
+قد يبدو التقديم على المنح الدراسية مرهقاً، ولكن باستراتيجية صحيحة يصبح أمراً يمكن التحكم فيه. يأخذك هذا الدليل خلال كل مرحلة من مراحل العملية.
 
-## Step 1 — Find the Right Scholarships
+## الخطوة 1 — ابحث عن المنح الدراسية المناسبة
 
-Use ScholarHub's filters to narrow down opportunities by:
-- **Degree level** (Bachelor, Master, PhD)
-- **Field of study**
-- **Country of destination**
-- **Funding type** (Full, Partial, Tuition only)
+استخدم فلاتر ScholarHub لتضييق نطاق الفرص حسب:
+- **المرحلة الدراسية** (بكالوريوس، ماجستير، دكتوراه)
+- **مجال الدراسة**
+- **دولة الوجهة**
+- **نوع التمويل** (كامل، جزئي، رسوم دراسية فقط)
 
-Save scholarships that match your profile so you can track their deadlines.
+احفظ المنح الدراسية التي تتناسب مع ملفك حتى تتمكن من تتبع مواعيدها النهائية.
 
-## Step 2 — Check Eligibility Before Applying
+## الخطوة 2 — تحقق من الأهلية قبل التقديم
 
-Read the eligibility requirements carefully before investing time in an application. Key things to verify:
-- Nationality and residency requirements
-- Minimum GPA or academic standing
-- Language proficiency requirements (IELTS, TOEFL, etc.)
-- Age limits (some scholarships have maximum age requirements)
+اقرأ شروط الأهلية بعناية قبل استثمار الوقت في طلب. الأشياء الرئيسية التي يجب التحقق منها:
+- متطلبات الجنسية والإقامة
+- الحد الأدنى للمعدل التراكمي أو المستوى الأكاديمي
+- متطلبات إتقان اللغة (IELTS، TOEFL، إلخ.)
+- حدود السن (بعض المنح لها حد أقصى للسن)
 
-## Step 3 — Prepare Your Documents Early
+## الخطوة 3 — جهّز وثائقك مبكراً
 
-Most scholarships require a standard set of documents. Prepare these in advance:
-- **Academic transcripts** — certified and translated if required
-- **Passport or national ID** — valid for the duration of study
-- **CV / Resume** — academic and professional achievements
-- **Letters of recommendation** — request these 4–6 weeks in advance
-- **Language certificates** — IELTS, TOEFL, DELF, etc.
-- **Statement of purpose / Motivation letter**
+تتطلب معظم المنح الدراسية مجموعة قياسية من الوثائق. جهّز هذه مسبقاً:
+- **كشوف الدرجات الأكاديمية** — موثّقة ومترجمة إذا لزم الأمر
+- **جواز السفر أو الهوية الوطنية** — صالحة طوال مدة الدراسة
+- **السيرة الذاتية** — الإنجازات الأكاديمية والمهنية
+- **خطابات التوصية** — اطلبها قبل 4 إلى 6 أسابيع
+- **شهادات اللغة** — IELTS، TOEFL، DELF، إلخ.
+- **بيان الغرض / خطاب الدافع**
 
-## Step 4 — Write a Compelling Personal Statement
+## الخطوة 4 — اكتب بياناً شخصياً مقنعاً
 
-Your personal statement is your opportunity to stand out. Be specific, tell a story, and connect your past experience to your future goals. Avoid generic statements.
+بيانك الشخصي هو فرصتك لتبرز. كن محدداً، احكِ قصة، واربط تجربتك السابقة بأهدافك المستقبلية. تجنّب البيانات العامة.
 
-## Step 5 — Submit Before the Deadline
+## الخطوة 5 — قدّم قبل الموعد النهائي
 
-Missing a deadline means starting over. Create calendar reminders 2 weeks and 3 days before each deadline. Submit early to allow time to fix any technical issues.
+تفويت موعد نهائي يعني البدء من جديد. أنشئ تذكيرات في التقويم قبل أسبوعين و3 أيام من كل موعد. قدّم مبكراً لإتاحة الوقت لإصلاح أي مشاكل تقنية.
 
-## Final Checklist
+## قائمة التحقق النهائية
 
-- [ ] All required documents attached
-- [ ] Personal statement proofread by at least two people
-- [ ] Correct scholarship program selected
-- [ ] Application submitted before the deadline`,
-      authorName: "Admin User",
-      tags: ["guide", "application", "tips", "how-to"],
+- [ ] جميع الوثائق المطلوبة مرفقة
+- [ ] تمت مراجعة البيان الشخصي من قبل شخصين على الأقل
+- [ ] تم اختيار برنامج المنحة الدراسية الصحيح
+- [ ] تم تقديم الطلب قبل الموعد النهائي`,
+      authorName: "المسؤول العام",
+      tags: ["دليل", "تقديم", "نصائح", "إرشادات"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-01-05"),
     },
     {
       slug: "how-to-write-a-winning-scholarship-essay",
-      title: "How to Write a Winning Scholarship Essay",
-      excerpt: "Practical tips from scholarship winners and academic advisors on crafting a compelling personal statement that stands out from thousands of applications.",
-      content: `## Why the Essay Matters
+      title: "كيف تكتب مقالة منحة دراسية فائزة",
+      excerpt: "نصائح عملية من الفائزين بالمنح الدراسية والمستشارين الأكاديميين حول صياغة بيان شخصي مقنع يبرز من بين آلاف الطلبات.",
+      content: `## لماذا تهم المقالة
 
-For most scholarships, the personal statement or motivation letter is the single most important part of your application. Grades get you through the door — your essay determines if you win.
+بالنسبة لمعظم المنح الدراسية، يُعدّ البيان الشخصي أو خطاب الدافع الجزء الأهم في طلبك. الدرجات تفتح لك الباب — مقالتك تحدد ما إذا كنت ستفوز.
 
-## Structure of a Strong Essay
+## بنية المقالة القوية
 
-### Opening — Hook the Reader
-Start with a specific moment, challenge, or insight that shaped your academic journey. Avoid opening with "My name is..." or "I am applying for...".
+### الافتتاحية — اجذب القارئ
+ابدأ بلحظة محددة، أو تحدٍّ، أو رؤية شكّلت رحلتك الأكاديمية. تجنّب الافتتاح بـ "اسمي..." أو "أتقدّم من أجل...".
 
-**Weak:** "I am applying for this scholarship because I want to study engineering."
+**ضعيفة:** "أتقدّم لهذه المنحة لأنني أريد دراسة الهندسة."
 
-**Strong:** "The day our village lost power for three weeks was the day I decided to become an electrical engineer."
+**قوية:** "اليوم الذي فقدت فيه قريتنا الكهرباء لمدة ثلاثة أسابيع كان اليوم الذي قررت فيه أن أصبح مهندساً كهربائياً."
 
-### Body — Show, Don't Tell
-Use concrete examples from your life. Instead of saying "I am hardworking," describe a project where you stayed up three nights to meet a deadline and what you learned from it.
+### الجسم — اعرض، لا تخبر
+استخدم أمثلة ملموسة من حياتك. بدلاً من قول "أنا مجتهد"، صف مشروعاً سهرت فيه ثلاث ليالٍ لتلبية موعد نهائي وما تعلّمته منه.
 
-Cover three things:
-1. **Where you come from** — your background and context
-2. **Where you are** — your current academic achievements and goals
-3. **Where you are going** — your vision and how this scholarship gets you there
+غطِّ ثلاثة أشياء:
+1. **من أين أتيت** — خلفيتك وسياقك
+2. **أين أنت الآن** — إنجازاتك الأكاديمية الحالية وأهدافك
+3. **إلى أين تتجه** — رؤيتك وكيف ستوصلك هذه المنحة إلى هناك
 
-### Closing — Connect to the Scholarship
-End by clearly connecting your goals to what the scholarship specifically offers. Show you have researched the program and know why this one — not just any scholarship — is right for you.
+### الخاتمة — اربطها بالمنحة
+اختم بربط أهدافك بوضوح بما تقدمه المنحة تحديداً. أظهر أنك بحثت عن البرنامج وتعرف لماذا هذه المنحة بالذات — وليس أي منحة أخرى — هي المناسبة لك.
 
-## Common Mistakes to Avoid
+## الأخطاء الشائعة التي يجب تجنبها
 
-- **Too generic** — could have been written by anyone
-- **Repeating your CV** — the essay should add new information
-- **Exceeding the word limit** — shows inability to follow instructions
-- **Poor grammar** — use Grammarly and have a native speaker review it
-- **Lack of structure** — paragraphs should flow logically
+- **عامة جداً** — قد يكون كتبها أي شخص
+- **تكرار سيرتك الذاتية** — يجب أن تضيف المقالة معلومات جديدة
+- **تجاوز الحد الأقصى للكلمات** — يدل على عدم القدرة على اتباع التعليمات
+- **القواعد الضعيفة** — استخدم Grammarly واطلب من متحدث أصلي مراجعتها
+- **عدم وجود بنية** — يجب أن تتدفق الفقرات بشكل منطقي
 
-## Revision Process
+## عملية المراجعة
 
-1. Write a first draft without editing
-2. Leave it for 24 hours
-3. Revise for content and structure
-4. Ask a professor or mentor to review
-5. Do a final proofread for grammar and spelling`,
-      authorName: "Admin User",
-      tags: ["essay", "writing", "personal statement", "guide", "tips"],
+1. اكتب مسودة أولى دون تحرير
+2. اتركها 24 ساعة
+3. راجعها للمحتوى والبنية
+4. اطلب من أستاذ أو مرشد المراجعة
+5. قم بمراجعة نهائية للقواعد والإملاء`,
+      authorName: "المسؤول العام",
+      tags: ["مقالة", "كتابة", "بيان شخصي", "دليل", "نصائح"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-01-12"),
     },
     {
       slug: "how-to-get-strong-letters-of-recommendation",
-      title: "How to Get Strong Letters of Recommendation",
-      excerpt: "A step-by-step guide to requesting, preparing for, and following up on letters of recommendation that genuinely strengthen your application.",
-      content: `## Why Recommendation Letters Matter
+      title: "كيف تحصل على خطابات توصية قوية",
+      excerpt: "دليل خطوة بخطوة لطلب خطابات التوصية والتحضير لها ومتابعتها بطريقة تعزّز طلبك بشكل حقيقي.",
+      content: `## لماذا تهم خطابات التوصية
 
-Scholarship committees use recommendation letters to verify claims you make in your personal statement and to hear an independent voice about your character and ability.
+تستخدم لجان المنح الدراسية خطابات التوصية للتحقق من الادعاءات التي تذكرها في بيانك الشخصي ولسماع صوت مستقل عن شخصيتك وقدراتك.
 
-## Who Should You Ask?
+## من يجب أن تطلب منه؟
 
-The best recommenders are people who:
-- Know you well academically or professionally
-- Have supervised your work directly
-- Can speak to specific achievements and qualities
-- Hold credible positions (professor, supervisor, mentor)
+أفضل الموصين هم الأشخاص الذين:
+- يعرفونك جيداً أكاديمياً أو مهنياً
+- أشرفوا على عملك مباشرة
+- يمكنهم التحدث عن إنجازات وصفات محددة
+- يشغلون مناصب موثوقة (أستاذ، مشرف، مرشد)
 
-**Avoid** asking people simply because they have impressive titles but barely know you.
+**تجنّب** طلبها من أشخاص بناءً فقط على ألقابهم الرنانة بينما لا يعرفونك جيداً.
 
-## How to Ask — Step by Step
+## كيفية الطلب — خطوة بخطوة
 
-### 1. Ask Early (at least 4–6 weeks before the deadline)
-Give your recommenders plenty of time. Asking at the last minute puts them in a difficult position and results in weaker letters.
+### 1. اطلب مبكراً (قبل 4 إلى 6 أسابيع على الأقل من الموعد النهائي)
+امنح موصيك وقتاً كافياً. الطلب في اللحظة الأخيرة يضعهم في موقف صعب ويؤدي إلى خطابات أضعف.
 
-### 2. Ask in Person or via Email
-For professors: visit during office hours or send a polite email. Explain which scholarship you are applying for and why you are asking them specifically.
+### 2. اطلب شخصياً أو عبر البريد الإلكتروني
+للأساتذة: زرهم خلال ساعات العمل أو أرسل بريداً إلكترونياً مهذباً. اشرح لأي منحة تتقدم ولماذا تطلب منهم تحديداً.
 
-### 3. Provide a "Recommender Package"
-Make it easy for your recommender to write a strong letter by providing:
-- Your CV
-- Your personal statement draft
-- The scholarship description and requirements
-- Specific achievements you'd like them to mention
-- Submission deadline and instructions
+### 3. قدّم "حزمة الموصي"
+سهّل على موصيك كتابة خطاب قوي بتقديم:
+- سيرتك الذاتية
+- مسودة بيانك الشخصي
+- وصف المنحة ومتطلباتها
+- إنجازات محددة تود أن يذكروها
+- الموعد النهائي للتقديم والتعليمات
 
-## Following Up
+## المتابعة
 
-Send a polite reminder one week before the deadline. After the scholarship process, always thank your recommenders regardless of the outcome — they invested time in supporting you.
+أرسل تذكيراً مهذباً قبل أسبوع من الموعد النهائي. بعد عملية المنحة، اشكر موصيك دائماً بصرف النظر عن النتيجة — لقد استثمروا وقتاً في دعمك.
 
-## What Makes a Strong Letter?
+## ما الذي يجعل الخطاب قوياً؟
 
-- Specific examples of your work and character
-- Comparative language ("Among the top 5% of students I have taught...")
-- Evidence of your potential for future success
-- A clear endorsement from the recommender`,
-      authorName: "Admin User",
-      tags: ["recommendation letter", "guide", "application tips"],
+- أمثلة محددة على عملك وشخصيتك
+- لغة مقارنة ("من بين أفضل 5% من الطلاب الذين درّستهم...")
+- دليل على إمكانياتك للنجاح المستقبلي
+- توصية واضحة من الموصي`,
+      authorName: "المسؤول العام",
+      tags: ["خطاب توصية", "دليل", "نصائح التقديم"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-01-18"),
     },
@@ -1513,157 +1513,157 @@ Send a polite reminder one week before the deadline. After the scholarship proce
     // ── SCHOLARSHIP LISTS ────────────────────────────────────────────────────
     {
       slug: "top-scholarships-for-stem-students-2026",
-      title: "Top 10 Scholarships for STEM Students in 2026",
-      excerpt: "A curated list of the most prestigious and well-funded scholarships available to science, technology, engineering, and mathematics students this year.",
-      content: `## Why STEM Scholarships Are Competitive
+      title: "أفضل 10 منح دراسية لطلاب العلوم والتكنولوجيا في 2026",
+      excerpt: "قائمة منتقاة لأكثر المنح الدراسية شهرةً وأفضلها تمويلاً المتاحة لطلاب العلوم والتكنولوجيا والهندسة والرياضيات هذا العام.",
+      content: `## لماذا منح العلوم والتكنولوجيا تنافسية
 
-STEM scholarships attract thousands of applicants because they offer generous funding and strong career prospects. Standing out requires both academic excellence and a compelling story.
+تجذب منح العلوم والتكنولوجيا آلاف المتقدمين لأنها تقدم تمويلاً سخياً وآفاقاً مهنية قوية. التميّز يتطلب التفوق الأكاديمي وقصة مقنعة معاً.
 
-## The Top 10
+## أفضل 10 منح
 
-### 1. Fulbright Foreign Student Program (USA)
-One of the most prestigious scholarships in the world. Covers full tuition, living expenses, and health insurance for graduate study in the United States. Open to students from over 160 countries.
+### 1. برنامج فولبرايت للطلاب الأجانب (الولايات المتحدة)
+واحدة من أكثر المنح شهرةً في العالم. تغطي الرسوم الدراسية الكاملة، ونفقات المعيشة، والتأمين الصحي للدراسات العليا في الولايات المتحدة. متاحة لطلاب من أكثر من 160 دولة.
 
-**Funding:** Full scholarship | **Level:** Master, PhD | **Deadline:** Varies by country
+**التمويل:** منحة كاملة | **المستوى:** ماجستير، دكتوراه | **الموعد النهائي:** يختلف حسب الدولة
 
-### 2. DAAD Scholarships (Germany)
-Germany's premier scholarship for international students. STEM students particularly benefit from Germany's world-class engineering and natural sciences programs — many tuition-free.
+### 2. منح DAAD (ألمانيا)
+المنحة الرائدة في ألمانيا للطلاب الدوليين. يستفيد طلاب العلوم والتكنولوجيا بشكل خاص من برامج الهندسة والعلوم الطبيعية الألمانية ذات المستوى العالمي — كثير منها بدون رسوم.
 
-**Funding:** Monthly stipend + travel allowance | **Level:** All levels | **Deadline:** Varies by program
+**التمويل:** راتب شهري + بدل سفر | **المستوى:** جميع المستويات | **الموعد النهائي:** يختلف حسب البرنامج
 
-### 3. Chevening Scholarships (UK)
-The UK government's flagship scholarship. Highly competitive and highly regarded. Covers full tuition, living costs, and flights.
+### 3. منح تشيفنينغ (المملكة المتحدة)
+المنحة الرائدة للحكومة البريطانية. تنافسية للغاية ومحترمة جداً. تغطي الرسوم الكاملة، وتكاليف المعيشة، والسفر.
 
-**Funding:** Full scholarship | **Level:** Master | **Deadline:** November each year
+**التمويل:** منحة كاملة | **المستوى:** ماجستير | **الموعد النهائي:** نوفمبر من كل عام
 
-### 4. Erasmus Mundus Joint Masters (EU)
-Study at two or three European universities and earn a joint degree. STEM programs are among the most popular.
+### 4. ماجستير إيراسموس موندوس المشترك (الاتحاد الأوروبي)
+ادرس في جامعتين أو ثلاث جامعات أوروبية واحصل على درجة مشتركة. برامج العلوم والتكنولوجيا من بين الأكثر شعبيةً.
 
-**Funding:** Full scholarship + travel | **Level:** Master | **Deadline:** January–March
+**التمويل:** منحة كاملة + سفر | **المستوى:** ماجستير | **الموعد النهائي:** يناير–مارس
 
-### 5. MEXT Scholarship (Japan)
-Japan's government scholarship for undergraduate and graduate study. Excellent for engineering, robotics, and technology students.
+### 5. منحة MEXT (اليابان)
+منحة الحكومة اليابانية للدراسة الجامعية والعليا. ممتازة لطلاب الهندسة والروبوتات والتكنولوجيا.
 
-**Funding:** Full scholarship | **Level:** Bachelor, Master, PhD | **Deadline:** May–June
+**التمويل:** منحة كاملة | **المستوى:** بكالوريوس، ماجستير، دكتوراه | **الموعد النهائي:** مايو–يونيو
 
-### 6. Gates Cambridge Scholarship (UK)
-Full funding for graduate study at the University of Cambridge. Extremely selective — only ~90 scholars per year worldwide.
+### 6. منحة غيتس كامبريدج (المملكة المتحدة)
+تمويل كامل للدراسات العليا في جامعة كامبريدج. انتقائية للغاية — حوالي 90 طالباً فقط سنوياً حول العالم.
 
-**Funding:** Full scholarship | **Level:** Master, PhD | **Deadline:** October
+**التمويل:** منحة كاملة | **المستوى:** ماجستير، دكتوراه | **الموعد النهائي:** أكتوبر
 
-### 7. Turkish Scholarships (Türkiye Burslari)
-Full government scholarship covering tuition, accommodation, health insurance, and a monthly stipend. Strong STEM programs in engineering and computer science.
+### 7. المنح التركية (Türkiye Burslari)
+منحة حكومية كاملة تغطي الرسوم، والسكن، والتأمين الصحي، وراتب شهري. برامج علوم وتكنولوجيا قوية في الهندسة وعلوم الحاسوب.
 
-**Funding:** Full scholarship | **Level:** Bachelor, Master, PhD | **Deadline:** February
+**التمويل:** منحة كاملة | **المستوى:** بكالوريوس، ماجستير، دكتوراه | **الموعد النهائي:** فبراير
 
-### 8. Chinese Government Scholarship (CSC)
-One of the largest scholarship programs in the world. China has invested heavily in engineering and technology education.
+### 8. منحة الحكومة الصينية (CSC)
+واحدة من أكبر برامج المنح الدراسية في العالم. استثمرت الصين بشكل كبير في تعليم الهندسة والتكنولوجيا.
 
-**Funding:** Full scholarship | **Level:** All levels | **Deadline:** March–April
+**التمويل:** منحة كاملة | **المستوى:** جميع المستويات | **الموعد النهائي:** مارس–أبريل
 
-### 9. Korea Government Scholarship Program (KGSP)
-Covers tuition, accommodation, living allowance, and Korean language training. Excellent for engineering and IT students.
+### 9. برنامج المنح الكورية الحكومية (KGSP)
+يغطي الرسوم، والسكن، وبدل المعيشة، والتدريب على اللغة الكورية. ممتاز لطلاب الهندسة وتكنولوجيا المعلومات.
 
-**Funding:** Full scholarship | **Level:** Bachelor, Master, PhD | **Deadline:** February–March
+**التمويل:** منحة كاملة | **المستوى:** بكالوريوس، ماجستير، دكتوراه | **الموعد النهائي:** فبراير–مارس
 
-### 10. Swedish Institute Scholarships
-Full funding for master's study in Sweden — a global leader in innovation, sustainability, and technology.
+### 10. منح المعهد السويدي
+تمويل كامل لدراسة الماجستير في السويد — رائدة عالمياً في الابتكار والاستدامة والتكنولوجيا.
 
-**Funding:** Full scholarship | **Level:** Master | **Deadline:** February
+**التمويل:** منحة كاملة | **المستوى:** ماجستير | **الموعد النهائي:** فبراير
 
-## Application Tips
+## نصائح للتقديم
 
-- Start researching 12–18 months before you want to begin studying
-- Apply to 5–8 scholarships to increase your chances
-- Tailor each application to the specific scholarship's values and priorities`,
-      authorName: "Admin User",
-      tags: ["STEM", "scholarship list", "2026", "engineering", "science", "technology"],
+- ابدأ البحث قبل 12–18 شهراً من الموعد الذي تريد بدء الدراسة فيه
+- تقدّم لـ 5–8 منح لزيادة فرصك
+- خصّص كل طلب وفقاً لقيم وأولويات المنحة المحددة`,
+      authorName: "المسؤول العام",
+      tags: ["علوم وتكنولوجيا", "قائمة منح", "2026", "هندسة", "علوم", "تكنولوجيا"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-01-22"),
     },
     {
       slug: "top-scholarships-for-arts-humanities-students-2026",
-      title: "Best Scholarships for Arts & Humanities Students in 2026",
-      excerpt: "Comprehensive list of scholarships available for students studying literature, history, philosophy, fine arts, languages, and other humanities disciplines.",
-      content: `## Arts & Humanities Scholarships: More Than You Think
+      title: "أفضل المنح الدراسية لطلاب الفنون والعلوم الإنسانية في 2026",
+      excerpt: "قائمة شاملة للمنح الدراسية المتاحة للطلاب الذين يدرسون الأدب والتاريخ والفلسفة والفنون الجميلة واللغات وغيرها من التخصصات الإنسانية.",
+      content: `## منح الفنون والعلوم الإنسانية: أكثر مما تعتقد
 
-Many students believe scholarship funding is concentrated in STEM fields. This is a myth. Arts and humanities students have access to a wide range of prestigious funding opportunities.
+يعتقد كثير من الطلاب أن تمويل المنح الدراسية يتركز في تخصصات العلوم والتكنولوجيا. هذه أسطورة. لدى طلاب الفنون والعلوم الإنسانية الوصول إلى مجموعة واسعة من فرص التمويل المرموقة.
 
-## Top Scholarships
+## أفضل المنح
 
-### 1. Rhodes Scholarship (Oxford)
-The oldest and most celebrated international scholarship. Open to all fields including arts, humanities, and social sciences. Covers full costs at Oxford University.
+### 1. منحة رودس (أوكسفورد)
+أقدم وأشهر منحة دراسية دولية. متاحة لجميع التخصصات بما فيها الفنون والعلوم الإنسانية والاجتماعية. تغطي التكاليف الكاملة في جامعة أوكسفورد.
 
-**Funding:** Full scholarship | **Level:** Graduate | **Deadline:** August–October
+**التمويل:** منحة كاملة | **المستوى:** دراسات عليا | **الموعد النهائي:** أغسطس–أكتوبر
 
-### 2. Fulbright Scholar Program
-Fulbright actively supports humanities research and arts study. Many past Fulbright scholars are writers, historians, and cultural researchers.
+### 2. برنامج فولبرايت للباحثين
+يدعم فولبرايت بشكل فعال البحث في العلوم الإنسانية ودراسة الفنون. كثير من الباحثين السابقين في فولبرايت كتّاب ومؤرخون وباحثون ثقافيون.
 
-**Funding:** Full scholarship | **Level:** Graduate, Research | **Deadline:** Varies by country
+**التمويل:** منحة كاملة | **المستوى:** دراسات عليا، بحث | **الموعد النهائي:** يختلف حسب الدولة
 
-### 3. Chevening Scholarships
-No field restrictions. History, literature, international relations, and journalism are popular among Chevening scholars.
+### 3. منح تشيفنينغ
+لا توجد قيود على التخصصات. التاريخ والأدب والعلاقات الدولية والصحافة شائعة بين باحثي تشيفنينغ.
 
-**Funding:** Full scholarship | **Level:** Master | **Deadline:** November
+**التمويل:** منحة كاملة | **المستوى:** ماجستير | **الموعد النهائي:** نوفمبر
 
-### 4. DAAD Scholarships for Arts & Humanities
-Germany has exceptional programs in history, philosophy, German studies, and fine arts. DAAD provides funding for all these areas.
+### 4. منح DAAD للفنون والعلوم الإنسانية
+لدى ألمانيا برامج استثنائية في التاريخ والفلسفة والدراسات الألمانية والفنون الجميلة. تقدم DAAD التمويل لجميع هذه المجالات.
 
-**Funding:** Monthly stipend | **Level:** All levels | **Deadline:** Varies
+**التمويل:** راتب شهري | **المستوى:** جميع المستويات | **الموعد النهائي:** يختلف
 
-### 5. French Government Scholarship (Eiffel Program)
-France is the global heart of art, philosophy, and culture. The Eiffel scholarship supports top international students in humanities and social sciences.
+### 5. منحة الحكومة الفرنسية (برنامج إيفل)
+فرنسا هي القلب العالمي للفن والفلسفة والثقافة. تدعم منحة إيفل أفضل الطلاب الدوليين في العلوم الإنسانية والاجتماعية.
 
-**Funding:** Monthly stipend + allowances | **Level:** Master, PhD | **Deadline:** January
+**التمويل:** راتب شهري + بدلات | **المستوى:** ماجستير، دكتوراه | **الموعد النهائي:** يناير
 
-## How to Stand Out as a Humanities Applicant
+## كيف تتميّز كمتقدم في العلوم الإنسانية
 
-- Demonstrate deep engagement with your subject through publications, projects, or community work
-- Show how your research or creative work addresses real-world questions
-- Connect your work to the values of the scholarship program (cultural exchange, global leadership, etc.)`,
-      authorName: "Admin User",
-      tags: ["arts", "humanities", "scholarship list", "2026", "literature", "history"],
+- أظهر التزاماً عميقاً بموضوعك من خلال المنشورات أو المشاريع أو العمل المجتمعي
+- أظهر كيف يعالج بحثك أو عملك الإبداعي قضايا واقعية
+- اربط عملك بقيم برنامج المنحة (التبادل الثقافي، القيادة العالمية، إلخ.)`,
+      authorName: "المسؤول العام",
+      tags: ["فنون", "علوم إنسانية", "قائمة منح", "2026", "أدب", "تاريخ"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-01-28"),
     },
     {
       slug: "fully-funded-scholarships-no-gpa-requirement-2026",
-      title: "Fully Funded Scholarships With No GPA Requirement in 2026",
-      excerpt: "Not all scholarships require a perfect GPA. Here are legitimate, prestigious fully funded opportunities that focus on leadership, potential, and character.",
-      content: `## Beyond GPA: Scholarships That See the Whole Person
+      title: "منح ممولة بالكامل بدون اشتراط معدل تراكمي في 2026",
+      excerpt: "ليست كل المنح الدراسية تتطلب معدلاً تراكمياً مثالياً. إليك فرصاً ممولة بالكامل، شرعية ومرموقة، تركز على القيادة والإمكانيات والشخصية.",
+      content: `## أبعد من المعدل التراكمي: منح ترى الإنسان بالكامل
 
-A common misconception is that only students with 4.0 GPAs win scholarships. While academic performance matters, many prestigious scholarships place equal or greater emphasis on leadership, community impact, and potential.
+من المفاهيم الخاطئة الشائعة أن الطلاب ذوي المعدلات 4.0 فقط يفوزون بالمنح الدراسية. بينما يهم الأداء الأكاديمي، تضع كثير من المنح المرموقة وزناً مساوياً أو أكبر على القيادة والأثر المجتمعي والإمكانيات.
 
-## Scholarships That Don't Require a Minimum GPA
+## منح لا تتطلب حداً أدنى للمعدل التراكمي
 
-### 1. Chevening Scholarships (UK)
-Chevening does not publish a minimum GPA. Selection is based on leadership potential, networking ability, and career plans. Many successful scholars had average academic records but exceptional life stories.
+### 1. منح تشيفنينغ (المملكة المتحدة)
+لا تنشر تشيفنينغ حداً أدنى للمعدل التراكمي. يستند الاختيار إلى الإمكانيات القيادية والقدرة على بناء الشبكات والخطط المهنية. كثير من الباحثين الناجحين كان لديهم سجلات أكاديمية متوسطة لكن قصص حياة استثنائية.
 
-### 2. Erasmus Mundus
-Selection criteria vary by program consortium. Many programs weight research experience and motivation more heavily than GPA.
+### 2. إيراسموس موندوس
+تختلف معايير الاختيار حسب تحالف البرنامج. كثير من البرامج تعطي وزناً أكبر للخبرة البحثية والدافع من المعدل التراكمي.
 
-### 3. Aga Khan Foundation International Scholarship
-Designed for students from developing countries who demonstrate financial need and strong character. Academic performance is considered but not the only factor.
+### 3. منحة مؤسسة الآغا خان الدولية
+مصممة للطلاب من الدول النامية الذين يثبتون الحاجة المالية والشخصية القوية. يُؤخذ الأداء الأكاديمي في الاعتبار لكنه ليس العامل الوحيد.
 
-### 4. Joint Japan/World Bank Graduate Scholarship
-Designed for mid-career professionals. Work experience and leadership potential are prioritized over academic grades.
+### 4. المنحة المشتركة لليابان والبنك الدولي للدراسات العليا
+مصممة للمهنيين في منتصف المسيرة المهنية. تُعطى الأولوية لخبرة العمل والإمكانيات القيادية على الدرجات الأكاديمية.
 
-### 5. Commonwealth Scholarships
-Focus on development impact and potential contribution to home country. Leadership and community work can outweigh GPA.
+### 5. منح الكومنولث
+تركز على أثر التنمية والمساهمة المحتملة في البلد الأم. القيادة والعمل المجتمعي يمكن أن يفوقا المعدل التراكمي.
 
-## How to Compensate for a Lower GPA
+## كيف تعوّض عن معدل تراكمي منخفض
 
-1. **Strong personal statement** — explain any academic challenges honestly and show growth
-2. **Exceptional recommendation letters** — a professor who knows you well can vouch for your potential
-3. **Relevant work or research experience** — shows practical capability beyond grades
-4. **Community involvement** — leadership roles, volunteering, social impact projects
-5. **Upward trajectory** — if your later grades are better than early ones, highlight that trend
+1. **بيان شخصي قوي** — اشرح أي تحديات أكاديمية بصدق وأظهر النمو
+2. **خطابات توصية استثنائية** — أستاذ يعرفك جيداً يستطيع أن يضمن إمكانياتك
+3. **خبرة عمل أو بحث ذات صلة** — تُظهر القدرة العملية بما يتجاوز الدرجات
+4. **المشاركة المجتمعية** — أدوار قيادية، تطوع، مشاريع ذات أثر اجتماعي
+5. **مسار صاعد** — إذا كانت درجاتك المتأخرة أفضل من المبكرة، أبرز هذا الاتجاه
 
-## Be Honest
+## كن صادقاً
 
-Never fabricate or exaggerate your GPA. Scholarship committees verify academic records and any dishonesty results in permanent disqualification.`,
-      authorName: "Admin User",
-      tags: ["fully funded", "no GPA", "scholarship list", "leadership", "guide"],
+لا تختلق أو تبالغ في معدلك التراكمي أبداً. تتحقق لجان المنح الدراسية من السجلات الأكاديمية وأي عدم صدق يؤدي إلى الاستبعاد الدائم.`,
+      authorName: "المسؤول العام",
+      tags: ["تمويل كامل", "بدون معدل", "قائمة منح", "قيادة", "دليل"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-02-03"),
     },
@@ -1671,244 +1671,244 @@ Never fabricate or exaggerate your GPA. Scholarship committees verify academic r
     // ── EXPERT ADVICE ────────────────────────────────────────────────────────
     {
       slug: "understanding-scholarship-eligibility-requirements",
-      title: "Understanding Scholarship Eligibility Requirements",
-      excerpt: "A practical guide to decoding eligibility criteria and quickly identifying which scholarships you actually qualify for — saving hours of wasted effort.",
-      content: `## Why Eligibility Matters First
+      title: "فهم شروط الأهلية للمنح الدراسية",
+      excerpt: "دليل عملي لفك شفرة معايير الأهلية والتعرف بسرعة على المنح التي تستحقها فعلاً — يوفر عليك ساعات من الجهد الضائع.",
+      content: `## لماذا الأهلية أولاً
 
-Many students spend weeks on applications only to discover they were never eligible. Always check eligibility before writing a single word of your personal statement.
+يقضي كثير من الطلاب أسابيع على الطلبات ليكتشفوا أنهم لم يكونوا مؤهلين أصلاً. تحقق دائماً من الأهلية قبل كتابة كلمة واحدة من بيانك الشخصي.
 
-## The Main Eligibility Categories
+## فئات الأهلية الرئيسية
 
-### 1. Nationality and Residency
-This is usually the first filter. Most government scholarships require you to be a citizen or permanent resident of a specific country. Some scholarships exclude citizens of certain countries. Read this section first.
+### 1. الجنسية والإقامة
+هذا عادةً هو الفلتر الأول. تتطلب معظم المنح الحكومية أن تكون مواطناً أو مقيماً دائماً في دولة محددة. تستثني بعض المنح مواطني دول معينة. اقرأ هذا القسم أولاً.
 
-### 2. Academic Level
-Scholarships specify whether they fund Bachelor, Master, PhD, Postdoc, or Research study. Applying for the wrong level wastes your time and theirs.
+### 2. المستوى الأكاديمي
+تحدد المنح ما إذا كانت تموّل البكالوريوس أم الماجستير أم الدكتوراه أم ما بعد الدكتوراه أم البحث. التقديم للمستوى الخاطئ يضيع وقتك ووقتهم.
 
-### 3. Field of Study
-Some scholarships are open to any field. Others restrict applications to specific disciplines (e.g., STEM only, public policy only, agriculture only). Check if your planned major is eligible.
+### 3. مجال الدراسة
+بعض المنح متاحة لأي مجال. تقصر منح أخرى الطلبات على تخصصات محددة (مثل العلوم والتكنولوجيا فقط، السياسة العامة فقط، الزراعة فقط). تحقق إذا كان تخصصك المخطط له مؤهلاً.
 
-### 4. GPA and Academic Standing
-Many scholarships require a minimum GPA or class standing. Some specify "upper third of graduating class" or equivalent. Understand how your GPA converts to the required scale.
+### 4. المعدل التراكمي والمستوى الأكاديمي
+تتطلب كثير من المنح حداً أدنى للمعدل التراكمي أو ترتيباً معيناً في الفصل. تحدد بعضها "الثلث الأعلى من فصل التخرج" أو ما يعادله. افهم كيف يتحول معدلك التراكمي إلى المقياس المطلوب.
 
-### 5. Age Limits
-Government scholarships often have maximum age requirements (e.g., under 35 for graduate study). Check this before investing time in an application.
+### 5. حدود السن
+كثيراً ما تكون للمنح الحكومية حدود قصوى للسن (مثل دون 35 للدراسات العليا). تحقق من هذا قبل استثمار الوقت في طلب.
 
-### 6. Language Proficiency
-Most English-medium programs require IELTS (typically 6.0–7.0) or TOEFL. Some accept Duolingo English Test. Check the specific score requirement and whether your existing certificate is still valid (most expire after 2 years).
+### 6. إتقان اللغة
+تتطلب معظم البرامج باللغة الإنجليزية IELTS (عادةً 6.0–7.0) أو TOEFL. تقبل بعضها اختبار Duolingo. تحقق من متطلب الدرجة المحددة وما إذا كانت شهادتك الحالية لا تزال صالحة (تنتهي صلاحية معظمها بعد سنتين).
 
-### 7. Employment Status
-Some scholarships (especially those for mid-career professionals) require a minimum number of years of work experience. Others prohibit applicants who are already enrolled in a degree program.
+### 7. حالة التوظيف
+تتطلب بعض المنح (خاصةً تلك المخصصة للمهنيين في منتصف المسيرة) حداً أدنى من سنوات الخبرة العملية. تحظر منح أخرى المتقدمين المسجلين بالفعل في برنامج درجة علمية.
 
-## Build Your Eligibility Checklist
+## بناء قائمة التحقق من الأهلية
 
-Before starting any application, create a checklist:
+قبل البدء بأي طلب، أنشئ قائمة تحقق:
 
-| Criterion | Requirement | Do I Qualify? |
-|-----------|-------------|---------------|
-| Nationality | Jordanian / Palestinian | ✅ |
-| Degree level | Master | ✅ |
-| Field | Computer Science | ✅ |
-| GPA | Min 3.0 / 4.0 | ✅ 3.4 |
-| Age | Max 35 | ✅ |
-| Language | IELTS 6.5 | ✅ 7.0 |
+| المعيار | المتطلب | هل أنا مؤهل؟ |
+|---------|---------|--------------|
+| الجنسية | أردني / فلسطيني | ✅ |
+| المرحلة الدراسية | ماجستير | ✅ |
+| المجال | علوم الحاسوب | ✅ |
+| المعدل التراكمي | حد أدنى 3.0 / 4.0 | ✅ 3.4 |
+| السن | بحد أقصى 35 | ✅ |
+| اللغة | IELTS 6.5 | ✅ 7.0 |
 
-## When You're "Almost" Eligible
+## عندما تكون "تقريباً" مؤهلاً
 
-If you meet 5 out of 6 criteria, do not apply. Scholarship committees are strict. Focus your energy on scholarships where you meet all requirements.`,
-      authorName: "Admin User",
-      tags: ["eligibility", "guide", "tips", "requirements"],
+إذا استوفيت 5 من 6 معايير، لا تتقدم. لجان المنح الدراسية صارمة. ركّز طاقتك على المنح التي تستوفي فيها جميع المتطلبات.`,
+      authorName: "المسؤول العام",
+      tags: ["أهلية", "دليل", "نصائح", "متطلبات"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-02-08"),
     },
     {
       slug: "scholarship-interview-preparation-guide",
-      title: "How to Prepare for a Scholarship Interview",
-      excerpt: "Once shortlisted, the interview is your final hurdle. Learn how to prepare, what questions to expect, and how to present yourself with confidence.",
-      content: `## Congratulations — You Have Been Shortlisted
+      title: "كيف تستعد لمقابلة منحة دراسية",
+      excerpt: "بمجرد أن يتم اختيارك ضمن القائمة المختصرة، تكون المقابلة عقبتك الأخيرة. تعلّم كيف تستعد، وما الأسئلة المتوقعة، وكيف تقدّم نفسك بثقة.",
+      content: `## تهانينا — تم اختيارك في القائمة المختصرة
 
-Being invited to a scholarship interview means your application impressed the committee. Now you need to convert that shortlist into a win.
+دعوتك إلى مقابلة منحة دراسية تعني أن طلبك أبهر اللجنة. الآن عليك تحويل تلك القائمة المختصرة إلى فوز.
 
-## Common Interview Formats
+## أشكال المقابلات الشائعة
 
-- **Panel interview** — 3–5 committee members asking questions (most common)
-- **One-on-one interview** — single interviewer, more conversational
-- **Group assessment** — you and other candidates discuss a topic together
-- **Online video interview** — via Zoom or Teams, increasingly common since 2020
+- **مقابلة لجنة** — 3 إلى 5 أعضاء لجنة يطرحون الأسئلة (الأكثر شيوعاً)
+- **مقابلة فردية** — مُحاوِر واحد، أكثر طابعاً حوارياً
+- **تقييم جماعي** — أنت ومرشحون آخرون تناقشون موضوعاً معاً
+- **مقابلة فيديو عبر الإنترنت** — عبر Zoom أو Teams، شائعة بشكل متزايد منذ 2020
 
-## Questions You Will Almost Certainly Be Asked
+## الأسئلة التي ستُسأل عنها بشكل شبه مؤكد
 
-### About You
-- "Tell us about yourself."
-- "Why did you choose this field of study?"
-- "What is your greatest academic achievement?"
+### عنك
+- "حدّثنا عن نفسك."
+- "لماذا اخترت هذا المجال للدراسة؟"
+- "ما أعظم إنجاز أكاديمي حققته؟"
 
-### About the Scholarship
-- "Why did you apply for this scholarship specifically?"
-- "What do you know about our program?"
-- "How does this scholarship align with your career goals?"
+### عن المنحة
+- "لماذا تقدّمت لهذه المنحة بالتحديد؟"
+- "ماذا تعرف عن برنامجنا؟"
+- "كيف تتماشى هذه المنحة مع أهدافك المهنية؟"
 
-### About Your Future
-- "What do you plan to do after completing your studies?"
-- "How will you contribute to your home country?"
-- "Where do you see yourself in 10 years?"
+### عن مستقبلك
+- "ماذا تخطط أن تفعل بعد الانتهاء من دراستك؟"
+- "كيف ستساهم في بلدك الأم؟"
+- "أين ترى نفسك بعد 10 سنوات؟"
 
-### Challenging Questions
-- "What is your greatest weakness?"
-- "Tell us about a failure and what you learned from it."
-- "Why should we choose you over other candidates?"
+### الأسئلة الصعبة
+- "ما أكبر نقاط ضعفك؟"
+- "حدّثنا عن إخفاق وما تعلّمته منه."
+- "لماذا يجب أن نختارك على المرشحين الآخرين؟"
 
-## How to Prepare
+## كيف تستعد
 
-### 1. Research the Scholarship Deeply
-Know the program's history, values, notable alumni, and mission. Show you have done your homework.
+### 1. ابحث عن المنحة بعمق
+اعرف تاريخ البرنامج وقيمه وخريجيه البارزين ورسالته. أظهر أنك قد قمت بواجبك.
 
-### 2. Practice Out Loud
-Thinking your answers is not the same as saying them. Practice with a friend, record yourself, or use a mirror. Focus on clarity and conciseness.
+### 2. تدرّب بصوت عالٍ
+التفكير في الإجابات ليس مثل قولها. تدرّب مع صديق، سجّل نفسك، أو استخدم مرآة. ركّز على الوضوح والإيجاز.
 
-### 3. Prepare STAR Stories
-For behavioral questions, use the STAR method:
-- **S**ituation — describe the context
-- **T**ask — what you needed to do
-- **A**ction — what you did
-- **R**esult — what happened as a result
+### 3. حضّر قصص STAR
+للأسئلة السلوكية، استخدم منهجية STAR:
+- **S** الموقف — صف السياق
+- **T** المهمة — ما الذي احتجت لفعله
+- **A** الإجراء — ما الذي فعلته
+- **R** النتيجة — ما الذي حدث نتيجةً لذلك
 
-### 4. Prepare Questions to Ask
-Asking thoughtful questions shows genuine interest. Try:
-- "What do the most successful scholars in your program have in common?"
-- "What opportunities exist for scholars to connect with alumni?"
+### 4. حضّر أسئلة لتطرحها
+طرح أسئلة مدروسة يُظهر اهتماماً حقيقياً. جرّب:
+- "ما القاسم المشترك بين أنجح الباحثين في برنامجكم؟"
+- "ما الفرص المتاحة للباحثين للتواصل مع الخريجين؟"
 
-## Interview Day Tips
+## نصائح يوم المقابلة
 
-- Dress professionally (even for online interviews)
-- Arrive or log in 10 minutes early
-- Maintain eye contact and speak at a measured pace
-- Listen carefully before answering — it is okay to take a moment to think
-- Send a thank-you email within 24 hours of the interview`,
-      authorName: "Admin User",
-      tags: ["interview", "preparation", "tips", "expert advice"],
+- ارتدِ ملابس مهنية (حتى للمقابلات عبر الإنترنت)
+- احضر أو سجّل دخولك قبل 10 دقائق
+- حافظ على التواصل البصري وتحدّث بإيقاع متزن
+- استمع جيداً قبل الإجابة — لا بأس بأخذ لحظة للتفكير
+- أرسل بريداً إلكترونياً للشكر خلال 24 ساعة من المقابلة`,
+      authorName: "المسؤول العام",
+      tags: ["مقابلة", "تحضير", "نصائح", "نصائح خبراء"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-02-12"),
     },
     {
       slug: "how-to-build-a-strong-cv-for-scholarship-applications",
-      title: "How to Build a Strong CV for Scholarship Applications",
-      excerpt: "Your CV is often the first document reviewers look at. Learn what to include, how to format it, and what scholarship committees actually look for.",
-      content: `## Scholarship CVs vs Job CVs
+      title: "كيف تبني سيرة ذاتية قوية لطلبات المنح الدراسية",
+      excerpt: "سيرتك الذاتية غالباً هي أول مستند ينظر إليه المراجعون. تعلّم ماذا تُدرج، وكيف تُنسّقها، وما الذي تبحث عنه لجان المنح الدراسية فعلاً.",
+      content: `## السيرة الذاتية للمنح الدراسية مقابل سيرة العمل
 
-A scholarship CV is different from a job application CV. Scholarship committees want to see academic achievements, research experience, publications, language skills, and community involvement — not just work history.
+السيرة الذاتية للمنح الدراسية مختلفة عن سيرة طلب العمل. تريد لجان المنح الدراسية أن ترى الإنجازات الأكاديمية، والخبرة البحثية، والمنشورات، والمهارات اللغوية، والمشاركة المجتمعية — وليس فقط تاريخ العمل.
 
-## Essential Sections
+## الأقسام الأساسية
 
-### 1. Personal Information
-Name, email, nationality, and date of birth. Keep it simple. No photo unless specifically requested.
+### 1. المعلومات الشخصية
+الاسم، البريد الإلكتروني، الجنسية، وتاريخ الميلاد. أبقِها بسيطة. لا توجد صورة إلا إذا طُلبت تحديداً.
 
-### 2. Education
-List your degrees in reverse chronological order. Include:
-- Institution name and location
-- Degree and field of study
-- Dates (start – end or expected)
-- GPA (if strong — above 3.0/4.0 or equivalent)
-- Thesis title if relevant
+### 2. التعليم
+أدرج درجاتك بترتيب زمني عكسي. اذكر:
+- اسم المؤسسة وموقعها
+- الدرجة ومجال الدراسة
+- التواريخ (البداية – النهاية أو المتوقعة)
+- المعدل التراكمي (إذا كان قوياً — أعلى من 3.0/4.0 أو ما يعادله)
+- عنوان الأطروحة إذا كان ذا صلة
 
-### 3. Academic Achievements and Awards
-List scholarships, honors, prizes, and distinctions. This section is often what differentiates competitive applicants.
+### 3. الإنجازات الأكاديمية والجوائز
+أدرج المنح الدراسية، والشرفيات، والجوائز، والتمييزات. غالباً ما يكون هذا القسم هو ما يميّز المتقدمين التنافسيين.
 
-### 4. Research Experience
-If you have conducted research (undergraduate thesis, lab work, research assistantship), describe it briefly with outcomes and supervisor name.
+### 4. الخبرة البحثية
+إذا أجريت أبحاثاً (أطروحة جامعية، عمل مختبري، مساعد بحثي)، صفها باختصار مع النتائج واسم المشرف.
 
-### 5. Publications and Presentations
-Even a conference presentation or co-authored paper strengthens your application significantly.
+### 5. المنشورات والعروض
+حتى عرض في مؤتمر أو ورقة بحثية بالمشاركة يعزّز طلبك بشكل كبير.
 
-### 6. Work Experience
-Focus on positions that show leadership, teaching, or research skills. A research assistant or teaching assistant role is more relevant than unrelated part-time work.
+### 6. خبرة العمل
+ركّز على المناصب التي تُظهر القيادة أو التدريس أو المهارات البحثية. دور مساعد بحثي أو تدريسي أكثر صلة من العمل بدوام جزئي غير ذي صلة.
 
-### 7. Volunteer and Community Work
-Scholarship committees — especially for programs like Chevening and Fulbright — value social impact and leadership. Include meaningful volunteer roles.
+### 7. التطوع والعمل المجتمعي
+تقدّر لجان المنح الدراسية — خاصةً لبرامج مثل تشيفنينغ وفولبرايت — الأثر الاجتماعي والقيادة. أدرج أدواراً تطوعية ذات معنى.
 
-### 8. Language Skills
-List all languages with your proficiency level (Native, Fluent, Intermediate, Basic) and any certifications (IELTS, TOEFL, DELF, Goethe).
+### 8. المهارات اللغوية
+أدرج جميع اللغات مع مستوى إتقانك (لغة أم، طليق، متوسط، أساسي) وأي شهادات (IELTS، TOEFL، DELF، Goethe).
 
-### 9. Technical Skills
-Relevant software, programming languages, laboratory techniques, or tools.
+### 9. المهارات التقنية
+البرامج ذات الصلة، لغات البرمجة، التقنيات المختبرية، أو الأدوات.
 
-### 10. References
-"References available upon request" or list 2 references with their name, title, institution, and email.
+### 10. المراجع
+"المراجع متوفرة عند الطلب" أو أدرج مرجعين باسمهم ولقبهم ومؤسستهم وبريدهم الإلكتروني.
 
-## Formatting Rules
+## قواعد التنسيق
 
-- **Length:** 2 pages maximum for most scholarships
-- **Font:** Clean, readable font (Calibri, Garamond, or similar), 11–12pt
-- **Margins:** Standard (2.5cm / 1 inch)
-- **File format:** PDF unless specified otherwise
-- **Consistency:** Same formatting throughout — no mixing of bullet styles
+- **الطول:** صفحتان كحد أقصى لمعظم المنح
+- **الخط:** خط نظيف وقابل للقراءة (Calibri، Garamond، أو ما شابه)، 11–12 نقطة
+- **الهوامش:** قياسية (2.5 سم / 1 إنش)
+- **تنسيق الملف:** PDF ما لم يُحدَّد غير ذلك
+- **الاتساق:** نفس التنسيق في كل مكان — لا تخلط أنماط النقاط
 
-## What to Avoid
+## ما يجب تجنبه
 
-- Photographs (unless specifically requested)
-- Personal information like marital status or religion (unless required)
-- Unrelated work history that doesn't add value
-- Spelling or grammar errors — always proofread`,
-      authorName: "Admin User",
-      tags: ["CV", "resume", "guide", "expert advice", "application tips"],
+- الصور (إلا إذا طُلبت تحديداً)
+- معلومات شخصية مثل الحالة الاجتماعية أو الديانة (إلا إذا طُلبت)
+- تاريخ عمل غير ذي صلة لا يضيف قيمة
+- أخطاء إملائية أو نحوية — راجع دائماً`,
+      authorName: "المسؤول العام",
+      tags: ["سيرة ذاتية", "CV", "دليل", "نصائح خبراء", "نصائح التقديم"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-02-15"),
     },
     {
       slug: "scholarship-application-timeline-12-month-plan",
-      title: "The 12-Month Scholarship Application Timeline",
-      excerpt: "A month-by-month plan to help you prepare, research, and submit scholarship applications well ahead of deadlines — with nothing left to chance.",
-      content: `## Why Planning Ahead Wins Scholarships
+      title: "الجدول الزمني لتقديم المنح الدراسية على مدى 12 شهراً",
+      excerpt: "خطة شهراً بشهر لمساعدتك على التحضير والبحث وتقديم طلبات المنح الدراسية قبل المواعيد النهائية بوقت كافٍ — دون أن تترك شيئاً للصدفة.",
+      content: `## لماذا التخطيط المسبق يفوز بالمنح الدراسية
 
-The students who win competitive scholarships rarely start preparing two weeks before the deadline. The best applications are built over months of research, drafting, and refinement.
+الطلاب الذين يفوزون بالمنح التنافسية نادراً ما يبدؤون التحضير قبل أسبوعين من الموعد النهائي. أفضل الطلبات تُبنى على مدى أشهر من البحث والصياغة والتحسين.
 
-## Your 12-Month Plan
+## خطتك لـ 12 شهراً
 
-### Months 12–10 Before Deadline: Research Phase
-- Identify 10–15 scholarships that match your profile
-- Create a spreadsheet tracking: name, deadline, eligibility, required documents, status
-- Research each scholarship's values, past scholars, and selection criteria
-- Begin improving areas of weakness (language scores, GPA, extracurriculars)
+### الأشهر 12–10 قبل الموعد النهائي: مرحلة البحث
+- حدّد 10–15 منحة تناسب ملفك
+- أنشئ جدول بيانات للتتبع: الاسم، الموعد النهائي، الأهلية، الوثائق المطلوبة، الحالة
+- ابحث عن قيم كل منحة، والباحثين السابقين، ومعايير الاختيار
+- ابدأ بتحسين نقاط الضعف (درجات اللغة، المعدل التراكمي، الأنشطة اللامنهجية)
 
-### Months 9–8: Document Preparation
-- Request official transcripts from your institution
-- Begin studying for language tests (IELTS, TOEFL) if needed
-- Update your CV with all recent achievements
-- Identify potential recommenders and inform them of your plans
+### الأشهر 9–8: تحضير الوثائق
+- اطلب كشوف الدرجات الرسمية من مؤسستك
+- ابدأ الدراسة لاختبارات اللغة (IELTS، TOEFL) إذا لزم الأمر
+- حدّث سيرتك الذاتية بجميع الإنجازات الأخيرة
+- حدّد الموصين المحتملين وأبلغهم بخططك
 
-### Months 7–6: First Drafts
-- Write first drafts of your personal statement / motivation letter
-- Ask recommenders formally — provide them with your CV and scholarship info
-- Have transcripts certified and translated if required
+### الأشهر 7–6: المسودات الأولى
+- اكتب مسودات أولى لبيانك الشخصي / خطاب الدافع
+- اطلب من الموصين رسمياً — قدّم لهم سيرتك الذاتية ومعلومات المنحة
+- اعتمد كشوف الدرجات وترجمها إذا لزم الأمر
 
-### Months 5–4: Revision and Feedback
-- Revise personal statements based on feedback from professors and mentors
-- Confirm recommenders are on track with their letters
-- Complete any outstanding documents (language certificates, etc.)
+### الأشهر 5–4: المراجعة والتغذية الراجعة
+- راجع البيانات الشخصية بناءً على ملاحظات الأساتذة والمرشدين
+- تأكد من أن الموصين على المسار الصحيح بخطاباتهم
+- أكمل أي وثائق متبقية (شهادات اللغة، إلخ.)
 
-### Months 3–2: Final Preparation
-- Final proofreading of all written materials
-- Ensure all documents are in the correct format and within page/word limits
-- Prepare for potential interviews — practice common questions
+### الأشهر 3–2: التحضير النهائي
+- مراجعة نهائية لجميع المواد المكتوبة
+- تأكد من أن جميع الوثائق بالتنسيق الصحيح وضمن حدود الصفحات/الكلمات
+- استعد للمقابلات المحتملة — تدرّب على الأسئلة الشائعة
 
-### Month 1: Submission
-- Submit applications at least one week before the deadline
-- Confirm receipt of all submitted materials
-- Follow up with recommenders if their letters have not been submitted
+### الشهر 1: التقديم
+- قدّم الطلبات قبل أسبوع على الأقل من الموعد النهائي
+- أكّد استلام جميع المواد المقدّمة
+- تابع مع الموصين إذا لم تُقدَّم خطاباتهم
 
-### After Submission
-- Track application status
-- Prepare for interviews if shortlisted
-- Continue applying to other scholarships — do not wait for one result
+### بعد التقديم
+- تتبّع حالة الطلب
+- استعد للمقابلات إذا تم اختيارك في القائمة المختصرة
+- استمر في التقديم لمنح أخرى — لا تنتظر نتيجة واحدة
 
-## Key Principles
+## المبادئ الرئيسية
 
-1. **Apply to multiple scholarships** — 5–10 is ideal
-2. **Tailor each application** — never submit the same essay twice
-3. **Meet every deadline** — late applications are never accepted
-4. **Keep records** — save copies of everything you submit`,
-      authorName: "Admin User",
-      tags: ["timeline", "planning", "guide", "application tips", "expert advice"],
+1. **تقدّم لمنح متعددة** — 5–10 هو المثالي
+2. **خصّص كل طلب** — لا تقدّم نفس المقالة مرتين أبداً
+3. **التزم بكل موعد نهائي** — الطلبات المتأخرة لا تُقبل أبداً
+4. **احتفظ بالسجلات** — احفظ نسخاً من كل ما تقدّمه`,
+      authorName: "المسؤول العام",
+      tags: ["جدول زمني", "تخطيط", "دليل", "نصائح التقديم", "نصائح خبراء"],
       status: "PUBLISHED" as const,
       publishedAt: new Date("2026-02-18"),
     },
@@ -1916,38 +1916,38 @@ The students who win competitive scholarships rarely start preparing two weeks b
     // ── DRAFT (coming soon) ──────────────────────────────────────────────────
     {
       slug: "scholarships-for-refugees-and-displaced-students-2026",
-      title: "Scholarships for Refugees and Displaced Students in 2026",
-      excerpt: "A dedicated resource listing scholarships specifically designed for refugees, asylum seekers, and students affected by conflict or displacement.",
-      content: `## Education as a Path to Stability
+      title: "منح دراسية للاجئين والطلاب النازحين في 2026",
+      excerpt: "مرجع مخصص يسرد المنح الدراسية المصممة خصيصاً للاجئين، وطالبي اللجوء، والطلاب المتأثرين بالنزاعات أو النزوح.",
+      content: `## التعليم طريقاً للاستقرار
 
-For students affected by conflict or displacement, scholarships are not just about career advancement — they can be life-changing. Many organizations have created dedicated funding streams for this group.
+بالنسبة للطلاب المتأثرين بالنزاعات أو النزوح، المنح الدراسية ليست فقط عن التطور المهني — يمكن أن تغيّر حياتهم. أنشأت كثير من المنظمات تدفقات تمويل مخصصة لهذه الفئة.
 
-## Key Scholarships
+## أبرز المنح
 
-### UNHCR / Albert Einstein German Academic Refugee Initiative (DAFI)
-Provides funding for refugees registered with UNHCR to pursue undergraduate education in their country of asylum.
+### مفوضية الأمم المتحدة لشؤون اللاجئين / مبادرة ألبرت أينشتاين الأكاديمية الألمانية للاجئين (DAFI)
+توفر تمويلاً للاجئين المسجلين لدى المفوضية لمتابعة التعليم الجامعي في بلد لجوئهم.
 
-### Scholars at Risk Network
-Connects threatened scholars with host institutions worldwide that can provide safety and support.
+### شبكة الباحثين في خطر
+تربط الباحثين المهددين بمؤسسات مضيفة حول العالم يمكنها توفير الأمان والدعم.
 
-### Institute of International Education — Scholar Rescue Fund
-Emergency fellowships for academics whose lives or work are threatened.
+### معهد التعليم الدولي — صندوق إنقاذ الباحثين
+زمالات طارئة للأكاديميين الذين تتعرض حياتهم أو عملهم للتهديد.
 
-### Chevening — Conflict, Stability and Security Fund
-Specific Chevening tracks for citizens of conflict-affected countries.
+### تشيفنينغ — صندوق النزاع والاستقرار والأمن
+مسارات تشيفنينغ محددة لمواطني الدول المتأثرة بالنزاعات.
 
-### MPOWER Financing
-Loans and scholarships for international students including refugees studying in the US and Canada.
+### تمويل MPOWER
+قروض ومنح دراسية للطلاب الدوليين بمن فيهم اللاجئون الذين يدرسون في الولايات المتحدة وكندا.
 
-## How to Apply as a Displaced Student
+## كيفية التقديم كطالب نازح
 
-- UNHCR registration document is often required as proof of refugee status
-- Explain your situation clearly and factually in your personal statement
-- Seek support from NGOs in your area who can assist with applications
+- وثيقة تسجيل المفوضية مطلوبة غالباً كإثبات لحالة اللجوء
+- اشرح وضعك بوضوح وبشكل واقعي في بيانك الشخصي
+- اطلب الدعم من المنظمات غير الحكومية في منطقتك التي يمكنها المساعدة في الطلبات
 
-*This article is being expanded with more programs and application guidance. Check back soon for the complete version.*`,
-      authorName: "Admin User",
-      tags: ["refugees", "displaced students", "scholarship list", "2026", "humanitarian"],
+*يجري توسيع هذه المقالة بمزيد من البرامج وإرشادات التقديم. تحقق قريباً للحصول على النسخة الكاملة.*`,
+      authorName: "المسؤول العام",
+      tags: ["لاجئون", "طلاب نازحون", "قائمة منح", "2026", "إنساني"],
       status: "DRAFT" as const,
       publishedAt: null,
     },
@@ -1991,22 +1991,22 @@ Loans and scholarships for international students including refugees studying in
 
   console.log("\n✨ All data seeded successfully!\n");
 
-  console.log("📋 TEST CREDENTIALS:");
-  console.log("   🔑 Admin:     admin@scholarhub.com / Admin@123");
-  console.log("   👨‍🏫 Professor: professor@university.edu / Prof@123");
-  console.log("   👩‍🎓 Student:   student@example.com / Student@123\n");
+  console.log("📋 بيانات الاعتماد للاختبار:");
+  console.log("   🔑 المسؤول:  admin@scholarhub.com / Admin@123");
+  console.log("   👨‍🏫 الأستاذ:  professor@university.edu / Prof@123");
+  console.log("   👩‍🎓 الطالب:   student@example.com / Student@123\n");
 
-  console.log("📊 SEEDED DATA:");
-  console.log("   ✅ 3 Users (Admin, Professor, Student)");
-  console.log("   ✅ 8 Categories");
-  console.log("   ✅ 6 Scholarships");
-  console.log("   ✅ 4 Testimonials");
-  console.log("   ✅ 2 Applications");
-  console.log("   ✅ 3 Saved Scholarships");
-  console.log("   ✅ 2 Notifications");
-  console.log("   ✅ 14 Page Content entries (incl. full Privacy Policy, Terms of Service, About Us & Footer config)");
-  console.log("   ✅ 6 FAQ Items");
-  console.log("   ✅ 10 Blog Posts (9 published, 1 draft)\n");
+  console.log("📊 البيانات المُدخلة:");
+  console.log("   ✅ 3 مستخدمين (مسؤول، أستاذ، طالب)");
+  console.log("   ✅ 8 تصنيفات");
+  console.log("   ✅ 6 منح دراسية");
+  console.log("   ✅ 4 شهادات");
+  console.log("   ✅ 2 طلبات");
+  console.log("   ✅ 3 منح محفوظة");
+  console.log("   ✅ 2 إشعارات");
+  console.log("   ✅ 14 إدخالاً في محتوى الصفحات (بما في ذلك سياسة الخصوصية وشروط الخدمة وصفحة من نحن وتكوين التذييل)");
+  console.log("   ✅ 6 عناصر في الأسئلة الشائعة");
+  console.log("   ✅ 10 منشورات مدونة (9 منشورة، 1 مسودة)\n");
 }
 
 main()
