@@ -92,7 +92,7 @@ jobs:
         run: npm ci
 
       - name: Build Docker image
-        run: docker build -t scholarhub-api:${{ github.sha }} .
+        run: docker build -t scholarhub-api-test:${{ github.sha }} .
         if: false # Enable when ready for Docker deployment
 
       - name: Build project
