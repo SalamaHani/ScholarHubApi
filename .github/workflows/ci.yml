@@ -93,7 +93,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-        docker tagscholarhubapiecs:${{ github.sha }}${{secrets.AWS_ECR_URL}}:latest
+         docker tagscholarhubapiecs:${{ github.sha }}${{secrets.AWS_ECR_URL}}:latest
          docker build -t scholarhubapiecs:${{ github.sha }} .
         if: false # Enable when ready for Docker deployment
          name: Configure AWS credentials
@@ -119,9 +119,9 @@ jobs:
         run: |
           docker push ${{secrets.AWS_ECR_URL}}:latest
           env:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
-          aws-region: ${{ secrets.AWS_REGION }}
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+            AWS_REGION: ${{ secrets.AWS_REGION }}
       - name: Build project
         run: npm run build
 
