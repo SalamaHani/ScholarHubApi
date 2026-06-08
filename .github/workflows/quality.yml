@@ -40,10 +40,8 @@ jobs:
     args: >
       -sonar.projectKey=SalamaHani_ScholarHubApi
       -sonar.organization=salamahani
-
       - name: Check TypeScript compilation
         run: npm run build
-
       - name: Run tests with coverage
         run: npm test -- --coverage --passWithNoTests
 
