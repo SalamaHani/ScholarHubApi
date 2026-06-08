@@ -92,9 +92,36 @@ jobs:
         run: npm ci
 
       - name: Build Docker image
-        run: docker build -t scholarhub-api-test:${{ github.sha }} .
+        run: |
+        docker tagscholarhubapiecs:${{ github.sha }}${{secrets.AWS_ECR_URL}}:latest
+         docker build -t scholarhubapiecs:${{ github.sha }} .
         if: false # Enable when ready for Docker deployment
+         name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login  ${{ secrets.AWS_ACCESS_KEY_ID }} AWS --password-stdin ${{secrets.AWS_ECR_URL}}
+      - name: Build Docker image
+        run: |
+          docker build -t scholarhub-api .
+
+      - name: Tag image
+        run: |
+          docker tag scholarhub-api:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/scholarhub-api:latest
+
+      - name: Push to ECR
+        run: |
+          docker push ${{secrets.AWS_ECR_URL}}:latest
+          env:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
       - name: Build project
         run: npm run build
 
