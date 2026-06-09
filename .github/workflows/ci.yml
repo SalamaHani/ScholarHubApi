@@ -77,7 +77,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -101,10 +100,6 @@ jobs:
 
       - name: Build app
         run: npm run build
-
-      - name: Build Docker image
-        run: docker build -t scholarhub .
-      
      
 
         if: false # Enable when ready for Docker deployment
