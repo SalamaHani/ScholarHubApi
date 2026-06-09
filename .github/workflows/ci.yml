@@ -68,7 +68,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.node-version }}
+      - name: test-results-${{ matrix.node-version }}
           path: |
             coverage/
             junit.xml
@@ -113,11 +113,11 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ECR
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login  --usernameAWS --password-stdin ${{secrets.AWS_ECR_URL}}
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login  --username AWS --password-stdin ${{secrets.AWS_ECR_URL}}
 
       - name: Build Docker image
         run: |
-          docker build -t scholarhub-api .
+          docker build -t scholarhubapiecs   .
 
       - name: Tag image
         run: |
@@ -141,7 +141,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
 
-       -name: Build and push Docker image to Docker Hub
+      - name: Build and push Docker image to Docker Hub  
         run: |
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/scholarhubapiecs:latest
         
