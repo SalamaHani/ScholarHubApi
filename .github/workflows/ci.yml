@@ -105,12 +105,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t scholarhub .
       
-
-      - name: Build Docker image
-        run: |
-         docker tag scholarhubapiecs:${{ github.sha }}${{secrets.AWS_ECR_URL}}/scholarhubapiecs:latest
-         docker tag scholarhub-api:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/scholarhubapiecs:latest
-         docker build -t scholarhubapiecs:${{ github.sha }} .
+     
 
         if: false # Enable when ready for Docker deployment
       - name: Configure AWS credentials
