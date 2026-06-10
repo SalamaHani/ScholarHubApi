@@ -116,10 +116,13 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t scholarhubapiecs   .
+      - name: Tag image
+        run: |
+          docker tag scholarhubapiecs:latest ${{ secrets.AWS_ECR_URL }}/scholarhubapiecs:latest
 
       - name: Push to ECR
         run: |
-          docker push ${{secrets.AWS_ECR_URL}}/scholarhubapiecs:latest
+          docker push ${{secrets.AWS_ECR_URL}}:latest
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRIT_ACCESS_KEY_ID }}
