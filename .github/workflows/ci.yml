@@ -115,11 +115,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.AWS_ECR_URL }}/scholarhubapiecs:latest .
-          
+          docker build -t ${{ secrets.AWS_ECR_URL }}:latest .
+
       - name: Tag image
         run: |
-          docker tag scholarhubapiecs:latest ${{ secrets.AWS_ECR_URL }}/scholarhubapiecs:latest
+          docker tag :latest ${{ secrets.AWS_ECR_URL }}:latest
 
       - name: Push to ECR
         run: |
