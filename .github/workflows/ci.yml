@@ -113,7 +113,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRIT_ACCESS_KEY_ID }}
           aws-region: us-east-1
 
-      - name: Login to Amazon ECR
+      - name: Login to Amazon ECR ECR
         id: login-ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login  --username AWS --password-stdin ${{secrets.AWS_ECR_URL}}
