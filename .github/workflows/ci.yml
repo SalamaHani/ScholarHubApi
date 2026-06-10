@@ -121,7 +121,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.AWS_ECR_URL }}:latest .
-          
+
       - name: Push to ECR
         run: |
           docker push ${{secrets.AWS_ECR_URL}}:latest
