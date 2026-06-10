@@ -68,6 +68,6 @@
     "node": ">=18.0.0"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  }
+  "seed": "node dist/seed.js"
+}
 }
