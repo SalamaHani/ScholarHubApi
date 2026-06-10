@@ -101,12 +101,6 @@ jobs:
       - name: Build seed
         run: npx tsc -p tsconfig.seed.json
 
-<<<<<<< HEAD
-=======
-      - name: Debug dist folder
-        run: ls -R dist
-
->>>>>>> d0e8e04b7e004ecdd08a29698bf377861d7403e0
       - name: Run Prisma Seed
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
