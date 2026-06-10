@@ -4,7 +4,12 @@
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": "./prisma",
+<<<<<<< HEAD
     "strict": true
+=======
+    "esModuleInterop": true,
+    "skipLibCheck": true
+>>>>>>> d0e8e04b7e004ecdd08a29698bf377861d7403e0
   },
   "include": ["prisma/seed.ts"]
 }
