@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
     "rootDir": "./prisma",
-    "strict": true,
-    "esModuleInterop": true
+    "strict": true
   },
   "include": ["prisma/seed.ts"]
 }
