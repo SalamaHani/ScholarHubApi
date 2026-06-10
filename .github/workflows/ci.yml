@@ -98,6 +98,12 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx prisma migrate deploy
 
+      - name: Build seed
+        run: npx tsc -p tsconfig.seed.json
+
+      - name: Debug dist folder
+        run: ls -R dist
+
       - name: Run Prisma Seed
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
