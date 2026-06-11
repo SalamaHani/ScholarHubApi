@@ -138,7 +138,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+        #push image to Docker Hub
       - name: Build Docker image
         run: |
           docker build -t scholarhubapiecs:latest .
